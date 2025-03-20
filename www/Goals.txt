@@ -97,5 +97,68 @@ Statistics calculation
 Dashboard visualization
 Settings functionality
 
+hit the message limit for js
 
 
+# Sleep Tracker Goals & Requirements
+
+## Core Functionality
+- Track sleep data including duration, quality, and sleep phases
+- Display data in calendar format with customizable color coding
+- Monitor related health metrics (steps, calories, standing hours)
+- Record daily events, tasks, and medical information
+
+## UI/UX Improvements
+1. Left Sidebar Layout:
+   - Prominently display current date with days since reference date (changeable in settings)
+   - Show today's tasks and tags below date
+   - Make date format: "Thursday Mar 20 2025" with smaller text "136 days since 4/11/24, 4.5 months"
+
+2. Navigation & Organization:
+   - Separate entries into month-based pages
+   - Add clear date/week indicators in the table
+   - Highlight today's row
+   - Show days from today (future=green, past=red, with shade changes every 7 days)
+   - Display weekday indicator
+
+3. Table Improvements:
+   - Create separate row for tags (color coded)
+   - Reposition "Afro" column away from medical issues
+   - Add subtle hover effects over table content
+   - Allow clicking on events/notes preview to see full content as popup
+
+4. Styling & Visual Elements:
+   - Modern circle close buttons for tag management
+   - Consistent color scheme for different metrics
+     * Deep sleep: #4A6BFF
+     * Light sleep: #2C7DD4
+     * REM sleep: #3DD3CB
+     * Calories: #EF8A2B
+     * Steps: #E0CB08
+     * Standing hours: #43C677
+
+## Dashboard & Statistics
+1. Functional dashboard with relevant statistics
+2. Weekly stats (current week) instead of all-time stats
+3. Sleep quality thresholds (configurable in settings):
+   - Total sleep:
+     * Red: <6h20m
+     * Yellow: <7h
+     * Green: >7h
+     * Dark green: >8h30m
+   - Deep sleep:
+     * Good: 20-25% or at least 1h30m (blue)
+     * Poor: <20% (red)
+   - Light sleep:
+     * Good: 50-60% or 3-5 hours (light blue)
+     * Poor: outside range (red)
+   - REM sleep:
+     * Red: <50m
+     * Yellow: <1h2m
+     * Green: >1h2m
+
+## Other Requirements
+- Modern, consistent design throughout the app
+- Responsive UI that works on different screen sizes
+- Data persistence between sessions
+- Dynamic tag creation and management
