@@ -703,6 +703,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         endDate = new Date(8640000000000000); // End of time
                         break;
                 }
+            });
+        });
 
     function navigateToPreviousMonth() {
         state.currentMonth.setMonth(state.currentMonth.getMonth() - 1);
@@ -1382,6 +1384,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return '#EF8A2B'; // Orange (on target) - updated per Goal #9
     }
     
+    // This is the correct way to close your file
+    // Make sure there are no additional lines or code after this
+    
     // Initialize the app
     init();
-});
+}
+}); // Close the DOMContentLoaded event listener
