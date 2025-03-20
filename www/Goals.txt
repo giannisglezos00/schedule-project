@@ -1,0 +1,44 @@
+Goals of things we need to do
+
+i think there needs to be a huge redesign in the way we see things
+i use this as a calendar too so i need to see future days and schedule things easily and be able to see my future tasks
+i would like to highlight the whole row of today's date
+the first column is mostly for days since 4/11/24 (which can be changed from the settings)
+also you should be able to click the preview of the events/notes entry and see the whole content as a popup and if it's empty to open a new entry and write
+
+Problems/changes:
+1.Date is very important so i think it should be on the left side of the screen for example Thursday Mar 20 2025 with smaller text 136 days since 4/11/24 ,4.5 months
+and under it a vertical list of tasks i need to do for today (from events/notes) along with today's tags
+2. i think we should seperate entries into pages based on month
+3.we should seperate tags from events/notes to it's own row
+4.Tags should be colored either randomly or you should be able to change a tag's color in the settings
+5.Afro should not be next to seizure and sleep problems cuz it's closer to an event
+6.the dashboard is not functional and should include statistics
+7.Statistics should be for the current week
+8.in tags management we need a better styling for the close button, modern circle would do the job
+9.Everything should have it's own color so it can be be easily recognized
+10.In the settings you need to be able to adjust how many hours of sleep are good
+for example 
+sleep:
+if total sleep is less than 6h20m it should be red, if it's less than 7 hours it should be yellow, if it's more than 7 hours green, if it's more than 8.5 hours it needs to be dark green
+if deep sleep is within 20-25% or at least 1h30m it should be it's blue
+if it's less it should be red
+if light sleep is 50-60% or 3-5 hours it should be it's light blue  color
+if it's less it should be red
+if rem sleep is less than 50m it should be red if it's less than 1h2m it should be yellow if it's more than 1h2m it should be green
+
+deep sleep: #4A6BFF
+light sleep: #2C7DD4
+rem sleep: #3DD3CB
+
+calories: #EF8A2B
+steps: #E0CB08
+standing hours: #43C677
+
+11. i think a subtle hover effect over every part of the table would be nice
+12. on the first column i would rly like to be able to see how many days from today something was, if you see on the picture attached i have different shades of colors for each day after today which is white days after today should be green, days before should be red and every 7 days before or after it should change
+13. you should be able to see what day of the week it is like the image i have attatched
+ maybe the simplest way would be to have an indicator separating every week
+if you're unable to finish changes in 1 conversation tell yourself everything you did / need to do so you can continue where you left off in another one
+
+i need everything to be consistent with a modern style
