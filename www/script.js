@@ -23,6 +23,527 @@ document.addEventListener('DOMContentLoaded', function() {
                     red: { hours: 0, minutes: 50 },
                     yellow: { hours: 1, minutes: 2 }
                 }
+        
+        // Update dashboard charts if dashboard is visible
+        if (elements.dashboardModal.style.display === 'block') {
+            updateDashboardCharts(weekEntries);
+        }
+    }
+
+    function filterEntries() {
+        const searchTerm = elements.searchInput.value.toLowerCase();
+        const selectedTag = elements.tagFilter.value;
+        
+        const rows = elements.sleepData.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            if (row.querySelector('.placeholder-cell')) {
+                return; // Skip placeholder row
+            }
+            
+            const text = row.innerText.toLowerCase();
+            
+            // Get entry ID from the edit button
+            const editBtn = row.querySelector('.edit-btn');
+            if (!editBtn) return;
+            
+            const entryId = editBtn.getAttribute('data-entry-id');
+            const entry = state.entries.find(e => e.id === entryId);
+            
+            let showRow = true;
+            
+            // Check search term
+            if (searchTerm && !text.includes(searchTerm)) {
+                showRow = false;
+            }
+            
+            // Check tag filter
+            if (selectedTag && entry && (!entry.tags || !entry.tags.includes(selectedTag))) {
+                showRow = false;
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+
+    function showAddEntryModal(date = null) {
+        // Clear form
+        elements.entryForm.reset();
+        elements.entryId.value = '';
+        
+        // Set date to today if not provided
+        if (date) {
+            if (!(date instanceof Date)) {
+                date = new Date(date);
+            }
+            elements.entryDate.value = date.toISOString().split('T')[0];
+        } else {
+            elements.entryDate.value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Show modal
+        elements.entryModal.style.display = 'block';
+        document.getElementById('modal-title').textContent = 'Add New Entry';
+    }
+
+    function showEditEntryModal(entryId) {
+        const entry = state.entries.find(e => e.id === entryId);
+        if (!entry) return;
+        
+        // Fill form with entry data
+        elements.entryId.value = entry.id;
+        elements.entryDate.value = entry.date;
+        elements.sleepScore.value = entry.sleepScore || '';
+        
+        // Set night sleep
+        if (entry.nightSleep) {
+            document.getElementById('night-sleep-hours').value = entry.nightSleep.hours || '';
+            document.getElementById('night-sleep-minutes').value = entry.nightSleep.minutes || '';
+        } else {
+            document.getElementById('night-sleep-hours').value = '';
+            document.getElementById('night-sleep-minutes').value = '';
+        }
+        
+        // Set day nap
+        if (entry.dayNap) {
+            document.getElementById('day-nap-hours').value = entry.dayNap.hours || '';
+            document.getElementById('day-nap-minutes').value = entry.dayNap.minutes || '';
+        } else {
+            document.getElementById('day-nap-hours').value = '';
+            document.getElementById('day-nap-minutes').value = '';
+        }
+        
+        // Set deep sleep
+        if (entry.deepSleep) {
+            document.getElementById('deep-sleep-hours').value = entry.deepSleep.hours || '';
+            document.getElementById('deep-sleep-minutes').value = entry.deepSleep.minutes || '';
+        } else {
+            document.getElementById('deep-sleep-hours').value = '';
+            document.getElementById('deep-sleep-minutes').value = '';
+        }
+        
+        // Set light sleep
+        if (entry.lightSleep) {
+            document.getElementById('light-sleep-hours').value = entry.lightSleep.hours || '';
+            document.getElementById('light-sleep-minutes').value = entry.lightSleep.minutes || '';
+        } else {
+            document.getElementById('light-sleep-hours').value = '';
+            document.getElementById('light-sleep-minutes').value = '';
+        }
+        
+        // Set REM sleep
+        if (entry.remSleep) {
+            document.getElementById('rem-sleep-hours').value = entry.remSleep.hours || '';
+            document.getElementById('rem-sleep-minutes').value = entry.remSleep.minutes || '';
+        } else {
+            document.getElementById('rem-sleep-hours').value = '';
+            document.getElementById('rem-sleep-minutes').value = '';
+        }
+        
+        // Set wakeups
+        document.getElementById('wake-ups').value = entry.wakeUps || '';
+        
+        // Set checkboxes
+        document.getElementById('cut-sleep').checked = entry.cutSleep || false;
+        document.getElementById('shake').checked = entry.shake || false;
+        document.getElementById('seizure').checked = entry.seizure || false;
+        document.getElementById('afr').checked = entry.afr || false;
+        
+        // Set events/notes
+        document.getElementById('events-notes').value = entry.eventsNotes || '';
+        
+        // Set tags
+        document.getElementById('tags').value = entry.tags ? entry.tags.join(', ') : '';
+        
+        // Set calories
+        document.getElementById('calories').value = entry.calories || '';
+        
+        // Set steps
+        document.getElementById('steps').value = entry.steps || '';
+        
+        // Set weight
+        document.getElementById('weight').value = entry.weight || '';
+        
+        // Set standing
+        document.getElementById('standing').value = entry.standing || '';
+        
+        // Set pills (checkboxes)
+        document.getElementById('pill-1').checked = false;
+        document.getElementById('pill-2').checked = false;
+        document.getElementById('pill-3').checked = false;
+        
+        if (entry.pills && entry.pills.length > 0) {
+            entry.pills.forEach(pill => {
+                const pillCheckbox = document.getElementById(`pill-${pill}`);
+                if (pillCheckbox) pillCheckbox.checked = true;
+            });
+        }
+        
+        // Show modal
+        elements.entryModal.style.display = 'block';
+        document.getElementById('modal-title').textContent = 'Edit Entry';
+    }
+    
+    function showEntryPreview(entryId) {
+        const entry = state.entries.find(e => e.id === entryId);
+        if (!entry) return;
+        
+        state.selectedEntryId = entryId;
+        
+        const entryDate = new Date(entry.date);
+        const formattedDate = entryDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        
+        // Create preview content
+        const previewContent = document.getElementById('entry-preview-content');
+        previewContent.innerHTML = '';
+        
+        const dateHeader = document.createElement('h3');
+        dateHeader.id = 'preview-date';
+        dateHeader.textContent = formattedDate;
+        previewContent.appendChild(dateHeader);
+        
+        const tagsContainer = document.createElement('div');
+        tagsContainer.id = 'preview-tags';
+        tagsContainer.classList.add('tags-container');
+        
+        if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tagName => {
+                const tag = state.tags.find(t => t.name === tagName);
+                if (tag) {
+                    const tagElement = document.createElement('span');
+                    tagElement.classList.add('tag');
+                    tagElement.textContent = tag.name;
+                    tagElement.style.backgroundColor = tag.color;
+                    
+                    // Adjust text color for better contrast
+                    const luminance = getLuminance(tag.color);
+                    if (luminance < 0.5) {
+                        tagElement.style.color = 'white';
+                    } else {
+                        tagElement.style.color = 'black';
+                    }
+                    
+                    tagsContainer.appendChild(tagElement);
+                }
+            });
+        } else {
+            tagsContainer.textContent = 'No tags';
+        }
+        previewContent.appendChild(tagsContainer);
+        
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('preview-notes');
+        contentContainer.textContent = entry.eventsNotes || 'No notes for this entry.';
+        previewContent.appendChild(contentContainer);
+        
+        // Create a section for sleep stats
+        if (entry.nightSleep || entry.deepSleep || entry.lightSleep || entry.remSleep) {
+            const statsSection = document.createElement('div');
+            statsSection.classList.add('preview-stats');
+            
+            const statsTitle = document.createElement('h4');
+            statsTitle.textContent = 'Sleep Statistics';
+            statsSection.appendChild(statsTitle);
+            
+            const statsList = document.createElement('ul');
+            
+            if (entry.sleepScore) {
+                const scoreItem = document.createElement('li');
+                scoreItem.textContent = `Sleep Score: ${entry.sleepScore}`;
+                statsList.appendChild(scoreItem);
+            }
+            
+            if (entry.nightSleep) {
+                const nightSleepItem = document.createElement('li');
+                nightSleepItem.textContent = `Night Sleep: ${formatTime(entry.nightSleep)}`;
+                statsList.appendChild(nightSleepItem);
+            }
+            
+            if (entry.deepSleep) {
+                const deepSleepItem = document.createElement('li');
+                deepSleepItem.textContent = `Deep Sleep: ${formatTime(entry.deepSleep)}`;
+                statsList.appendChild(deepSleepItem);
+            }
+            
+            if (entry.lightSleep) {
+                const lightSleepItem = document.createElement('li');
+                lightSleepItem.textContent = `Light Sleep: ${formatTime(entry.lightSleep)}`;
+                statsList.appendChild(lightSleepItem);
+            }
+            
+            if (entry.remSleep) {
+                const remSleepItem = document.createElement('li');
+                remSleepItem.textContent = `REM Sleep: ${formatTime(entry.remSleep)}`;
+                statsList.appendChild(remSleepItem);
+            }
+            
+            statsSection.appendChild(statsList);
+            previewContent.appendChild(statsSection);
+        }
+        
+        // Show modal
+        elements.entryPreviewModal.style.display = 'block';
+    }
+    
+    function showSettingsModal() {
+        // Fill form with settings data
+        document.getElementById('reference-date').value = state.settings.referenceDate;
+        document.getElementById('calories-goal').value = state.settings.caloriesGoal;
+        document.getElementById('steps-goal').value = state.settings.stepsGoal;
+        
+        // Set sleep thresholds
+        document.getElementById('sleep-red-hours').value = state.settings.sleepThresholds.totalSleep.red.hours;
+        document.getElementById('sleep-red-minutes').value = state.settings.sleepThresholds.totalSleep.red.minutes;
+        
+        document.getElementById('sleep-yellow-hours').value = state.settings.sleepThresholds.totalSleep.yellow.hours;
+        document.getElementById('sleep-yellow-minutes').value = state.settings.sleepThresholds.totalSleep.yellow.minutes;
+        
+        document.getElementById('sleep-darkgreen-hours').value = state.settings.sleepThresholds.totalSleep.darkGreen.hours;
+        document.getElementById('sleep-darkgreen-minutes').value = state.settings.sleepThresholds.totalSleep.darkGreen.minutes;
+        
+        document.getElementById('deep-min-hours').value = state.settings.sleepThresholds.deepSleep.minimum.hours;
+        document.getElementById('deep-min-minutes').value = state.settings.sleepThresholds.deepSleep.minimum.minutes;
+        
+        document.getElementById('light-min-hours').value = state.settings.sleepThresholds.lightSleep.minimum.hours;
+        document.getElementById('light-min-minutes').value = state.settings.sleepThresholds.lightSleep.minimum.minutes;
+        
+        document.getElementById('light-max-hours').value = state.settings.sleepThresholds.lightSleep.maximum.hours;
+        document.getElementById('light-max-minutes').value = state.settings.sleepThresholds.lightSleep.maximum.minutes;
+        
+        document.getElementById('rem-red-hours').value = state.settings.sleepThresholds.remSleep.red.hours;
+        document.getElementById('rem-red-minutes').value = state.settings.sleepThresholds.remSleep.red.minutes;
+        
+        document.getElementById('rem-yellow-hours').value = state.settings.sleepThresholds.remSleep.yellow.hours;
+        document.getElementById('rem-yellow-minutes').value = state.settings.sleepThresholds.remSleep.yellow.minutes;
+        
+        // Set theme
+        document.getElementById('theme-selector').value = state.settings.theme;
+        
+        // Show existing tags
+        const tagsContainer = document.getElementById('tags-list');
+        tagsContainer.innerHTML = '';
+        
+        state.tags.forEach(tag => {
+            const tagElement = document.createElement('div');
+            tagElement.classList.add('tag-item');
+            
+            const tagName = document.createElement('span');
+            tagName.textContent = tag.name;
+            tagName.style.backgroundColor = tag.color;
+            
+            // Adjust text color for better contrast
+            const luminance = getLuminance(tag.color);
+            if (luminance < 0.5) {
+                tagName.style.color = 'white';
+            } else {
+                tagName.style.color = 'black';
+            }
+            
+            tagElement.appendChild(tagName);
+            
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.value = tag.color;
+            colorPicker.addEventListener('change', function() {
+                tag.color = this.value;
+                tagName.style.backgroundColor = this.value;
+                
+                // Adjust text color for better contrast
+                const luminance = getLuminance(this.value);
+                if (luminance < 0.5) {
+                    tagName.style.color = 'white';
+                } else {
+                    tagName.style.color = 'black';
+                }
+                
+                saveData();
+                renderEntries();
+                updateTagsRow();
+            });
+            tagElement.appendChild(colorPicker);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-tag-btn');
+            deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+            deleteBtn.addEventListener('click', function() {
+                state.tags = state.tags.filter(t => t.id !== tag.id);
+                saveData();
+                updateTagFilter();
+                renderEntries();
+                updateTagsRow();
+                showSettingsModal(); // Refresh settings modal
+            });
+            tagElement.appendChild(deleteBtn);
+            
+            tagsContainer.appendChild(tagElement);
+        });
+        
+        // Show modal
+        elements.settingsModal.style.display = 'block';
+    }
+    
+    function showDashboardModal() {
+        // Get the start and end dates of the current week
+        const today = new Date();
+        const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - currentDay);
+        startDate.setHours(0, 0, 0, 0);
+        
+        const endDate = new Date(today);
+        endDate.setDate(today.getDate() + (6 - currentDay));
+        endDate.setHours(23, 59, 59, 999);
+        
+        // Filter entries for the current week
+        const weekEntries = state.entries.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= startDate && entryDate <= endDate;
+        });
+        
+        // Update dashboard charts
+        updateDashboardCharts(weekEntries);
+        
+        // Show modal
+        elements.dashboardModal.style.display = 'block';
+    }
+    
+
+                    data: [avgDeep, avgLight, avgRem],
+                    backgroundColor: ['#4A6BFF', '#2C7DD4', '#3DD3CB'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const minutes = context.raw;
+                                const hours = Math.floor(minutes / 60);
+                                const mins = Math.round(minutes % 60);
+                                return `${context.label}: ${hours}h ${mins}m`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Activity Chart
+        const activityCtx = elements.activityChart.getContext('2d');
+        const activityLabels = [];
+        const caloriesData = [];
+        const stepsData = [];
+        const standingData = [];
+        
+        entries.forEach(entry => {
+            const entryDate = new Date(entry.date);
+            activityLabels.push(entryDate.toLocaleDateString('en-US', { weekday: 'short' }));
+            caloriesData.push(entry.calories || 0);
+            stepsData.push(entry.steps || 0);
+            standingData.push(entry.standing || 0);
+        });
+        
+        // Clear previous chart if it exists
+        if (window.activityChart) {
+            window.activityChart.destroy();
+        }
+        
+        window.activityChart = new Chart(activityCtx, {
+            type: 'bar',
+            data: {
+                labels: activityLabels,
+                datasets: [
+                    {
+                        label: 'Calories',
+                        data: caloriesData,
+                        backgroundColor: '#EF8A2B',
+                        yAxisID: 'y-calories'
+                    },
+                    {
+                        label: 'Steps (x100)',
+                        data: stepsData.map(steps => steps / 100), // Scale down for better visualization
+                        backgroundColor: '#E0CB08',
+                        yAxisID: 'y-steps'
+                    },
+                    {
+                        label: 'Standing Hours',
+                        data: standingData,
+                        backgroundColor: '#43C677',
+                        yAxisID: 'y-standing'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    'y-calories': {
+                        position: 'left',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Calories'
+                        }
+                    },
+                    'y-steps': {
+                        position: 'right',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Steps (x100)'
+                        }
+                    },
+                    'y-standing': {
+                        display: false,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Events Timeline
+        const eventsContainer = elements.eventsTimeline;
+        eventsContainer.innerHTML = '';
+        
+        entries.forEach(entry => {
+            if (entry.eventsNotes) {
+                const entryDate = new Date(entry.date);
+                const dateString = entryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                const eventItem = document.createElement('div');
+                eventItem.classList.add('event-item');
+                
+                const eventDate = document.createElement('div');
+                eventDate.classList.add('event-date');
+                eventDate.textContent = dateString;
+                eventItem.appendChild(eventDate);
+                
+                const eventContent = document.createElement('div');
+                eventContent.classList.add('event-content');
+                eventContent.textContent = entry.eventsNotes;
+                eventItem.appendChild(eventContent);
+                
+                eventsContainer.appendChild(eventItem);
+            }
+        });
+        
+        if (eventsContainer.children.length === 0) {
+            eventsContainer.textContent = 'No events for this period.';
+        }
+        
+        // Generate insights based on the data
+        generateSleepInsights(entries);
+    }
             },
             theme: 'light',
             accentColor: 'blue'
@@ -202,6 +723,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.target.style.display = 'none';
             }
         });
+
+        // Set up theme toggle
+        document.getElementById('theme-selector').addEventListener('change', function() {
+            state.settings.theme = this.value;
+            applyTheme();
+            saveData();
+        });
+
+        // Apply initial theme
+        applyTheme();
+    }
+
+    function applyTheme() {
+        // Apply theme to document body
+        if (state.settings.theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        } else if (state.settings.theme === 'light') {
+            document.body.classList.remove('dark-theme');
+        } else if (state.settings.theme === 'auto') {
+            // Check system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
     }
 
     function updateDateDisplay() {
@@ -258,6 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Define the reference date for day calculations
         const referenceDate = new Date(state.settings.referenceDate);
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
         // Find the first day of the month
         const firstDay = new Date(currentYear, currentMonth, 1);
@@ -265,15 +814,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Render entries
         filteredEntries.forEach(entry => {
             const entryDate = new Date(entry.date);
+            entryDate.setHours(0, 0, 0, 0);
             const daysDiff = Math.floor((entryDate - referenceDate) / (1000 * 60 * 60 * 24));
             const daysDiffFromToday = Math.floor((entryDate - today) / (1000 * 60 * 60 * 24));
             
             // Determine day color based on difference from today
-            let dayColor = 'white';
+            let dayColor = '';
             if (daysDiffFromToday < 0) {
                 dayColor = 'red-day'; // Past
             } else if (daysDiffFromToday > 0) {
                 dayColor = 'green-day'; // Future
+            } else {
+                dayColor = 'today-day'; // Today
             }
             
             // Determine if this is a week separator
@@ -388,6 +940,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const editBtn = document.createElement('button');
             editBtn.classList.add('action-btn', 'edit-btn');
             editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.setAttribute('data-entry-id', entry.id);
             editBtn.addEventListener('click', () => showEditEntryModal(entry.id));
             actionsCell.appendChild(editBtn);
             
@@ -724,916 +1277,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (deepSleepEntryCount > 0) {
-            const avgDeepSleepMinutes =
-
-            
-            // message limmite continue here
-
-            if (deepSleepEntryCount > 0) {
-                const avgDeepSleepMinutes = totalDeepSleepMinutes / deepSleepEntryCount;
-                const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
-                const avgDeepSleepMins = Math.round(avgDeepSleepMinutes % 60);
-                elements.avgDeepSleep.textContent = `${avgDeepSleepHours}h ${avgDeepSleepMins}m`;
-            } else {
-                elements.avgDeepSleep.textContent = 'No Data';
-            }
-            
-            // Calculate average REM sleep
-            let totalRemSleepMinutes = 0;
-            let remSleepEntryCount = 0;
-            
-            weekEntries.forEach(entry => {
-                if (entry.remSleep) {
-                    totalRemSleepMinutes += (entry.remSleep.hours || 0) * 60 + (entry.remSleep.minutes || 0);
-                    remSleepEntryCount++;
-                }
-            });
-            
-            if (remSleepEntryCount > 0) {
-                const avgRemSleepMinutes = totalRemSleepMinutes / remSleepEntryCount;
-                const avgRemSleepHours = Math.floor(avgRemSleepMinutes / 60);
-                const avgRemSleepMins = Math.round(avgRemSleepMinutes % 60);
-                elements.avgRemSleep.textContent = `${avgRemSleepHours}h ${avgRemSleepMins}m`;
-            } else {
-                elements.avgRemSleep.textContent = 'No Data';
-            }
-            
-            // Calculate average light sleep
-            let totalLightSleepMinutes = 0;
-            let lightSleepEntryCount = 0;
-            
-            weekEntries.forEach(entry => {
-                if (entry.lightSleep) {
-                    totalLightSleepMinutes += (entry.lightSleep.hours || 0) * 60 + (entry.lightSleep.minutes || 0);
-                    lightSleepEntryCount++;
-                }
-            });
-            
-            if (lightSleepEntryCount > 0) {
-                const avgLightSleepMinutes = totalLightSleepMinutes / lightSleepEntryCount;
-                const avgLightSleepHours = Math.floor(avgLightSleepMinutes / 60);
-                const avgLightSleepMins = Math.round(avgLightSleepMinutes % 60);
-                elements.avgLightSleep.textContent = `${avgLightSleepHours}h ${avgLightSleepMins}m`;
-            } else {
-                elements.avgLightSleep.textContent = 'No Data';
-            }
-            
-            // Update dashboard charts if dashboard is visible
-            if (elements.dashboardModal.style.display === 'block') {
-                updateDashboardCharts(weekEntries);
-            }
+            const avgDeepSleepMinutes = totalDeepSleepMinutes / deepSleepEntryCount;
+            const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
+            const avgDeepSleepMins = Math.round(avgDeepSleepMinutes % 60);
+            elements.avgDeepSleep.textContent = `${avgDeepSleepHours}h ${avgDeepSleepMins}m`;
+        } else {
+            elements.avgDeepSleep.textContent = 'No Data';
         }
-    
-        function filterEntries() {
-            const searchTerm = elements.searchInput.value.toLowerCase();
-            const selectedTag = elements.tagFilter.value;
-            
-            const rows = elements.sleepData.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                if (row.querySelector('.placeholder-cell')) {
-                    return; // Skip placeholder row
-                }
-                
-                const text = row.innerText.toLowerCase();
-                const entryDate = row.querySelector('.date-cell').innerText;
-                
-                // Get entry ID from the edit button
-                const editBtn = row.querySelector('.edit-btn');
-                if (!editBtn) return;
-                
-                const entryId = editBtn.getAttribute('data-entry-id');
-                const entry = state.entries.find(e => e.id === entryId);
-                
-                let showRow = true;
-                
-                // Check search term
-                if (searchTerm && !text.includes(searchTerm)) {
-                    showRow = false;
-                }
-                
-                // Check tag filter
-                if (selectedTag && entry && (!entry.tags || !entry.tags.includes(selectedTag))) {
-                    showRow = false;
-                }
-                
-                row.style.display = showRow ? '' : 'none';
-            });
-        }
-    
-        function showAddEntryModal(date = null) {
-            // Clear form
-            elements.entryForm.reset();
-            elements.entryId.value = '';
-            
-            // Set date to today if not provided
-            if (date) {
-                if (!(date instanceof Date)) {
-                    date = new Date(date);
-                }
-                elements.entryDate.value = date.toISOString().split('T')[0];
-            } else {
-                elements.entryDate.value = new Date().toISOString().split('T')[0];
-            }
-            
-            // Reset tag checkboxes
-            document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            
-            // Show modal
-            elements.entryModal.style.display = 'block';
-            document.getElementById('entry-modal-title').textContent = 'Add New Entry';
-        }
-    
-        function showEditEntryModal(entryId) {
-            const entry = state.entries.find(e => e.id === entryId);
-            if (!entry) return;
-            
-            // Fill form with entry data
-            elements.entryId.value = entry.id;
-            elements.entryDate.value = entry.date;
-            elements.sleepScore.value = entry.sleepScore || '';
-            
-            // Set night sleep
-            if (entry.nightSleep) {
-                document.getElementById('night-sleep-hours').value = entry.nightSleep.hours || '';
-                document.getElementById('night-sleep-minutes').value = entry.nightSleep.minutes || '';
-            }
-            
-            // Set day nap
-            if (entry.dayNap) {
-                document.getElementById('day-nap-hours').value = entry.dayNap.hours || '';
-                document.getElementById('day-nap-minutes').value = entry.dayNap.minutes || '';
-            }
-            
-            // Set deep sleep
-            if (entry.deepSleep) {
-                document.getElementById('deep-sleep-hours').value = entry.deepSleep.hours || '';
-                document.getElementById('deep-sleep-minutes').value = entry.deepSleep.minutes || '';
-            }
-            
-            // Set light sleep
-            if (entry.lightSleep) {
-                document.getElementById('light-sleep-hours').value = entry.lightSleep.hours || '';
-                document.getElementById('light-sleep-minutes').value = entry.lightSleep.minutes || '';
-            }
-            
-            // Set REM sleep
+        
+        // Calculate average REM sleep
+        let totalRemSleepMinutes = 0;
+        let remSleepEntryCount = 0;
+        
+        weekEntries.forEach(entry => {
             if (entry.remSleep) {
-                document.getElementById('rem-sleep-hours').value = entry.remSleep.hours || '';
-                document.getElementById('rem-sleep-minutes').value = entry.remSleep.minutes || '';
+                totalRemSleepMinutes += (entry.remSleep.hours || 0) * 60 + (entry.remSleep.minutes || 0);
+                remSleepEntryCount++;
             }
-            
-            // Set wakeups
-            document.getElementById('wake-ups').value = entry.wakeUps || '';
-            
-            // Set checkboxes
-            document.getElementById('cut-sleep').checked = entry.cutSleep || false;
-            document.getElementById('shake').checked = entry.shake || false;
-            document.getElementById('seizure').checked = entry.seizure || false;
-            document.getElementById('afro').checked = entry.afro || false;
-            
-            // Set events/notes
-            document.getElementById('events-notes').value = entry.eventsNotes || '';
-            
-            // Set calories
-            document.getElementById('calories').value = entry.calories || '';
-            
-            // Set steps
-            document.getElementById('steps').value = entry.steps || '';
-            
-            // Set weight
-            document.getElementById('weight').value = entry.weight || '';
-            
-            // Set standing
-            document.getElementById('standing').value = entry.standing || '';
-            
-            // Set pills
-            document.getElementById('pills').value = entry.pills ? entry.pills.join(', ') : '';
-            
-            // Set tags
-            document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
-                checkbox.checked = entry.tags && entry.tags.includes(checkbox.value);
-            });
-            
-            // Show modal
-            elements.entryModal.style.display = 'block';
-            document.getElementById('entry-modal-title').textContent = 'Edit Entry';
-        }
-    
-        function showEntryPreview(entryId) {
-            const entry = state.entries.find(e => e.id === entryId);
-            if (!entry) return;
-            
-            state.selectedEntryId = entryId;
-            
-            const entryDate = new Date(entry.date);
-            const formattedDate = entryDate.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
-            
-            document.getElementById('preview-date').textContent = formattedDate;
-            document.getElementById('preview-content').textContent = entry.eventsNotes || 'No notes for this entry.';
-            
-            // Show tags
-            const tagsContainer = document.getElementById('preview-tags');
-            tagsContainer.innerHTML = '';
-            
-            if (entry.tags && entry.tags.length > 0) {
-                entry.tags.forEach(tagName => {
-                    const tag = state.tags.find(t => t.name === tagName);
-                    if (tag) {
-                        const tagElement = document.createElement('span');
-                        tagElement.classList.add('tag');
-                        tagElement.textContent = tag.name;
-                        tagElement.style.backgroundColor = tag.color;
-                        
-                        // Adjust text color for better contrast
-                        const luminance = getLuminance(tag.color);
-                        if (luminance < 0.5) {
-                            tagElement.style.color = 'white';
-                        } else {
-                            tagElement.style.color = 'black';
-                        }
-                        
-                        tagsContainer.appendChild(tagElement);
-                    }
-                });
-            } else {
-                tagsContainer.textContent = 'No tags';
-            }
-            
-            // Show modal
-            elements.entryPreviewModal.style.display = 'block';
-        }
-    
-        function showSettingsModal() {
-            // Fill form with settings data
-            document.getElementById('reference-date').value = state.settings.referenceDate;
-            document.getElementById('calories-goal').value = state.settings.caloriesGoal;
-            document.getElementById('steps-goal').value = state.settings.stepsGoal;
-            
-            // Set sleep thresholds
-            document.getElementById('total-sleep-red-hours').value = state.settings.sleepThresholds.totalSleep.red.hours;
-            document.getElementById('total-sleep-red-minutes').value = state.settings.sleepThresholds.totalSleep.red.minutes;
-            
-            document.getElementById('total-sleep-yellow-hours').value = state.settings.sleepThresholds.totalSleep.yellow.hours;
-            document.getElementById('total-sleep-yellow-minutes').value = state.settings.sleepThresholds.totalSleep.yellow.minutes;
-            
-            document.getElementById('total-sleep-dark-green-hours').value = state.settings.sleepThresholds.totalSleep.darkGreen.hours;
-            document.getElementById('total-sleep-dark-green-minutes').value = state.settings.sleepThresholds.totalSleep.darkGreen.minutes;
-            
-            document.getElementById('deep-sleep-min-hours').value = state.settings.sleepThresholds.deepSleep.minimum.hours;
-            document.getElementById('deep-sleep-min-minutes').value = state.settings.sleepThresholds.deepSleep.minimum.minutes;
-            
-            document.getElementById('light-sleep-min-hours').value = state.settings.sleepThresholds.lightSleep.minimum.hours;
-            document.getElementById('light-sleep-min-minutes').value = state.settings.sleepThresholds.lightSleep.minimum.minutes;
-            
-            document.getElementById('light-sleep-max-hours').value = state.settings.sleepThresholds.lightSleep.maximum.hours;
-            document.getElementById('light-sleep-max-minutes').value = state.settings.sleepThresholds.lightSleep.maximum.minutes;
-            
-            document.getElementById('rem-sleep-red-hours').value = state.settings.sleepThresholds.remSleep.red.hours;
-            document.getElementById('rem-sleep-red-minutes').value = state.settings.sleepThresholds.remSleep.red.minutes;
-            
-            document.getElementById('rem-sleep-yellow-hours').value = state.settings.sleepThresholds.remSleep.yellow.hours;
-            document.getElementById('rem-sleep-yellow-minutes').value = state.settings.sleepThresholds.remSleep.yellow.minutes;
-            
-            // Set theme
-            document.getElementById('theme-selector').value = state.settings.theme;
-            
-            // Set accent color
-            document.getElementById('accent-color').value = state.settings.accentColor;
-            
-            // Show existing tags
-            const tagsContainer = document.getElementById('tags-list');
-            tagsContainer.innerHTML = '';
-            
-            state.tags.forEach(tag => {
-                const tagElement = document.createElement('div');
-                tagElement.classList.add('tag-item');
-                
-                const tagName = document.createElement('span');
-                tagName.textContent = tag.name;
-                tagName.style.backgroundColor = tag.color;
-                
-                // Adjust text color for better contrast
-                const luminance = getLuminance(tag.color);
-                if (luminance < 0.5) {
-                    tagName.style.color = 'white';
-                } else {
-                    tagName.style.color = 'black';
-                }
-                
-                tagElement.appendChild(tagName);
-                
-                const colorPicker = document.createElement('input');
-                colorPicker.type = 'color';
-                colorPicker.value = tag.color;
-                colorPicker.addEventListener('change', function() {
-                    tag.color = this.value;
-                    tagName.style.backgroundColor = this.value;
-                    
-                    // Adjust text color for better contrast
-                    const luminance = getLuminance(this.value);
-                    if (luminance < 0.5) {
-                        tagName.style.color = 'white';
-                    } else {
-                        tagName.style.color = 'black';
-                    }
-                    
-                    saveData();
-                    renderEntries();
-                    updateTagsRow();
-                });
-                tagElement.appendChild(colorPicker);
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.classList.add('delete-tag-btn');
-                deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
-                deleteBtn.addEventListener('click', function() {
-                    state.tags = state.tags.filter(t => t.id !== tag.id);
-                    saveData();
-                    updateTagFilter();
-                    renderEntries();
-                    updateTagsRow();
-                    showSettingsModal(); // Refresh settings modal
-                });
-                tagElement.appendChild(deleteBtn);
-                
-                tagsContainer.appendChild(tagElement);
-            });
-            
-            // Show modal
-            elements.settingsModal.style.display = 'block';
-        }
-    
-        function showDashboardModal() {
-            // Get the start and end dates of the current week
-            const today = new Date();
-            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-            
-            const startDate = new Date(today);
-            startDate.setDate(today.getDate() - currentDay);
-            startDate.setHours(0, 0, 0, 0);
-            
-            const endDate = new Date(today);
-            endDate.setDate(today.getDate() + (6 - currentDay));
-            endDate.setHours(23, 59, 59, 999);
-            
-            // Set dashboard title
-            document.getElementById('dashboard-title').textContent = `Dashboard: Week of ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-            
-            // Filter entries for the current week
-            const weekEntries = state.entries.filter(entry => {
-                const entryDate = new Date(entry.date);
-                return entryDate >= startDate && entryDate <= endDate;
-            });
-            
-            // Update dashboard charts
-            updateDashboardCharts(weekEntries);
-            
-            // Show modal
-            elements.dashboardModal.style.display = 'block';
-        }
-    
-        function updateDashboardCharts(entries) {
-            // Use Chart.js to create visualizations
-            
-            // Sleep Trend Chart
-            const sleepTrendCtx = elements.sleepTrendChart.getContext('2d');
-            const sleepTrendLabels = [];
-            const sleepScoreData = [];
-            const sleepDurationData = [];
-            
-            entries.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            entries.forEach(entry => {
-                const entryDate = new Date(entry.date);
-                sleepTrendLabels.push(entryDate.toLocaleDateString('en-US', { weekday: 'short' }));
-                sleepScoreData.push(entry.sleepScore || 0);
-                
-                const totalMinutes = entry.nightSleep ? 
-                    (entry.nightSleep.hours || 0) * 60 + (entry.nightSleep.minutes || 0) : 0;
-                sleepDurationData.push(totalMinutes / 60); // Convert to hours
-            });
-            
-            // Clear previous chart if it exists
-            if (window.sleepTrendChart) {
-                window.sleepTrendChart.destroy();
-            }
-            
-            window.sleepTrendChart = new Chart(sleepTrendCtx, {
-                type: 'line',
-                data: {
-                    labels: sleepTrendLabels,
-                    datasets: [
-                        {
-                            label: 'Sleep Score',
-                            data: sleepScoreData,
-                            borderColor: '#4A6BFF',
-                            backgroundColor: 'rgba(74, 107, 255, 0.1)',
-                            yAxisID: 'y-score',
-                            fill: true
-                        },
-                        {
-                            label: 'Sleep Duration (hours)',
-                            data: sleepDurationData,
-                            borderColor: '#2C7DD4',
-                            backgroundColor: 'rgba(44, 125, 212, 0.1)',
-                            yAxisID: 'y-duration',
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        'y-score': {
-                            position: 'left',
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Sleep Score'
-                            }
-                        },
-                        'y-duration': {
-                            position: 'right',
-                            beginAtZero: true,
-                            max: 12,
-                            title: {
-                                display: true,
-                                text: 'Hours'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Sleep Composition Chart
-            const compositionCtx = elements.compositionChart.getContext('2d');
-            
-            // Calculate averages
-            let totalDeep = 0, totalLight = 0, totalRem = 0, count = 0;
-            
-            entries.forEach(entry => {
-                if (entry.deepSleep && entry.lightSleep && entry.remSleep) {
-                    totalDeep += (entry.deepSleep.hours || 0) * 60 + (entry.deepSleep.minutes || 0);
-                    totalLight += (entry.lightSleep.hours || 0) * 60 + (entry.lightSleep.minutes || 0);
-                    totalRem += (entry.remSleep.hours || 0) * 60 + (entry.remSleep.minutes || 0);
-                    count++;
-                }
-            });
-            
-            const avgDeep = count > 0 ? totalDeep / count : 0;
-            const avgLight = count > 0 ? totalLight / count : 0;
-            const avgRem = count > 0 ? totalRem / count : 0;
-            
-            // Clear previous chart if it exists
-            if (window.compositionChart) {
-                window.compositionChart.destroy();
-            }
-            
-            window.compositionChart = new Chart(compositionCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Deep Sleep', 'Light Sleep', 'REM Sleep'],
-                    datasets: [{
-                        data: [avgDeep, avgLight, avgRem],
-                        backgroundColor: ['#4A6BFF', '#2C7DD4', '#3DD3CB'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const minutes = context.raw;
-                                    const hours = Math.floor(minutes / 60);
-                                    const mins = Math.round(minutes % 60);
-                                    return `${context.label}: ${hours}h ${mins}m`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Activity Chart
-            const activityCtx = elements.activityChart.getContext('2d');
-            const activityLabels = [];
-            const caloriesData = [];
-            const stepsData = [];
-            
-            entries.forEach(entry => {
-                const entryDate = new Date(entry.date);
-                activityLabels.push(entryDate.toLocaleDateString('en-US', { weekday: 'short' }));
-                caloriesData.push(entry.calories || 0);
-                stepsData.push(entry.steps || 0);
-            });
-            
-            // Clear previous chart if it exists
-            if (window.activityChart) {
-                window.activityChart.destroy();
-            }
-            
-            window.activityChart = new Chart(activityCtx, {
-                type: 'bar',
-                data: {
-                    labels: activityLabels,
-                    datasets: [
-                        {
-                            label: 'Calories',
-                            data: caloriesData,
-                            backgroundColor: '#EF8A2B',
-                            yAxisID: 'y-calories'
-                        },
-                        {
-                            label: 'Steps',
-                            data: stepsData,
-                            backgroundColor: '#E0CB08',
-                            yAxisID: 'y-steps'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        'y-calories': {
-                            position: 'left',
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Calories'
-                            }
-                        },
-                        'y-steps': {
-                            position: 'right',
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Steps'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Events Timeline
-            const eventsContainer = elements.eventsTimeline;
-            eventsContainer.innerHTML = '';
-            
-            entries.forEach(entry => {
-                if (entry.eventsNotes) {
-                    const entryDate = new Date(entry.date);
-                    const dateString = entryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                    
-                    const eventItem = document.createElement('div');
-                    eventItem.classList.add('event-item');
-                    
-                    const eventDate = document.createElement('div');
-                    eventDate.classList.add('event-date');
-                    eventDate.textContent = dateString;
-                    eventItem.appendChild(eventDate);
-                    
-                    const eventContent = document.createElement('div');
-                    eventContent.classList.add('event-content');
-                    eventContent.textContent = entry.eventsNotes;
-                    eventItem.appendChild(eventContent);
-                    
-                    eventsContainer.appendChild(eventItem);
-                }
-            });
-            
-            if (eventsContainer.children.length === 0) {
-                eventsContainer.textContent = 'No events for this week.';
-            }
-        }
-    
-        function saveEntry(event) {
-            event.preventDefault();
-            
-            const entryId = elements.entryId.value || Date.now().toString();
-            const date = elements.entryDate.value;
-            
-            // Create sleep time objects
-            const nightSleep = {
-                hours: parseInt(document.getElementById('night-sleep-hours').value) || 0,
-                minutes: parseInt(document.getElementById('night-sleep-minutes').value) || 0
-            };
-            
-            const dayNap = {
-                hours: parseInt(document.getElementById('day-nap-hours').value) || 0,
-                minutes: parseInt(document.getElementById('day-nap-minutes').value) || 0
-            };
-            
-            const deepSleep = {
-                hours: parseInt(document.getElementById('deep-sleep-hours').value) || 0,
-                minutes: parseInt(document.getElementById('deep-sleep-minutes').value) || 0
-            };
-            
-            const lightSleep = {
-                hours: parseInt(document.getElementById('light-sleep-hours').value) || 0,
-                minutes: parseInt(document.getElementById('light-sleep-minutes').value) || 0
-            };
-            
-            const remSleep = {
-                hours: parseInt(document.getElementById('rem-sleep-hours').value) || 0,
-                minutes: parseInt(document.getElementById('rem-sleep-minutes').value) || 0
-            };
-            
-            // Get selected tags
-            const selectedTags = [];
-            document.querySelectorAll('.tag-checkbox:checked').forEach(checkbox => {
-                selectedTags.push(checkbox.value);
-            });
-            
-            // Get pills (comma-separated list)
-            const pillsInput = document.getElementById('pills').value;
-            const pills = pillsInput ? pillsInput.split(',').map(pill => pill.trim()) : [];
-            
-            // Create entry object
-            const entry = {
-                id: entryId,
-                date: date,
-                sleepScore: parseInt(elements.sleepScore.value) || 0,
-                nightSleep: nightSleep.hours === 0 && nightSleep.minutes === 0 ? null : nightSleep,
-                dayNap: dayNap.hours === 0 && dayNap.minutes === 0 ? null : dayNap,
-                deepSleep: deepSleep.hours === 0 && deepSleep.minutes === 0 ? null : deepSleep,
-                lightSleep: lightSleep.hours === 0 && lightSleep.minutes === 0 ? null : lightSleep,
-                remSleep: remSleep.hours === 0 && remSleep.minutes === 0 ? null : remSleep,
-                wakeUps: parseInt(document.getElementById('wake-ups').value) || 0,
-                cutSleep: document.getElementById('cut-sleep').checked,
-                shake: document.getElementById('shake').checked,
-                seizure: document.getElementById('seizure').checked,
-                afro: document.getElementById('afro').checked,
-                eventsNotes: document.getElementById('events-notes').value,
-                calories: parseInt(document.getElementById('calories').value) || 0,
-                steps: parseInt(document.getElementById('steps').value) || 0,
-                weight: parseFloat(document.getElementById('weight').value) || 0,
-                standing: parseInt(document.getElementById('standing').value) || 0,
-                pills: pills,
-                tags: selectedTags
-            };
-            
-            // Find index of existing entry or -1 if new
-            const existingIndex = state.entries.findIndex(e => e.id === entryId);
-            
-            if (existingIndex >= 0) {
-                // Update existing entry
-                state.entries[existingIndex] = entry;
-            } else {
-                // Add new entry
-                state.entries.push(entry);
-            }
-            
-            // Save data
-            saveData();
-            
-            // Update UI
-            renderEntries();
-            updateTodayInfo();
-            updateStatistics();
-            
-            // Close modal
-            elements.entryModal.style.display = 'none';
-        }
-    
-        function saveSettings(event) {
-            event.preventDefault();
-            
-            // Get reference date
-            state.settings.referenceDate = document.getElementById('reference-date').value;
-            
-            // Get goals
-            state.settings.caloriesGoal = parseInt(document.getElementById('calories-goal').value) || 2000;
-            state.settings.stepsGoal = parseInt(document.getElementById('steps-goal').value) || 10000;
-            
-            // Get sleep thresholds
-            state.settings.sleepThresholds.totalSleep.red.hours = parseInt(document.getElementById('total-sleep-red-hours').value) || 0;
-            state.settings.sleepThresholds.totalSleep.red.minutes = parseInt(document.getElementById('total-sleep-red-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.totalSleep.yellow.hours = parseInt(document.getElementById('total-sleep-yellow-hours').value) || 0;
-            state.settings.sleepThresholds.totalSleep.yellow.minutes = parseInt(document.getElementById('total-sleep-yellow-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.totalSleep.darkGreen.hours = parseInt(document.getElementById('total-sleep-dark-green-hours').value) || 0;
-            state.settings.sleepThresholds.totalSleep.darkGreen.minutes = parseInt(document.getElementById('total-sleep-dark-green-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.deepSleep.minimum.hours = parseInt(document.getElementById('deep-sleep-min-hours').value) || 0;
-            state.settings.sleepThresholds.deepSleep.minimum.minutes = parseInt(document.getElementById('deep-sleep-min-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.lightSleep.minimum.hours = parseInt(document.getElementById('light-sleep-min-hours').value) || 0;
-            state.settings.sleepThresholds.lightSleep.minimum.minutes = parseInt(document.getElementById('light-sleep-min-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.lightSleep.maximum.hours = parseInt(document.getElementById('light-sleep-max-hours').value) || 0;
-            state.settings.sleepThresholds.lightSleep.maximum.minutes = parseInt(document.getElementById('light-sleep-max-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.remSleep.red.hours = parseInt(document.getElementById('rem-sleep-red-hours').value) || 0;
-            state.settings.sleepThresholds.remSleep.red.minutes = parseInt(document.getElementById('rem-sleep-red-minutes').value) || 0;
-            
-            state.settings.sleepThresholds.remSleep.yellow.hours = parseInt(document.getElementById('rem-sleep-yellow-hours').value) || 0;
-            state.settings.sleepThresholds.remSleep.yellow.minutes = parseInt(document.getElementById('rem-sleep-yellow-minutes').value) || 0;
-            
-            // Get theme
-            state.settings.theme = document.getElementById('theme-selector').value;
-            
-            // Get accent color
-            state.settings.accentColor = document.getElementById('accent-color').value;
-            
-            // Save data
-            saveData();
-            
-            // Update UI
-            updateDateDisplay();
-            document.documentElement.setAttribute('data-theme', state.settings.theme);
-            document.documentElement.style.setProperty('--accent-color', state.settings.accentColor);
-            renderEntries();
-            
-            // Close modal
-            elements.settingsModal.style.display = 'none';
+        });
+        
+        if (remSleepEntryCount > 0) {
+            const avgRemSleepMinutes = totalRemSleepMinutes / remSleepEntryCount;
+            const avgRemSleepHours = Math.floor(avgRemSleepMinutes / 60);
+            const avgRemSleepMins = Math.round(avgRemSleepMinutes % 60);
+            elements.avgRemSleep.textContent = `${avgRemSleepHours}h ${avgRemSleepMins}m`;
+        } else {
+            elements.avgRemSleep.textContent = 'No Data';
         }
         
-        function addNewTag() {
-            const tagName = document.getElementById('new-tag-name').value.trim();
-            if (!tagName) {
-                alert('Please enter a tag name.');
-                return;
+        // Calculate average light sleep
+        let totalLightSleepMinutes = 0;
+        let lightSleepEntryCount = 0;
+        
+        weekEntries.forEach(entry => {
+            if (entry.lightSleep) {
+                totalLightSleepMinutes += (entry.lightSleep.hours || 0) * 60 + (entry.lightSleep.minutes || 0);
+                lightSleepEntryCount++;
             }
-            
-            // Check if tag already exists
-            if (state.tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
-                alert('Tag already exists.');
-                return;
-            }
-            
-            // Generate a random color or use default
-            const tagColor = document.getElementById('new-tag-color').value || getRandomColor();
-            
-            // Create new tag
-            const newTag = {
-                id: Date.now().toString(),
-                name: tagName,
-                color: tagColor
-            };
-            
-            // Add to state
-            state.tags.push(newTag);
-            
-            // Save data
-            saveData();
-            
-            // Update UI
-            updateTagFilter();
-            updateTagsRow();
-            document.getElementById('new-tag-name').value = '';
-            document.getElementById('new-tag-color').value = '#' + Math.floor(Math.random()*16777215).toString(16);
-            
-            // Refresh settings modal
-            showSettingsModal();
-        }
+        });
         
-        function deleteEntry(entryId) {
-            if (confirm('Are you sure you want to delete this entry?')) {
-                // Remove entry from state
-                state.entries = state.entries.filter(entry => entry.id !== entryId);
-                
-                // Save data
-                saveData();
-                
-                // Update UI
-                renderEntries();
-                updateTodayInfo();
-                updateStatistics();
-            }
+        if (lightSleepEntryCount > 0) {
+            const avgLightSleepMinutes = totalLightSleepMinutes / lightSleepEntryCount;
+            const avgLightSleepHours = Math.floor(avgLightSleepMinutes / 60);
+            const avgLightSleepMins = Math.round(avgLightSleepMinutes % 60);
+            elements.avgLightSleep.textContent = `${avgLightSleepHours}h ${avgLightSleepMins}m`;
+        } else {
+            elements.avgLightSleep.textContent = 'No Data';
         }
-        
-        function getRandomColor() {
-            // Generate pastel colors for better readability
-            const hue = Math.floor(Math.random() * 360);
-            const saturation = 65 + Math.floor(Math.random() * 25); // 65-90%
-            const lightness = 65 + Math.floor(Math.random() * 15); // 65-80%
-            
-            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        }
-        
-        // Theme handling
-        function applyTheme() {
-            document.documentElement.setAttribute('data-theme', state.settings.theme);
-            document.documentElement.style.setProperty('--accent-color', state.settings.accentColor);
-        }
-        
-        // Function to export data as JSON file
-        function exportData() {
-            const data = {
-                entries: state.entries,
-                tags: state.tags,
-                settings: state.settings
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sleep_tracker_export_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        
-        // Function to import data from JSON file
-        function importData(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                try {
-                    const importedData = JSON.parse(event.target.result);
-                    
-                    if (importedData.entries && importedData.tags && importedData.settings) {
-                        // Confirm import
-                        if (confirm('This will replace all your current data. Continue?')) {
-                            state.entries = importedData.entries;
-                            state.tags = importedData.tags;
-                            state.settings = importedData.settings;
-                            
-                            saveData();
-                            init();
-                            alert('Data imported successfully!');
-                        }
-                    } else {
-                        alert('Invalid data format.');
-                    }
-                } catch (error) {
-                    alert('Error importing data: ' + error.message);
-                }
-            };
-            
-            reader.readAsText(file);
-        }
-        
-        // Initialize import/export functionality
-        function setupImportExport() {
-            const exportBtn = document.getElementById('export-data-btn');
-            const importBtn = document.getElementById('import-data-btn');
-            const importFileInput = document.getElementById('import-file');
-            
-            exportBtn.addEventListener('click', exportData);
-            
-            importBtn.addEventListener('click', () => {
-                importFileInput.click();
-            });
-            
-            importFileInput.addEventListener('change', (event) => {
-                if (event.target.files.length > 0) {
-                    importData(event.target.files[0]);
-                }
-            });
-        }
-        
-        // Setup keyboard shortcuts
-        function setupKeyboardShortcuts() {
-            document.addEventListener('keydown', function(event) {
-                // Alt+N: Add new entry
-                if (event.altKey && event.key === 'n') {
-                    event.preventDefault();
-                    showAddEntryModal();
-                }
-                
-                // Alt+S: Open settings
-                if (event.altKey && event.key === 's') {
-                    event.preventDefault();
-                    showSettingsModal();
-                }
-                
-                // Alt+D: Open dashboard
-                if (event.altKey && event.key === 'd') {
-                    event.preventDefault();
-                    showDashboardModal();
-                }
-                
-                // Escape: Close modal
-                if (event.key === 'Escape') {
-                    document.querySelectorAll('.modal').forEach(modal => {
-                        if (modal.style.display === 'block') {
-                            modal.style.display = 'none';
-                        }
-                    });
-                }
-            });
-        }
-        
-        // Call additional setup functions
-        setupImportExport();
-        setupKeyboardShortcuts();
-        applyTheme();
-    });
+    }
+
