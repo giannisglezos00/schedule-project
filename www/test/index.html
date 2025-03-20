@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Tracker</title>
+    <!-- Link to our CSS file -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <script src="script.js"></script>
+    
+    <div class="container">
+        <!-- Header section -->
+        <header>
+            <h1>Sleep Tracker</h1>
+            <div class="date-display">
+                <span id="current-date">Wednesday 19 Mar 2025</span>
+                <span id="days-count">3.8 Months</span>
+            </div>
+        </header>
+
+        <!-- Controls for adding new entries and filtering -->
+        <div class="controls">
+            <button id="add-entry-btn" class="primary-btn">
+                <i class="fas fa-plus"></i> New Entry
+            </button>
+
+            <div class="filter-controls">
+                <input type="text" id="search-input" placeholder="Search events...">
+                <select id="tag-filter">
+                    <option value="">All Tags</option>
+                    <!-- Tags will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Main table to display all sleep tracking data -->
+        <div class="table-container">
+            <table id="sleep-table">
+                <thead>
+                    <tr>
+                        <th>Day #</th>
+                        <th>Date</th>
+                        <th>Sleep Score</th>
+                        <th>Night Sleep</th>
+                        <th>Day Nap</th>
+                        <th>Deep Sleep</th>
+                        <th>Light Sleep</th>
+                        <th>REM Sleep</th>
+                        <th>Wake Ups</th>
+                        <th>Cut Sleep</th>
+                        <th>Shake</th>
+                        <th>Seiz.</th>
+                        <th>Afr.</th>
+                        <th>Events/Notes</th>
+                        <th>Kcal</th>
+                        <th>Steps</th>
+                        <th>Weight</th>
+                        <th>Standing</th>
+                        <th>Pills</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sleep-data">
+                    <!-- Data will be populated dynamically here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="pagination">
+            <button id="prev-page" class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+            <span id="page-indicator">Page 1 of 1</span>
+            <button id="next-page" class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Statistics section -->
+        <div class="statistics">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Average Sleep Score</h3>
+                    <div class="stat-value" id="avg-sleep-score">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Sleep Duration</h3>
+                    <div class="stat-value" id="avg-sleep-duration">0h 0m</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Steps</h3>
+                    <div class="stat-value" id="avg-steps">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Recent Weight</h3>
+                    <div class="stat-value" id="recent-weight">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing entries -->
+    <div id="entry-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title">Add New Entry</h2>
+            
+            <form id="entry-form">
+                <input type="hidden" id="entry-id">
+                
+                <div class="form-group">
+                    <label for="entry-date">Date:</label>
+                    <input type="date" id="entry-date" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sleep-score">Sleep Score (0-100):</label>
+                        <input type="number" id="sleep-score" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="night-sleep">Night Sleep Duration:</label>
+                        <div class="time-input">
+                            <input type="number" id="night-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="night-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="day-nap">Day Nap:</label>
+                        <div class="time-input">
+                            <input type="number" id="day-nap-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="day-nap-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deep-sleep">Deep Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="deep-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="deep-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="light-sleep">Light Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="light-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="light-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rem-sleep">REM Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="rem-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="rem-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wake-ups">Wake Ups:</label>
+                        <input type="number" id="wake-ups" min="0" max="20">
+                    </div>
+                </div>
+                
+                <div class="form-row checkbox-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="cut-sleep">
+                        <label for="cut-sleep">Cut Sleep</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="shake">
+                        <label for="shake">Shake</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="seizure">
+                        <label for="seizure">Seizure</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="afr">
+                        <label for="afr">Girlfriend</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="events-notes">Events/Notes:</label>
+                    <textarea id="events-notes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags">Tags (comma separated):</label>
+                    <input type="text" id="tags" placeholder="anniversary, outing, etc.">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="calories">Calories (kcal):</label>
+                        <input type="number" id="calories" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steps">Steps:</label>
+                        <input type="number" id="steps" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weight">Weight:</label>
+                        <input type="number" id="weight" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="standing">Standing Hours:</label>
+                        <input type="number" id="standing" min="0" max="24">
+                    </div>
+                </div>
+                
+                <div class="form-row checkbox-group">
+                    <label>Pills Taken:</label>
+                    <div class="pill-checkboxes">
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-1">
+                            <label for="pill-1">Pill 1</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-2">
+                            <label for="pill-2">Pill 2</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-3">
+                            <label for="pill-3">Pill 3</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="save-btn" class="primary-btn">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript file link -->
+    <script src="script.js"></script>
+</body>
+</html>
