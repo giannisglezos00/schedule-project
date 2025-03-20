@@ -10,12 +10,12 @@
     --danger-color: #FF4B55;
     --info-color: #2C7DD4;
     
-    /* Sleep metrics colors */
+    /* Sleep metrics colors - updated per requirement */
     --deep-sleep: #4A6BFF;
     --light-sleep: #2C7DD4;
-    --rem-sleep: #3DD3CB;
+    --rem-sleep: #3DD3CB;  /* Fixed color per requirement #6 */
     
-    /* Activity metrics colors */
+    /* Activity metrics colors - updated per requirement */
     --calories: #EF8A2B;
     --steps: #E0CB08;
     --standing: #43C677;
@@ -46,9 +46,414 @@
     /* Sizing and spacing */
     --header-height: 60px;
     --sidebar-width: 250px;
-    --card-radius: 8px;
-    --btn-radius: 6px;
-    --input-radius: 4px;
+    --card-radius: 12px; /* Increased for more rounded edges (Goal #12) */
+    --btn-radius: 10px; /* Increased for more rounded edges */
+    --input-radius: 8px; /* Increased for more rounded edges */
+
+.dashboard-insights:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-insights h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.insights-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.insight-card {
+    padding: 1rem;
+    border-left: 4px solid var(--primary-color);
+    background-color: var(--bg-color);
+    border-radius: 0 var(--input-radius) var(--input-radius) 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.insight-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.insight-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.insight-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ===== PREVIEW MODAL STYLES ===== */
+#preview-date {
+    margin-bottom: 1rem;
+}
+
+.preview-notes {
+    margin: 1.5rem 0;
+    white-space: pre-line;
+    line-height: 1.5;
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border-radius: var(--card-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.preview-stats {
+    margin-top: 1.5rem;
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border-radius: var(--card-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.preview-stats h4 {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.preview-stats ul {
+    list-style-type: none;
+}
+
+.preview-stats li {
+    padding: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.preview-stats li:hover {
+    background-color: rgba(74, 107, 255, 0.05);
+}
+
+.preview-stats li:last-child {
+    border-bottom: none;
+}
+
+/* ===== TASK SYSTEM (Goal #2) ===== */
+.task-input-container {
+    margin-top: 1rem;
+}
+
+.task-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.task-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--input-radius);
+    transition: all 0.2s ease;
+}
+
+.task-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2);
+    outline: none;
+}
+
+.add-task-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-task-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(74, 107, 255, 0.3);
+}
+
+.tasks-list {
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.task-item:hover {
+    background-color: rgba(74, 107, 255, 0.05);
+}
+
+.task-item .task-text {
+    flex: 1;
+}
+
+.task-item .delete-task-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.task-item .delete-task-btn:hover {
+    color: white;
+    background-color: var(--danger-color);
+}
+
+/* ===== EMPTY STATE STYLING (Goal #9) ===== */
+.empty-cell {
+    background-color: white !important;
+}
+
+/* ===== DAYS FROM TODAY COLUMN (Goal #10) ===== */
+.days-from-today-header {
+    text-align: center;
+}
+
+.days-from-today {
+    text-align: center;
+    font-weight: 500;
+}
+
+.days-past {
+    color: var(--danger-color);
+}
+
+.days-future {
+    color: var(--success-color);
+}
+
+.days-today {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Week shade changes (Goal #10) */
+.week-1-past { background-color: rgba(255, 75, 85, 0.05) !important; }
+.week-2-past { background-color: rgba(255, 75, 85, 0.1) !important; }
+.week-3-past { background-color: rgba(255, 75, 85, 0.15) !important; }
+.week-4-past { background-color: rgba(255, 75, 85, 0.2) !important; }
+
+.week-1-future { background-color: rgba(67, 198, 119, 0.05) !important; }
+.week-2-future { background-color: rgba(67, 198, 119, 0.1) !important; }
+.week-3-future { background-color: rgba(67, 198, 119, 0.15) !important; }
+.week-4-future { background-color: rgba(67, 198, 119, 0.2) !important; }
+
+/* ===== DARK THEME IMPROVEMENTS (Goal #4) ===== */
+body.dark-theme {
+    --bg-color: #1E1E2E;
+    --card-bg: #2A2A3C;
+    --hover-bg: #33334D;
+    --border-color: #3F3F5C;
+    --text-color: #ECEFF4;
+    --text-secondary: #A1A8B9;
+    --text-muted: #6E7383;
+    
+    /* Important fix for Goal #4 - background should change in dark mode */
+    background-color: #15151f;
+}
+
+body.dark-theme .empty-cell {
+    background-color: var(--card-bg) !important;
+}
+
+body.dark-theme #sleep-table td {
+    background-color: var(--card-bg);
+}
+
+body.dark-theme input[type="checkbox"] {
+    background-color: var(--bg-color);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media screen and (max-width: 1200px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .date-sidebar {
+        position: static;
+        height: auto;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        margin: 0 0 10px 0;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container.large {
+        grid-column: span 1;
+    }
+    
+    /* Responsive controls */
+    .controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .buttons-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    #settings-btn {
+        margin-left: 0;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    #search-input, #tag-filter {
+        flex: 1;
+        min-width: unset;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .modal-content {
+        min-width: unset;
+        width: 90%;
+        margin: 30px auto;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .month-selector {
+        width: 100%;
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .buttons-group, .filter-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .month-selector {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .dashboard-controls {
+        flex-direction: column;
+    }
+    
+    .date-range-selector {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== ANIMATION CLASSES ===== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease;
+}
+
+/* ===== ACCENT COLOR CLASSES (Goal #5) ===== */
+body[data-accent="blue"] {
+    --primary-color: #4A6BFF;
+    --primary-hover: #3951cc;
+}
+
+body[data-accent="purple"] {
+    --primary-color: #6C63FF;
+    --primary-hover: #5750cc;
+}
+
+body[data-accent="teal"] {
+    --primary-color: #3DD3CB;
+    --primary-hover: #2fb5ae;
+}
+
+body[data-accent="orange"] {
+    --primary-color: #EF8A2B;
+    --primary-hover: #d47a22;
+}
+
+body[data-accent="pink"] {
+    --primary-color: #FF6384;
+    --primary-hover: #e94e70;
+}
 }
 
 * {
@@ -87,6 +492,9 @@ body {
     position: sticky;
     top: 0;
     overflow-y: auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    border-radius: 0 var(--card-radius) var(--card-radius) 0;
+    margin-right: 10px;
 }
 
 .date-display {
@@ -145,11 +553,17 @@ body {
 
 .tag {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     background-color: #e9ecef;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* ===== MAIN CONTENT STYLES ===== */
@@ -180,6 +594,7 @@ header h1 {
     border-bottom: 1px solid var(--border-color);
 }
 
+/* Rearranged controls per Goal #12 */
 .buttons-group {
     display: flex;
     gap: 0.75rem;
@@ -193,6 +608,19 @@ header h1 {
     align-items: center;
 }
 
+/* Month controls next to add new entry as per Goal #12 */
+.month-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: 1rem;
+}
+
+/* Settings button moved to right side per Goal #12 */
+#settings-btn {
+    margin-left: auto;
+}
+
 .primary-btn, .secondary-btn, .accent-btn {
     padding: 0.5rem 1rem;
     border-radius: var(--btn-radius);
@@ -202,7 +630,13 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.primary-btn:hover, .secondary-btn:hover, .accent-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .primary-btn {
@@ -237,11 +671,13 @@ header h1 {
     border: 1px solid var(--border-color);
     border-radius: var(--input-radius);
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 #search-input:focus, #tag-filter:focus {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2);
 }
 
 #search-input {
@@ -252,13 +688,6 @@ header h1 {
     min-width: 150px;
 }
 
-/* ===== MONTH NAVIGATION ===== */
-.month-selector {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
 #current-month {
     font-size: 1.1rem;
     font-weight: 500;
@@ -267,20 +696,27 @@ header h1 {
 }
 
 .month-btn {
-    background: transparent;
-    border: none;
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--text-color);
     display: flex;
     align-items: center;
-    padding: 0.25rem;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .month-btn:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 /* ===== TABLE STYLES ===== */
@@ -291,11 +727,18 @@ header h1 {
 
 #sleep-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: var(--card-radius);
     overflow: hidden;
     background-color: var(--bg-color);
+}
+
+/* Reduced overall table width as per Goal #13 */
+#sleep-table {
+    max-width: 95%;
+    margin: 0 auto;
 }
 
 #sleep-table thead {
@@ -308,11 +751,31 @@ header h1 {
     font-weight: 600;
     border-bottom: 2px solid var(--border-color);
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background-color: var(--card-bg);
+    z-index: 10;
+}
+
+/* Modified column widths per Goal #3 */
+#sleep-table th:nth-child(1) { /* Day # */
+    width: 60px;
+}
+
+#sleep-table th:nth-child(2) { /* Date */
+    width: 120px;
 }
 
 #sleep-table td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
+    background-color: white; /* Empty fields should be white per Goal #9 */
+    transition: background-color 0.2s ease;
+}
+
+/* Hover effects for table rows per Goal #16 */
+#sleep-table tbody tr:hover td {
+    background-color: rgba(74, 107, 255, 0.05);
 }
 
 /* Color coding for day number column */
@@ -322,24 +785,26 @@ header h1 {
 }
 
 .red-day {
-    background-color: var(--past-day);
+    background-color: var(--past-day) !important;
     color: var(--danger-color);
 }
 
 .green-day {
-    background-color: var(--future-day);
+    background-color: var(--future-day) !important;
     color: var(--success-color);
 }
 
 .today-day {
-    background-color: var(--primary-color);
+    background-color: var(--primary-color) !important;
     color: white;
     font-weight: bold;
 }
 
-/* Today's row highlighting */
-.today-row {
-    background-color: rgba(74, 107, 255, 0.1);
+/* Today's row highlighting - enhanced to be more visible */
+.today-row td {
+    background-color: rgba(74, 107, 255, 0.1) !important;
+    border-top: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color) !important;
 }
 
 /* Week separator */
@@ -361,18 +826,59 @@ header h1 {
     margin-right: 0.5rem;
 }
 
-/* Events cell styling */
+/* Days from today column */
+.days-from-today {
+    font-weight: 500;
+    text-align: center;
+}
+
+.days-past {
+    color: var(--danger-color);
+}
+
+.days-future {
+    color: var(--success-color);
+}
+
+/* Events cell styling with enhanced hover effects (Goal #11) */
 .events-cell {
     max-width: 250px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
 }
 
 .events-cell.has-content:hover {
     color: var(--primary-color);
-    text-decoration: underline;
+    background-color: rgba(74, 107, 255, 0.1) !important;
+    border-radius: 4px;
+}
+
+/* Tooltip on hover for events/notes (Goal #11) */
+.events-cell.has-content::after {
+    content: "Click to view full details";
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.events-cell.has-content:hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Actions column */
@@ -387,21 +893,27 @@ header h1 {
     cursor: pointer;
     font-size: 0.9rem;
     color: var(--text-secondary);
-    padding: 0.25rem;
-    border-radius: 4px;
+    padding: 0.5rem;
+    border-radius: 50%;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-btn:hover {
     background-color: var(--hover-bg);
+    transform: translateY(-2px);
 }
 
 .edit-btn:hover {
     color: var(--primary-color);
+    background-color: rgba(74, 107, 255, 0.1);
 }
 
 .delete-btn:hover {
     color: var(--danger-color);
+    background-color: rgba(255, 75, 85, 0.1);
 }
 
 /* Tags row */
@@ -428,7 +940,7 @@ header h1 {
 }
 
 .statistics h2::after {
-    content: "Weekly";
+    content: "Current Week";
     font-size: 0.8rem;
     background-color: var(--accent-color);
     color: white;
@@ -452,6 +964,12 @@ header h1 {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card h3 {
@@ -487,6 +1005,7 @@ header h1 {
     padding: 2rem;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     animation: modalOpen 0.3s ease;
+    width: 90%; /* Increased for Goal #15 */
 }
 
 .dashboard-modal-content, .preview-modal-content {
@@ -509,10 +1028,20 @@ header h1 {
     font-size: 1.5rem;
     font-weight: bold;
     cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s ease, transform 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .close-btn:hover {
     color: var(--primary-color);
+    background-color: rgba(74, 107, 255, 0.1);
+    transform: rotate(90deg);
 }
 
 .modal-title {
@@ -553,7 +1082,7 @@ header h1 {
     border: 1px solid var(--border-color);
     border-radius: var(--input-radius);
     background-color: white;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .form-group input:focus,
@@ -561,6 +1090,7 @@ header h1 {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2);
 }
 
 .time-input {
@@ -596,6 +1126,39 @@ header h1 {
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1.5rem;
+}
+
+/* Improved checkbox styling */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+input[type="checkbox"]:checked::after {
+    content: "✓";
+    font-size: 14px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:hover {
+    border-color: var(--primary-color);
 }
 
 /* ===== SETTINGS MODAL STYLES ===== */
@@ -662,13 +1225,20 @@ header h1 {
     background-color: var(--card-bg);
     border-radius: var(--card-radius);
     border: 1px solid var(--border-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tag-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .tag-item span {
-    padding: 0.15rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 999px;
 }
 
+/* Modern circle close button (Goal #8) */
 .delete-tag-btn {
     background: none;
     border: none;
@@ -677,15 +1247,21 @@ header h1 {
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #f1f3f6;
 }
 
 .delete-tag-btn:hover {
-    color: var(--danger-color);
+    color: white;
+    background-color: var(--danger-color);
+    transform: rotate(90deg);
 }
 
 .delete-tag-btn i {
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .color-options {
@@ -695,8 +1271,8 @@ header h1 {
 }
 
 .color-option {
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
@@ -705,6 +1281,7 @@ header h1 {
 
 .color-option:hover {
     transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
 }
 
 .color-option.selected {
@@ -757,18 +1334,28 @@ header h1 {
 
 .range-btn:hover {
     border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .range-btn.active {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(74, 107, 255, 0.3);
 }
 
 .chart-type-selector select {
     padding: 0.4rem;
     border: 1px solid var(--border-color);
     border-radius: var(--input-radius);
+    transition: all 0.2s ease;
+}
+
+.chart-type-selector select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2);
+    outline: none;
 }
 
 .dashboard-grid {
@@ -787,6 +1374,12 @@ header h1 {
     height: 300px;
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .chart-container h3 {
@@ -858,183 +1451,5 @@ header h1 {
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-insights h3 {
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.insights-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
-}
-
-.insight-card {
-    padding: 1rem;
-    border-left: 4px solid var(--primary-color);
-    background-color: var(--bg-color);
-    border-radius: 0 var(--input-radius) var(--input-radius) 0;
-}
-
-.insight-title {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.insight-description {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-/* ===== PREVIEW MODAL STYLES ===== */
-#preview-date {
-    margin-bottom: 1rem;
-}
-
-.preview-notes {
-    margin: 1.5rem 0;
-    white-space: pre-line;
-    line-height: 1.5;
-}
-
-.preview-stats {
-    margin-top: 1.5rem;
-    background-color: var(--card-bg);
-    padding: 1rem;
-    border-radius: var(--card-radius);
-}
-
-.preview-stats h4 {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.preview-stats ul {
-    list-style-type: none;
-}
-
-.preview-stats li {
-    padding: 0.35rem 0;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.preview-stats li:last-child {
-    border-bottom: none;
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
-@media screen and (max-width: 1200px) {
-    .main-layout {
-        grid-template-columns: 1fr;
-    }
-    
-    .date-sidebar {
-        position: static;
-        height: auto;
-        padding: 1rem;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .chart-container.large {
-        grid-column: span 1;
-    }
-}
-
-@media screen and (max-width: 768px) {
-    .controls {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .filter-controls {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    #search-input, #tag-filter {
-        flex: 1;
-        min-width: unset;
-    }
-    
-    .form-row {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .modal-content {
-        min-width: unset;
-        width: 90%;
-        margin: 30px auto;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media screen and (max-width: 480px) {
-    .buttons-group, .filter-controls {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .month-selector {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .dashboard-controls {
-        flex-direction: column;
-    }
-    
-    .date-range-selector {
-        justify-content: space-between;
-        width: 100%;
-    }
-}
-
-/* ===== DARK THEME ===== */
-body.dark-theme {
-    --bg-color: #1E1E2E;
-    --card-bg: #2A2A3C;
-    --hover-bg: #33334D;
-    --border-color: #3F3F5C;
-    --text-color: #ECEFF4;
-    --text-secondary: #A1A8B9;
-    --text-muted: #6E7383;
-}
-
-/* ===== UTILITY CLASSES ===== */
-.hidden {
-    display: none !important;
-}
-
-.visible {
-    display: block !important;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* ===== ANIMATION CLASSES ===== */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
