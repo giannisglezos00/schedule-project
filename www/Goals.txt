@@ -1,10 +1,6 @@
-Goals of things we need to do
-
-i think there needs to be a huge redesign in the way we see things
-i use this as a calendar too so i need to see future days and schedule things easily and be able to see my future tasks
-i would like to highlight the whole row of today's date
-the first column is mostly for days since 4/11/24 (which can be changed from the settings)
-also you should be able to click the preview of the events/notes entry and see the whole content as a popup and if it's empty to open a new entry and write
+Notes:
+no need for mobile design
+this will be used on a computer on a self hosted web app
 
 Problems/changes:
 
