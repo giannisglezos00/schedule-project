@@ -1,5 +1,143 @@
 // Sleep Tracker Script
 document.addEventListener('DOMContentLoaded', function() {
+    // Add this at the beginning of your script.js file, just after the DOMContentLoaded event listener
+console.log('Script loaded');
+
+// Debug event listener
+function debugAddEntryButton() {
+    console.log('Add Entry Button clicked');
+    const entryModal = document.getElementById('entry-modal');
+    
+    if (!entryModal) {
+        console.error('Entry modal not found');
+        return;
+    }
+    
+    entryModal.style.display = 'block';
+    console.log('Modal should be visible now');
+}
+
+// Additional debugging for event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const addEntryBtn = document.getElementById('add-entry-btn');
+    
+    if (!addEntryBtn) {
+        console.error('Add Entry Button not found');
+        return;
+    }
+    
+    console.log('Add Entry Button found');
+    
+    // Remove existing listeners and add new one
+    addEntryBtn.removeEventListener('click', showAddEntryModal);
+    addEntryBtn.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent any default form submission
+        console.log('Add Entry Button clicked');
+        showAddEntryModal();
+    });
+    
+    // Also add a direct debug method
+    addEntryBtn.onclick = debugAddEntryButton;
+});
+
+// Add updateStatistics function
+function updateStatistics(entries = state.entries) {
+    // Calculate current week's entries
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - currentDay);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + (6 - currentDay));
+    endDate.setHours(23, 59, 59, 999);
+    
+    const weekEntries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= startDate && entryDate <= endDate;
+    });
+    
+    // Calculate average sleep score
+    const avgSleepScore = weekEntries.length > 0 
+        ? weekEntries.reduce((sum, entry) => sum + (entry.sleepScore || 0), 0) / weekEntries.length 
+        : 0;
+    
+    // Calculate average sleep duration
+    const avgSleepDuration = calculateAverageSleepDuration(weekEntries);
+    
+    // Calculate average steps
+    const avgSteps = weekEntries.length > 0 
+        ? weekEntries.reduce((sum, entry) => sum + (entry.steps || 0), 0) / weekEntries.length 
+        : 0;
+    
+    // Calculate average sleep phases
+    const avgDeepSleep = calculateAverageSleepPhase(weekEntries, 'deepSleep');
+    const avgRemSleep = calculateAverageSleepPhase(weekEntries, 'remSleep');
+    const avgLightSleep = calculateAverageSleepPhase(weekEntries, 'lightSleep');
+    
+    // Update UI elements
+    if (elements.avgSleepScore) elements.avgSleepScore.textContent = avgSleepScore.toFixed(1);
+    if (elements.avgSleepDuration) elements.avgSleepDuration.textContent = formatSleepDuration(avgSleepDuration);
+    if (elements.avgSteps) elements.avgSteps.textContent = Math.round(avgSteps).toLocaleString();
+    if (elements.avgDeepSleep) elements.avgDeepSleep.textContent = formatSleepDuration(avgDeepSleep);
+    if (elements.avgRemSleep) elements.avgRemSleep.textContent = formatSleepDuration(avgRemSleep);
+    if (elements.avgLightSleep) elements.avgLightSleep.textContent = formatSleepDuration(avgLightSleep);
+}
+
+// Helper function to calculate average sleep duration
+function calculateAverageSleepDuration(entries) {
+    if (entries.length === 0) return { hours: 0, minutes: 0 };
+    
+    const totalMinutes = entries.reduce((sum, entry) => {
+        const nightSleep = entry.nightSleep || { hours: 0, minutes: 0 };
+        return sum + (nightSleep.hours * 60 + nightSleep.minutes);
+    }, 0);
+    
+    const avgMinutes = totalMinutes / entries.length;
+    
+    return {
+        hours: Math.floor(avgMinutes / 60),
+        minutes: Math.round(avgMinutes % 60)
+    };
+}
+
+// Helper function to calculate average sleep phase duration
+function calculateAverageSleepPhase(entries, phaseKey) {
+    if (entries.length === 0) return { hours: 0, minutes: 0 };
+    
+    const totalMinutes = entries.reduce((sum, entry) => {
+        const phaseTime = entry[phaseKey] || { hours: 0, minutes: 0 };
+        return sum + (phaseTime.hours * 60 + phaseTime.minutes);
+    }, 0);
+    
+    const avgMinutes = totalMinutes / entries.length;
+    
+    return {
+        hours: Math.floor(avgMinutes / 60),
+        minutes: Math.round(avgMinutes % 60)
+    };
+}
+
+// Helper function to format sleep duration
+function formatSleepDuration(duration) {
+    return `${duration.hours}h ${duration.minutes}m`;
+}
+
+// Ensure the modal close button works
+document.addEventListener('DOMContentLoaded', function() {
+    const closeButtons = document.querySelectorAll('.close-btn');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            console.log('Close button clicked');
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+});
     // App state
     const state = {
         entries: [],
