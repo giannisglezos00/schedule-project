@@ -159,3 +159,10 @@
 [Thu Mar 20 11:05:49.341192 2025] [php:warn] [pid 43124:tid 1880] [client ::1:51706] PHP Warning:  Attempt to read property "connect_error" on null in C:\\Users\\John\\Desktop\\UniServerZ\\www\\test_db.php on line 4
 [Thu Mar 20 11:05:49.341192 2025] [php:warn] [pid 43124:tid 1880] [client ::1:51706] PHP Warning:  Undefined variable $conn in C:\\Users\\John\\Desktop\\UniServerZ\\www\\test_db.php on line 9
 [Thu Mar 20 11:05:49.341192 2025] [php:error] [pid 43124:tid 1880] [client ::1:51706] PHP Fatal error:  Uncaught Error: Call to a member function query() on null in C:\\Users\\John\\Desktop\\UniServerZ\\www\\test_db.php:9\nStack trace:\n#0 {main}\n  thrown in C:\\Users\\John\\Desktop\\UniServerZ\\www\\test_db.php on line 9
+[Thu Mar 20 18:39:36.577556 2025] [core:warn] [pid 32232:tid 484] AH00098: pid file C:/Users/John/Documents/GitHub/schedule-project/core/apache2/logs/httpd.pid overwritten -- Unclean shutdown of previous Apache run?
+[Thu Mar 20 18:39:36.850046 2025] [mpm_winnt:notice] [pid 32232:tid 484] AH00455: Apache/2.4.58 (Win64) PHP/8.3.0 configured -- resuming normal operations
+[Thu Mar 20 18:39:36.850046 2025] [mpm_winnt:notice] [pid 32232:tid 484] AH00456: Apache Lounge VS17 Server built: Oct 18 2023 13:03:18
+[Thu Mar 20 18:39:36.850046 2025] [core:notice] [pid 32232:tid 484] AH00094: Command line: 'C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\bin\\httpd_z.exe -d C:/Users/John/Documents/GitHub/schedule-project/core/apache2 -f C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\conf\\httpd.conf -d C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2'
+[Thu Mar 20 18:39:36.870555 2025] [mpm_winnt:notice] [pid 32232:tid 484] AH00418: Parent: Created child process 39656
+[Thu Mar 20 18:39:37.931343 2025] [mpm_winnt:notice] [pid 39656:tid 556] AH00354: Child: Starting 150 worker threads.
+[Thu Mar 20 18:39:37.938534 2025] [php:error] [pid 39656:tid 1916] [client ::1:49810] script 'C:/Users/John/Documents/GitHub/schedule-project/www/index.php' not found or unable to stat
