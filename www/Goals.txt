@@ -62,3 +62,28 @@ To implement this in your project:
 
 You'll need to create or update your CSS (style.css) to match these structural changes
 The JavaScript (script.js) will need to be updated to handle the new functionality
+
+change after updated css :
+The left sidebar now shows today's date prominently with tasks underneath
+Month-based pagination with controls to navigate between months
+Separate row for tags in the table header
+Prepared for tag colors (both random and custom via settings)
+Repositioned columns (Afro is separated from medical issues)
+Enhanced dashboard with proper charts and legends
+Statistics specifically for the current week (noted in header)
+Modern circular close buttons for tag management
+Consistent color coding for different metrics:
+Deep sleep: #4A6BFF
+Light sleep: #2C7DD4
+REM sleep: #3DD3CB
+Calories: #EF8A2B
+Steps: #E0CB08
+Standing: #43C677
+Customizable sleep quality thresholds with color indicators
+Subtle hover effects on table rows and interactive elements
+Day indicators showing how many days from today with color coding
+Day of week indicators and week separators
+The stylesheet is fully responsive and includes both light and dark themes. Note that for the sidebar to work properly, you'll need to add a sidebar div to your HTML structure, which wasn't in the original HTML. You should modify your index.html to include the sidebar structure.
+
+
+
