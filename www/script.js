@@ -1086,19 +1086,153 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initialize the application
-    init();
-});
-Container.children.length === 0) {
-            eventsContainer.textContent = 'No events for this period.';
+    function saveEntry(event) {
+        event.preventDefault();
+        
+        const entryId = elements.entryId.value;
+        const isNewEntry = !entryId;
+        
+        // Collect form data
+        const entry = {
+            id: isNewEntry ? Date.now().toString() + Math.random().toString(36).substr(2, 5) : entryId,
+            date: elements.entryDate.value,
+            sleepScore: elements.sleepScore.value ? parseInt(elements.sleepScore.value) : null,
+            nightSleep: {
+                hours: document.getElementById('night-sleep-hours').value ? parseInt(document.getElementById('night-sleep-hours').value) : 0,
+                minutes: document.getElementById('night-sleep-minutes').value ? parseInt(document.getElementById('night-sleep-minutes').value) : 0
+            },
+            dayNap: {
+                hours: document.getElementById('day-nap-hours').value ? parseInt(document.getElementById('day-nap-hours').value) : 0,
+                minutes: document.getElementById('day-nap-minutes').value ? parseInt(document.getElementById('day-nap-minutes').value) : 0
+            },
+            deepSleep: {
+                hours: document.getElementById('deep-sleep-hours').value ? parseInt(document.getElementById('deep-sleep-hours').value) : 0,
+                minutes: document.getElementById('deep-sleep-minutes').value ? parseInt(document.getElementById('deep-sleep-minutes').value) : 0
+            },
+            lightSleep: {
+                hours: document.getElementById('light-sleep-hours').value ? parseInt(document.getElementById('light-sleep-hours').value) : 0,
+                minutes: document.getElementById('light-sleep-minutes').value ? parseInt(document.getElementById('light-sleep-minutes').value) : 0
+            },
+            remSleep: {
+                hours: document.getElementById('rem-sleep-hours').value ? parseInt(document.getElementById('rem-sleep-hours').value) : 0,
+                minutes: document.getElementById('rem-sleep-minutes').value ? parseInt(document.getElementById('rem-sleep-minutes').value) : 0
+            },
+            wakeUps: document.getElementById('wake-ups').value ? parseInt(document.getElementById('wake-ups').value) : null,
+            cutSleep: document.getElementById('cut-sleep').checked,
+            shake: document.getElementById('shake').checked,
+            seizure: document.getElementById('seizure').checked,
+            afr: document.getElementById('afr').checked,
+            eventsNotes: document.getElementById('events-notes').value,
+            tags: document.getElementById('tags').value ? document.getElementById('tags').value.split(',').map(tag => tag.trim()) : [],
+            calories: document.getElementById('calories').value ? parseInt(document.getElementById('calories').value) : null,
+            steps: document.getElementById('steps').value ? parseInt(document.getElementById('steps').value) : null,
+            weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
+            standing: document.getElementById('standing').value ? parseInt(document.getElementById('standing').value) : null,
+            pills: []
+        };
+        
+        // Get pills
+        if (document.getElementById('pill-1').checked) entry.pills.push('1');
+        if (document.getElementById('pill-2').checked) entry.pills.push('2');
+        if (document.getElementById('pill-3').checked) entry.pills.push('3');
+        
+        // Add or update entry
+        if (isNewEntry) {
+            state.entries.push(entry);
+        } else {
+            const index = state.entries.findIndex(e => e.id === entryId);
+            if (index !== -1) {
+                state.entries[index] = entry;
+            }
         }
         
-        // Generate insights based on the data
-        generateSleepInsights(entries);
+        // Save data
+        saveData();
+        
+        // Hide modal
+        elements.entryModal.style.display = 'none';
+        
+        // Update UI
+        renderEntries();
+        updateTodayInfo();
+        updateStatistics();
     }
-
-    function updateStatistics() {
-        // Get the start and end dates of the current week
+    
+    function saveSettings(event) {
+        event.preventDefault();
+        
+        // Collect form data
+        state.settings.referenceDate = document.getElementById('reference-date').value;
+        state.settings.caloriesGoal = parseInt(document.getElementById('calories-goal').value) || 2000;
+        state.settings.stepsGoal = parseInt(document.getElementById('steps-goal').value) || 10000;
+        
+        // Collect sleep thresholds
+        state.settings.sleepThresholds = {
+            totalSleep: {
+                red: {
+                    hours: parseInt(document.getElementById('sleep-red-hours').value) || 6,
+                    minutes: parseInt(document.getElementById('sleep-red-minutes').value) || 20
+                },
+                yellow: {
+                    hours: parseInt(document.getElementById('sleep-yellow-hours').value) || 7,
+                    minutes: parseInt(document.getElementById('sleep-yellow-minutes').value) || 0
+                },
+                darkGreen: {
+                    hours: parseInt(document.getElementById('sleep-darkgreen-hours').value) || 8,
+                    minutes: parseInt(document.getElementById('sleep-darkgreen-minutes').value) || 30
+                }
+            },
+            deepSleep: {
+                minimum: {
+                    hours: parseInt(document.getElementById('deep-min-hours').value) || 1,
+                    minutes: parseInt(document.getElementById('deep-min-minutes').value) || 30
+                }
+            },
+            lightSleep: {
+                minimum: {
+                    hours: parseInt(document.getElementById('light-min-hours').value) || 3,
+                    minutes: parseInt(document.getElementById('light-min-minutes').value) || 0
+                },
+                maximum: {
+                    hours: parseInt(document.getElementById('light-max-hours').value) || 5,
+                    minutes: parseInt(document.getElementById('light-max-minutes').value) || 0
+                }
+            },
+            remSleep: {
+                red: {
+                    hours: parseInt(document.getElementById('rem-red-hours').value) || 0,
+                    minutes: parseInt(document.getElementById('rem-red-minutes').value) || 50
+                },
+                yellow: {
+                    hours: parseInt(document.getElementById('rem-yellow-hours').value) || 1,
+                    minutes: parseInt(document.getElementById('rem-yellow-minutes').value) || 2
+                }
+            }
+        };
+        
+        // Save theme
+        state.settings.theme = document.getElementById('theme-selector').value;
+        
+        // Apply theme
+        applyTheme();
+        
+        // Save data
+        saveData();
+        
+        // Hide modal
+        elements.settingsModal.style.display = 'none';
+        
+        // Update UI
+        updateDateDisplay();
+        renderEntries();
+        updateStatistics();
+    }
+    
+    function showDashboardModal() {
+        // Show modal
+        elements.dashboardModal.style.display = 'block';
+        
+        // Update dashboard with current data
         const today = new Date();
         const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
         
@@ -1116,108 +1250,64 @@ Container.children.length === 0) {
             return entryDate >= startDate && entryDate <= endDate;
         });
         
-        if (weekEntries.length === 0) {
-            elements.avgSleepScore.textContent = 'No Data';
-            elements.avgSleepDuration.textContent = 'No Data';
-            elements.avgSteps.textContent = 'No Data';
-            elements.avgDeepSleep.textContent = 'No Data';
-            elements.avgRemSleep.textContent = 'No Data';
-            elements.avgLightSleep.textContent = 'No Data';
-            return;
-        }
+        // Update dashboard charts
+        updateDashboardCharts(weekEntries);
         
-        // Calculate average sleep score
-        const totalSleepScore = weekEntries.reduce((sum, entry) => sum + (entry.sleepScore || 0), 0);
-        const avgSleepScore = totalSleepScore / weekEntries.length;
-        elements.avgSleepScore.textContent = Math.round(avgSleepScore);
-        
-        // Calculate average sleep duration
-        let totalSleepMinutes = 0;
-        let sleepEntryCount = 0;
-        
-        weekEntries.forEach(entry => {
-            if (entry.nightSleep) {
-                totalSleepMinutes += (entry.nightSleep.hours || 0) * 60 + (entry.nightSleep.minutes || 0);
-                sleepEntryCount++;
-            }
+        // Set up date range buttons
+        const rangeButtons = document.querySelectorAll('.range-btn');
+        rangeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                rangeButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Get date range
+                const range = this.getAttribute('data-range');
+                
+                // Calculate date range
+                const today = new Date();
+                let startDate, endDate;
+                
+                switch (range) {
+                    case 'week':
+                        startDate = new Date(today);
+                        startDate.setDate(today.getDate() - today.getDay());
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(today);
+                        endDate.setDate(today.getDate() + (6 - today.getDay()));
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                    case 'month':
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+                        break;
+                    case 'year':
+                        startDate = new Date(today.getFullYear(), 0, 1);
+                        endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+                        break;
+                    case 'all':
+                        startDate = new Date(0); // Beginning of time
+                        endDate = new Date(8640000000000000); // End of time
+                        break;
+                }
+                
+                // Filter entries for the selected range
+                const filteredEntries = state.entries.filter(entry => {
+                    const entryDate = new Date(entry.date);
+                    return entryDate >= startDate && entryDate <= endDate;
+                });
+                
+                // Update dashboard charts
+                updateDashboardCharts(filteredEntries);
+            });
         });
         
-        if (sleepEntryCount > 0) {
-            const avgSleepMinutes = totalSleepMinutes / sleepEntryCount;
-            const avgSleepHours = Math.floor(avgSleepMinutes / 60);
-            const avgSleepMins = Math.round(avgSleepMinutes % 60);
-            elements.avgSleepDuration.textContent = `${avgSleepHours}h ${avgSleepMins}m`;
-        } else {
-            elements.avgSleepDuration.textContent = 'No Data';
-        }
-        
-        // Calculate average steps
-        const totalSteps = weekEntries.reduce((sum, entry) => sum + (entry.steps || 0), 0);
-        const avgSteps = totalSteps / weekEntries.length;
-        elements.avgSteps.textContent = Math.round(avgSteps).toLocaleString();
-        
-        // Calculate average deep sleep
-        let totalDeepSleepMinutes = 0;
-        let deepSleepEntryCount = 0;
-        
-        weekEntries.forEach(entry => {
-            if (entry.deepSleep) {
-                totalDeepSleepMinutes += (entry.deepSleep.hours || 0) * 60 + (entry.deepSleep.minutes || 0);
-                deepSleepEntryCount++;
-            }
-        });
-        
-        if (deepSleepEntryCount > 0) {
-            const avgDeepSleepMinutes = totalDeepSleepMinutes / deepSleepEntryCount;
-            const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
-            const avgDeepSleepMins = Math.round(avgDeepSleepMinutes % 60);
-            elements.avgDeepSleep.textContent = `${avgDeepSleepHours}h ${avgDeepSleepMins}m`;
-        } else {
-            elements.avgDeepSleep.textContent = 'No Data';
-        }
-        
-        // Calculate average REM sleep
-        let totalRemSleepMinutes = 0;
-        let remSleepEntryCount = 0;
-        
-        weekEntries.forEach(entry => {
-            if (entry.remSleep) {
-                totalRemSleepMinutes += (entry.remSleep.hours || 0) * 60 + (entry.remSleep.minutes || 0);
-                remSleepEntryCount++;
-            }
-        });
-        
-        if (remSleepEntryCount > 0) {
-            const avgRemSleepMinutes = totalRemSleepMinutes / remSleepEntryCount;
-            const avgRemSleepHours = Math.floor(avgRemSleepMinutes / 60);
-            const avgRemSleepMins = Math.round(avgRemSleepMinutes % 60);
-            elements.avgRemSleep.textContent = `${avgRemSleepHours}h ${avgRemSleepMins}m`;
-        } else {
-            elements.avgRemSleep.textContent = 'No Data';
-        }
-        
-        // Calculate average light sleep
-        let totalLightSleepMinutes = 0;
-        let lightSleepEntryCount = 0;
-        
-        weekEntries.forEach(entry => {
-            if (entry.lightSleep) {
-                totalLightSleepMinutes += (entry.lightSleep.hours || 0) * 60 + (entry.lightSleep.minutes || 0);
-                lightSleepEntryCount++;
-            }
-        });
-        
-        if (lightSleepEntryCount > 0) {
-            const avgLightSleepMinutes = totalLightSleepMinutes / lightSleepEntryCount;
-            const avgLightSleepHours = Math.floor(avgLightSleepMinutes / 60);
-            const avgLightSleepMins = Math.round(avgLightSleepMinutes % 60);
-            elements.avgLightSleep.textContent = `${avgLightSleepHours}h ${avgLightSleepMins}m`;
-        } else {
-            elements.avgLightSleep.textContent = 'No Data';
-        }
-        
-        // Update dashboard charts if dashboard is visible
-        if (elements.dashboardModal.style.display === 'block') {
+        // Set up chart metric selector
+        document.getElementById('chart-metric').addEventListener('change', function() {
             updateDashboardCharts(weekEntries);
-        }
+        });
     }
+});
