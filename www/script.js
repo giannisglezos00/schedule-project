@@ -725,6 +725,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (deepSleepEntryCount > 0) {
             const avgDeepSleepMinutes =
+
+            
+            // message limmite continue here
+
             if (deepSleepEntryCount > 0) {
                 const avgDeepSleepMinutes = totalDeepSleepMinutes / deepSleepEntryCount;
                 const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
@@ -1456,5 +1460,180 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Close modal
             elements.settingsModal.style.display = 'none';
-
-            // message limmite continue here
+        }
+        
+        function addNewTag() {
+            const tagName = document.getElementById('new-tag-name').value.trim();
+            if (!tagName) {
+                alert('Please enter a tag name.');
+                return;
+            }
+            
+            // Check if tag already exists
+            if (state.tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
+                alert('Tag already exists.');
+                return;
+            }
+            
+            // Generate a random color or use default
+            const tagColor = document.getElementById('new-tag-color').value || getRandomColor();
+            
+            // Create new tag
+            const newTag = {
+                id: Date.now().toString(),
+                name: tagName,
+                color: tagColor
+            };
+            
+            // Add to state
+            state.tags.push(newTag);
+            
+            // Save data
+            saveData();
+            
+            // Update UI
+            updateTagFilter();
+            updateTagsRow();
+            document.getElementById('new-tag-name').value = '';
+            document.getElementById('new-tag-color').value = '#' + Math.floor(Math.random()*16777215).toString(16);
+            
+            // Refresh settings modal
+            showSettingsModal();
+        }
+        
+        function deleteEntry(entryId) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                // Remove entry from state
+                state.entries = state.entries.filter(entry => entry.id !== entryId);
+                
+                // Save data
+                saveData();
+                
+                // Update UI
+                renderEntries();
+                updateTodayInfo();
+                updateStatistics();
+            }
+        }
+        
+        function getRandomColor() {
+            // Generate pastel colors for better readability
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = 65 + Math.floor(Math.random() * 25); // 65-90%
+            const lightness = 65 + Math.floor(Math.random() * 15); // 65-80%
+            
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+        
+        // Theme handling
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', state.settings.theme);
+            document.documentElement.style.setProperty('--accent-color', state.settings.accentColor);
+        }
+        
+        // Function to export data as JSON file
+        function exportData() {
+            const data = {
+                entries: state.entries,
+                tags: state.tags,
+                settings: state.settings
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sleep_tracker_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Function to import data from JSON file
+        function importData(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    
+                    if (importedData.entries && importedData.tags && importedData.settings) {
+                        // Confirm import
+                        if (confirm('This will replace all your current data. Continue?')) {
+                            state.entries = importedData.entries;
+                            state.tags = importedData.tags;
+                            state.settings = importedData.settings;
+                            
+                            saveData();
+                            init();
+                            alert('Data imported successfully!');
+                        }
+                    } else {
+                        alert('Invalid data format.');
+                    }
+                } catch (error) {
+                    alert('Error importing data: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Initialize import/export functionality
+        function setupImportExport() {
+            const exportBtn = document.getElementById('export-data-btn');
+            const importBtn = document.getElementById('import-data-btn');
+            const importFileInput = document.getElementById('import-file');
+            
+            exportBtn.addEventListener('click', exportData);
+            
+            importBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+            
+            importFileInput.addEventListener('change', (event) => {
+                if (event.target.files.length > 0) {
+                    importData(event.target.files[0]);
+                }
+            });
+        }
+        
+        // Setup keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(event) {
+                // Alt+N: Add new entry
+                if (event.altKey && event.key === 'n') {
+                    event.preventDefault();
+                    showAddEntryModal();
+                }
+                
+                // Alt+S: Open settings
+                if (event.altKey && event.key === 's') {
+                    event.preventDefault();
+                    showSettingsModal();
+                }
+                
+                // Alt+D: Open dashboard
+                if (event.altKey && event.key === 'd') {
+                    event.preventDefault();
+                    showDashboardModal();
+                }
+                
+                // Escape: Close modal
+                if (event.key === 'Escape') {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        if (modal.style.display === 'block') {
+                            modal.style.display = 'none';
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Call additional setup functions
+        setupImportExport();
+        setupKeyboardShortcuts();
+        applyTheme();
+    });
