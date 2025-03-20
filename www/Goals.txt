@@ -42,3 +42,23 @@ standing hours: #43C677
 if you're unable to finish changes in 1 conversation tell yourself everything you did / need to do so you can continue where you left off in another one
 
 i need everything to be consistent with a modern style
+
+Change after updated html:
+Date and Today's Tasks: Added a left sidebar that prominently displays the current date and a section for today's tasks extracted from events/notes.
+Month-based Pagination: Added month selector controls to navigate between months, separating entries into pages based on month.
+Tags Separation: Created a separate row for tags in the table header.
+Tag Colors: Added color picker for tags in settings and prepared for random/custom tag colors.
+Rearranged Columns: Moved "Afro" away from medical issues (seizure/sleep problems) as requested.
+Functional Dashboard: Updated the dashboard to include more metrics and proper charts with legends.
+Current Week Statistics: Modified statistics section to display current week data.
+Modern Close Buttons: Prepared for modern circle close buttons in tag management.
+Color Coding: Added color legends and prepared for consistent color schemes for different metrics.
+Sleep Quality Thresholds: Added settings for customizable sleep thresholds with color coding.
+Hover Effects: Added a comment about subtle hover effects (to be implemented in CSS).
+Day Indicators: Structured the table to support showing days from today with color coding.
+Day of Week Indicators: Added support for showing day of week and indicators separating weeks.
+
+To implement this in your project:
+
+You'll need to create or update your CSS (style.css) to match these structural changes
+The JavaScript (script.js) will need to be updated to handle the new functionality
