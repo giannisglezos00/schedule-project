@@ -23,527 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     red: { hours: 0, minutes: 50 },
                     yellow: { hours: 1, minutes: 2 }
                 }
-        
-        // Update dashboard charts if dashboard is visible
-        if (elements.dashboardModal.style.display === 'block') {
-            updateDashboardCharts(weekEntries);
-        }
-    }
-
-    function filterEntries() {
-        const searchTerm = elements.searchInput.value.toLowerCase();
-        const selectedTag = elements.tagFilter.value;
-        
-        const rows = elements.sleepData.querySelectorAll('tr');
-        
-        rows.forEach(row => {
-            if (row.querySelector('.placeholder-cell')) {
-                return; // Skip placeholder row
-            }
-            
-            const text = row.innerText.toLowerCase();
-            
-            // Get entry ID from the edit button
-            const editBtn = row.querySelector('.edit-btn');
-            if (!editBtn) return;
-            
-            const entryId = editBtn.getAttribute('data-entry-id');
-            const entry = state.entries.find(e => e.id === entryId);
-            
-            let showRow = true;
-            
-            // Check search term
-            if (searchTerm && !text.includes(searchTerm)) {
-                showRow = false;
-            }
-            
-            // Check tag filter
-            if (selectedTag && entry && (!entry.tags || !entry.tags.includes(selectedTag))) {
-                showRow = false;
-            }
-            
-            row.style.display = showRow ? '' : 'none';
-        });
-    }
-
-    function showAddEntryModal(date = null) {
-        // Clear form
-        elements.entryForm.reset();
-        elements.entryId.value = '';
-        
-        // Set date to today if not provided
-        if (date) {
-            if (!(date instanceof Date)) {
-                date = new Date(date);
-            }
-            elements.entryDate.value = date.toISOString().split('T')[0];
-        } else {
-            elements.entryDate.value = new Date().toISOString().split('T')[0];
-        }
-        
-        // Show modal
-        elements.entryModal.style.display = 'block';
-        document.getElementById('modal-title').textContent = 'Add New Entry';
-    }
-
-    function showEditEntryModal(entryId) {
-        const entry = state.entries.find(e => e.id === entryId);
-        if (!entry) return;
-        
-        // Fill form with entry data
-        elements.entryId.value = entry.id;
-        elements.entryDate.value = entry.date;
-        elements.sleepScore.value = entry.sleepScore || '';
-        
-        // Set night sleep
-        if (entry.nightSleep) {
-            document.getElementById('night-sleep-hours').value = entry.nightSleep.hours || '';
-            document.getElementById('night-sleep-minutes').value = entry.nightSleep.minutes || '';
-        } else {
-            document.getElementById('night-sleep-hours').value = '';
-            document.getElementById('night-sleep-minutes').value = '';
-        }
-        
-        // Set day nap
-        if (entry.dayNap) {
-            document.getElementById('day-nap-hours').value = entry.dayNap.hours || '';
-            document.getElementById('day-nap-minutes').value = entry.dayNap.minutes || '';
-        } else {
-            document.getElementById('day-nap-hours').value = '';
-            document.getElementById('day-nap-minutes').value = '';
-        }
-        
-        // Set deep sleep
-        if (entry.deepSleep) {
-            document.getElementById('deep-sleep-hours').value = entry.deepSleep.hours || '';
-            document.getElementById('deep-sleep-minutes').value = entry.deepSleep.minutes || '';
-        } else {
-            document.getElementById('deep-sleep-hours').value = '';
-            document.getElementById('deep-sleep-minutes').value = '';
-        }
-        
-        // Set light sleep
-        if (entry.lightSleep) {
-            document.getElementById('light-sleep-hours').value = entry.lightSleep.hours || '';
-            document.getElementById('light-sleep-minutes').value = entry.lightSleep.minutes || '';
-        } else {
-            document.getElementById('light-sleep-hours').value = '';
-            document.getElementById('light-sleep-minutes').value = '';
-        }
-        
-        // Set REM sleep
-        if (entry.remSleep) {
-            document.getElementById('rem-sleep-hours').value = entry.remSleep.hours || '';
-            document.getElementById('rem-sleep-minutes').value = entry.remSleep.minutes || '';
-        } else {
-            document.getElementById('rem-sleep-hours').value = '';
-            document.getElementById('rem-sleep-minutes').value = '';
-        }
-        
-        // Set wakeups
-        document.getElementById('wake-ups').value = entry.wakeUps || '';
-        
-        // Set checkboxes
-        document.getElementById('cut-sleep').checked = entry.cutSleep || false;
-        document.getElementById('shake').checked = entry.shake || false;
-        document.getElementById('seizure').checked = entry.seizure || false;
-        document.getElementById('afr').checked = entry.afr || false;
-        
-        // Set events/notes
-        document.getElementById('events-notes').value = entry.eventsNotes || '';
-        
-        // Set tags
-        document.getElementById('tags').value = entry.tags ? entry.tags.join(', ') : '';
-        
-        // Set calories
-        document.getElementById('calories').value = entry.calories || '';
-        
-        // Set steps
-        document.getElementById('steps').value = entry.steps || '';
-        
-        // Set weight
-        document.getElementById('weight').value = entry.weight || '';
-        
-        // Set standing
-        document.getElementById('standing').value = entry.standing || '';
-        
-        // Set pills (checkboxes)
-        document.getElementById('pill-1').checked = false;
-        document.getElementById('pill-2').checked = false;
-        document.getElementById('pill-3').checked = false;
-        
-        if (entry.pills && entry.pills.length > 0) {
-            entry.pills.forEach(pill => {
-                const pillCheckbox = document.getElementById(`pill-${pill}`);
-                if (pillCheckbox) pillCheckbox.checked = true;
-            });
-        }
-        
-        // Show modal
-        elements.entryModal.style.display = 'block';
-        document.getElementById('modal-title').textContent = 'Edit Entry';
-    }
-    
-    function showEntryPreview(entryId) {
-        const entry = state.entries.find(e => e.id === entryId);
-        if (!entry) return;
-        
-        state.selectedEntryId = entryId;
-        
-        const entryDate = new Date(entry.date);
-        const formattedDate = entryDate.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
-        
-        // Create preview content
-        const previewContent = document.getElementById('entry-preview-content');
-        previewContent.innerHTML = '';
-        
-        const dateHeader = document.createElement('h3');
-        dateHeader.id = 'preview-date';
-        dateHeader.textContent = formattedDate;
-        previewContent.appendChild(dateHeader);
-        
-        const tagsContainer = document.createElement('div');
-        tagsContainer.id = 'preview-tags';
-        tagsContainer.classList.add('tags-container');
-        
-        if (entry.tags && entry.tags.length > 0) {
-            entry.tags.forEach(tagName => {
-                const tag = state.tags.find(t => t.name === tagName);
-                if (tag) {
-                    const tagElement = document.createElement('span');
-                    tagElement.classList.add('tag');
-                    tagElement.textContent = tag.name;
-                    tagElement.style.backgroundColor = tag.color;
-                    
-                    // Adjust text color for better contrast
-                    const luminance = getLuminance(tag.color);
-                    if (luminance < 0.5) {
-                        tagElement.style.color = 'white';
-                    } else {
-                        tagElement.style.color = 'black';
-                    }
-                    
-                    tagsContainer.appendChild(tagElement);
-                }
-            });
-        } else {
-            tagsContainer.textContent = 'No tags';
-        }
-        previewContent.appendChild(tagsContainer);
-        
-        const contentContainer = document.createElement('div');
-        contentContainer.classList.add('preview-notes');
-        contentContainer.textContent = entry.eventsNotes || 'No notes for this entry.';
-        previewContent.appendChild(contentContainer);
-        
-        // Create a section for sleep stats
-        if (entry.nightSleep || entry.deepSleep || entry.lightSleep || entry.remSleep) {
-            const statsSection = document.createElement('div');
-            statsSection.classList.add('preview-stats');
-            
-            const statsTitle = document.createElement('h4');
-            statsTitle.textContent = 'Sleep Statistics';
-            statsSection.appendChild(statsTitle);
-            
-            const statsList = document.createElement('ul');
-            
-            if (entry.sleepScore) {
-                const scoreItem = document.createElement('li');
-                scoreItem.textContent = `Sleep Score: ${entry.sleepScore}`;
-                statsList.appendChild(scoreItem);
-            }
-            
-            if (entry.nightSleep) {
-                const nightSleepItem = document.createElement('li');
-                nightSleepItem.textContent = `Night Sleep: ${formatTime(entry.nightSleep)}`;
-                statsList.appendChild(nightSleepItem);
-            }
-            
-            if (entry.deepSleep) {
-                const deepSleepItem = document.createElement('li');
-                deepSleepItem.textContent = `Deep Sleep: ${formatTime(entry.deepSleep)}`;
-                statsList.appendChild(deepSleepItem);
-            }
-            
-            if (entry.lightSleep) {
-                const lightSleepItem = document.createElement('li');
-                lightSleepItem.textContent = `Light Sleep: ${formatTime(entry.lightSleep)}`;
-                statsList.appendChild(lightSleepItem);
-            }
-            
-            if (entry.remSleep) {
-                const remSleepItem = document.createElement('li');
-                remSleepItem.textContent = `REM Sleep: ${formatTime(entry.remSleep)}`;
-                statsList.appendChild(remSleepItem);
-            }
-            
-            statsSection.appendChild(statsList);
-            previewContent.appendChild(statsSection);
-        }
-        
-        // Show modal
-        elements.entryPreviewModal.style.display = 'block';
-    }
-    
-    function showSettingsModal() {
-        // Fill form with settings data
-        document.getElementById('reference-date').value = state.settings.referenceDate;
-        document.getElementById('calories-goal').value = state.settings.caloriesGoal;
-        document.getElementById('steps-goal').value = state.settings.stepsGoal;
-        
-        // Set sleep thresholds
-        document.getElementById('sleep-red-hours').value = state.settings.sleepThresholds.totalSleep.red.hours;
-        document.getElementById('sleep-red-minutes').value = state.settings.sleepThresholds.totalSleep.red.minutes;
-        
-        document.getElementById('sleep-yellow-hours').value = state.settings.sleepThresholds.totalSleep.yellow.hours;
-        document.getElementById('sleep-yellow-minutes').value = state.settings.sleepThresholds.totalSleep.yellow.minutes;
-        
-        document.getElementById('sleep-darkgreen-hours').value = state.settings.sleepThresholds.totalSleep.darkGreen.hours;
-        document.getElementById('sleep-darkgreen-minutes').value = state.settings.sleepThresholds.totalSleep.darkGreen.minutes;
-        
-        document.getElementById('deep-min-hours').value = state.settings.sleepThresholds.deepSleep.minimum.hours;
-        document.getElementById('deep-min-minutes').value = state.settings.sleepThresholds.deepSleep.minimum.minutes;
-        
-        document.getElementById('light-min-hours').value = state.settings.sleepThresholds.lightSleep.minimum.hours;
-        document.getElementById('light-min-minutes').value = state.settings.sleepThresholds.lightSleep.minimum.minutes;
-        
-        document.getElementById('light-max-hours').value = state.settings.sleepThresholds.lightSleep.maximum.hours;
-        document.getElementById('light-max-minutes').value = state.settings.sleepThresholds.lightSleep.maximum.minutes;
-        
-        document.getElementById('rem-red-hours').value = state.settings.sleepThresholds.remSleep.red.hours;
-        document.getElementById('rem-red-minutes').value = state.settings.sleepThresholds.remSleep.red.minutes;
-        
-        document.getElementById('rem-yellow-hours').value = state.settings.sleepThresholds.remSleep.yellow.hours;
-        document.getElementById('rem-yellow-minutes').value = state.settings.sleepThresholds.remSleep.yellow.minutes;
-        
-        // Set theme
-        document.getElementById('theme-selector').value = state.settings.theme;
-        
-        // Show existing tags
-        const tagsContainer = document.getElementById('tags-list');
-        tagsContainer.innerHTML = '';
-        
-        state.tags.forEach(tag => {
-            const tagElement = document.createElement('div');
-            tagElement.classList.add('tag-item');
-            
-            const tagName = document.createElement('span');
-            tagName.textContent = tag.name;
-            tagName.style.backgroundColor = tag.color;
-            
-            // Adjust text color for better contrast
-            const luminance = getLuminance(tag.color);
-            if (luminance < 0.5) {
-                tagName.style.color = 'white';
-            } else {
-                tagName.style.color = 'black';
-            }
-            
-            tagElement.appendChild(tagName);
-            
-            const colorPicker = document.createElement('input');
-            colorPicker.type = 'color';
-            colorPicker.value = tag.color;
-            colorPicker.addEventListener('change', function() {
-                tag.color = this.value;
-                tagName.style.backgroundColor = this.value;
-                
-                // Adjust text color for better contrast
-                const luminance = getLuminance(this.value);
-                if (luminance < 0.5) {
-                    tagName.style.color = 'white';
-                } else {
-                    tagName.style.color = 'black';
-                }
-                
-                saveData();
-                renderEntries();
-                updateTagsRow();
-            });
-            tagElement.appendChild(colorPicker);
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.classList.add('delete-tag-btn');
-            deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
-            deleteBtn.addEventListener('click', function() {
-                state.tags = state.tags.filter(t => t.id !== tag.id);
-                saveData();
-                updateTagFilter();
-                renderEntries();
-                updateTagsRow();
-                showSettingsModal(); // Refresh settings modal
-            });
-            tagElement.appendChild(deleteBtn);
-            
-            tagsContainer.appendChild(tagElement);
-        });
-        
-        // Show modal
-        elements.settingsModal.style.display = 'block';
-    }
-    
-    function showDashboardModal() {
-        // Get the start and end dates of the current week
-        const today = new Date();
-        const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() - currentDay);
-        startDate.setHours(0, 0, 0, 0);
-        
-        const endDate = new Date(today);
-        endDate.setDate(today.getDate() + (6 - currentDay));
-        endDate.setHours(23, 59, 59, 999);
-        
-        // Filter entries for the current week
-        const weekEntries = state.entries.filter(entry => {
-            const entryDate = new Date(entry.date);
-            return entryDate >= startDate && entryDate <= endDate;
-        });
-        
-        // Update dashboard charts
-        updateDashboardCharts(weekEntries);
-        
-        // Show modal
-        elements.dashboardModal.style.display = 'block';
-    }
-    
-
-                    data: [avgDeep, avgLight, avgRem],
-                    backgroundColor: ['#4A6BFF', '#2C7DD4', '#3DD3CB'],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const minutes = context.raw;
-                                const hours = Math.floor(minutes / 60);
-                                const mins = Math.round(minutes % 60);
-                                return `${context.label}: ${hours}h ${mins}m`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        
-        // Activity Chart
-        const activityCtx = elements.activityChart.getContext('2d');
-        const activityLabels = [];
-        const caloriesData = [];
-        const stepsData = [];
-        const standingData = [];
-        
-        entries.forEach(entry => {
-            const entryDate = new Date(entry.date);
-            activityLabels.push(entryDate.toLocaleDateString('en-US', { weekday: 'short' }));
-            caloriesData.push(entry.calories || 0);
-            stepsData.push(entry.steps || 0);
-            standingData.push(entry.standing || 0);
-        });
-        
-        // Clear previous chart if it exists
-        if (window.activityChart) {
-            window.activityChart.destroy();
-        }
-        
-        window.activityChart = new Chart(activityCtx, {
-            type: 'bar',
-            data: {
-                labels: activityLabels,
-                datasets: [
-                    {
-                        label: 'Calories',
-                        data: caloriesData,
-                        backgroundColor: '#EF8A2B',
-                        yAxisID: 'y-calories'
-                    },
-                    {
-                        label: 'Steps (x100)',
-                        data: stepsData.map(steps => steps / 100), // Scale down for better visualization
-                        backgroundColor: '#E0CB08',
-                        yAxisID: 'y-steps'
-                    },
-                    {
-                        label: 'Standing Hours',
-                        data: standingData,
-                        backgroundColor: '#43C677',
-                        yAxisID: 'y-standing'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    'y-calories': {
-                        position: 'left',
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Calories'
-                        }
-                    },
-                    'y-steps': {
-                        position: 'right',
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Steps (x100)'
-                        }
-                    },
-                    'y-standing': {
-                        display: false,
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-        
-        // Events Timeline
-        const eventsContainer = elements.eventsTimeline;
-        eventsContainer.innerHTML = '';
-        
-        entries.forEach(entry => {
-            if (entry.eventsNotes) {
-                const entryDate = new Date(entry.date);
-                const dateString = entryDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                
-                const eventItem = document.createElement('div');
-                eventItem.classList.add('event-item');
-                
-                const eventDate = document.createElement('div');
-                eventDate.classList.add('event-date');
-                eventDate.textContent = dateString;
-                eventItem.appendChild(eventDate);
-                
-                const eventContent = document.createElement('div');
-                eventContent.classList.add('event-content');
-                eventContent.textContent = entry.eventsNotes;
-                eventItem.appendChild(eventContent);
-                
-                eventsContainer.appendChild(eventItem);
-            }
-        });
-        
-        if (eventsContainer.children.length === 0) {
-            eventsContainer.textContent = 'No events for this period.';
-        }
-        
-        // Generate insights based on the data
-        generateSleepInsights(entries);
-    }
             },
             theme: 'light',
             accentColor: 'blue'
@@ -785,6 +264,42 @@ document.addEventListener('DOMContentLoaded', function() {
         state.currentMonth.setMonth(state.currentMonth.getMonth() + 1);
         updateMonthDisplay();
         renderEntries();
+    }
+
+    function filterEntries() {
+        const searchTerm = elements.searchInput.value.toLowerCase();
+        const selectedTag = elements.tagFilter.value;
+        
+        const rows = elements.sleepData.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            if (row.querySelector('.placeholder-cell')) {
+                return; // Skip placeholder row
+            }
+            
+            const text = row.innerText.toLowerCase();
+            
+            // Get entry ID from the edit button
+            const editBtn = row.querySelector('.edit-btn');
+            if (!editBtn) return;
+            
+            const entryId = editBtn.getAttribute('data-entry-id');
+            const entry = state.entries.find(e => e.id === entryId);
+            
+            let showRow = true;
+            
+            // Check search term
+            if (searchTerm && !text.includes(searchTerm)) {
+                showRow = false;
+            }
+            
+            // Check tag filter
+            if (selectedTag && entry && (!entry.tags || !entry.tags.includes(selectedTag))) {
+                showRow = false;
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
     }
 
     function renderEntries() {
@@ -1205,6 +720,382 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.todayTasks.appendChild(li);
         }
     }
+    
+    function showAddEntryModal(date = null) {
+        // Clear form
+        elements.entryForm.reset();
+        elements.entryId.value = '';
+        
+        // Set date to today if not provided
+        if (date) {
+            if (!(date instanceof Date)) {
+                date = new Date(date);
+            }
+            elements.entryDate.value = date.toISOString().split('T')[0];
+        } else {
+            elements.entryDate.value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Show modal
+        elements.entryModal.style.display = 'block';
+        document.getElementById('modal-title').textContent = 'Add New Entry';
+    }
+    
+    function showEditEntryModal(entryId) {
+        const entry = state.entries.find(e => e.id === entryId);
+        if (!entry) return;
+        
+        // Fill form with entry data
+        elements.entryId.value = entry.id;
+        elements.entryDate.value = entry.date;
+        elements.sleepScore.value = entry.sleepScore || '';
+        
+        // Set night sleep
+        if (entry.nightSleep) {
+            document.getElementById('night-sleep-hours').value = entry.nightSleep.hours || '';
+            document.getElementById('night-sleep-minutes').value = entry.nightSleep.minutes || '';
+        } else {
+            document.getElementById('night-sleep-hours').value = '';
+            document.getElementById('night-sleep-minutes').value = '';
+        }
+        
+        // Set day nap
+        if (entry.dayNap) {
+            document.getElementById('day-nap-hours').value = entry.dayNap.hours || '';
+            document.getElementById('day-nap-minutes').value = entry.dayNap.minutes || '';
+        } else {
+            document.getElementById('day-nap-hours').value = '';
+            document.getElementById('day-nap-minutes').value = '';
+        }
+        
+        // Set deep sleep
+        if (entry.deepSleep) {
+            document.getElementById('deep-sleep-hours').value = entry.deepSleep.hours || '';
+            document.getElementById('deep-sleep-minutes').value = entry.deepSleep.minutes || '';
+        } else {
+            document.getElementById('deep-sleep-hours').value = '';
+            document.getElementById('deep-sleep-minutes').value = '';
+        }
+        
+        // Set light sleep
+        if (entry.lightSleep) {
+            document.getElementById('light-sleep-hours').value = entry.lightSleep.hours || '';
+            document.getElementById('light-sleep-minutes').value = entry.lightSleep.minutes || '';
+        } else {
+            document.getElementById('light-sleep-hours').value = '';
+            document.getElementById('light-sleep-minutes').value = '';
+        }
+        
+        // Set REM sleep
+        if (entry.remSleep) {
+            document.getElementById('rem-sleep-hours').value = entry.remSleep.hours || '';
+            document.getElementById('rem-sleep-minutes').value = entry.remSleep.minutes || '';
+        } else {
+            document.getElementById('rem-sleep-hours').value = '';
+            document.getElementById('rem-sleep-minutes').value = '';
+        }
+        
+        // Set wakeups
+        document.getElementById('wake-ups').value = entry.wakeUps || '';
+        
+        // Set checkboxes
+        document.getElementById('cut-sleep').checked = entry.cutSleep || false;
+        document.getElementById('shake').checked = entry.shake || false;
+        document.getElementById('seizure').checked = entry.seizure || false;
+        document.getElementById('afr').checked = entry.afr || false;
+        
+        // Set events/notes
+        document.getElementById('events-notes').value = entry.eventsNotes || '';
+        
+        // Set tags
+        document.getElementById('tags').value = entry.tags ? entry.tags.join(', ') : '';
+        
+        // Set calories
+        document.getElementById('calories').value = entry.calories || '';
+        
+        // Set steps
+        document.getElementById('steps').value = entry.steps || '';
+        
+        // Set weight
+        document.getElementById('weight').value = entry.weight || '';
+        
+        // Set standing
+        document.getElementById('standing').value = entry.standing || '';
+        
+        // Set pills (checkboxes)
+        document.getElementById('pill-1').checked = false;
+        document.getElementById('pill-2').checked = false;
+        document.getElementById('pill-3').checked = false;
+        
+        if (entry.pills && entry.pills.length > 0) {
+            entry.pills.forEach(pill => {
+                const pillCheckbox = document.getElementById(`pill-${pill}`);
+                if (pillCheckbox) pillCheckbox.checked = true;
+            });
+        }
+        
+        // Show modal
+        elements.entryModal.style.display = 'block';
+        document.getElementById('modal-title').textContent = 'Edit Entry';
+    }
+    
+    function showEntryPreview(entryId) {
+        const entry = state.entries.find(e => e.id === entryId);
+        if (!entry) return;
+        
+        state.selectedEntryId = entryId;
+        
+        const entryDate = new Date(entry.date);
+        const formattedDate = entryDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        
+        // Create preview content
+        const previewContent = document.getElementById('entry-preview-content');
+        previewContent.innerHTML = '';
+        
+        const dateHeader = document.createElement('h3');
+        dateHeader.id = 'preview-date';
+        dateHeader.textContent = formattedDate;
+        previewContent.appendChild(dateHeader);
+        
+        const tagsContainer = document.createElement('div');
+        tagsContainer.id = 'preview-tags';
+        tagsContainer.classList.add('tags-container');
+        
+        if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tagName => {
+                const tag = state.tags.find(t => t.name === tagName);
+                if (tag) {
+                    const tagElement = document.createElement('span');
+                    tagElement.classList.add('tag');
+                    tagElement.textContent = tag.name;
+                    tagElement.style.backgroundColor = tag.color;
+                    
+                    // Adjust text color for better contrast
+                    const luminance = getLuminance(tag.color);
+                    if (luminance < 0.5) {
+                        tagElement.style.color = 'white';
+                    } else {
+                        tagElement.style.color = 'black';
+                    }
+                    
+                    tagsContainer.appendChild(tagElement);
+                }
+            });
+        } else {
+            tagsContainer.textContent = 'No tags';
+        }
+        previewContent.appendChild(tagsContainer);
+        
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('preview-notes');
+        contentContainer.textContent = entry.eventsNotes || 'No notes for this entry.';
+        previewContent.appendChild(contentContainer);
+        
+        // Create a section for sleep stats
+        if (entry.nightSleep || entry.deepSleep || entry.lightSleep || entry.remSleep) {
+            const statsSection = document.createElement('div');
+            statsSection.classList.add('preview-stats');
+            
+            const statsTitle = document.createElement('h4');
+            statsTitle.textContent = 'Sleep Statistics';
+            statsSection.appendChild(statsTitle);
+            
+            const statsList = document.createElement('ul');
+            
+            if (entry.sleepScore) {
+                const scoreItem = document.createElement('li');
+                scoreItem.textContent = `Sleep Score: ${entry.sleepScore}`;
+                statsList.appendChild(scoreItem);
+            }
+            
+            if (entry.nightSleep) {
+                const nightSleepItem = document.createElement('li');
+                nightSleepItem.textContent = `Night Sleep: ${formatTime(entry.nightSleep)}`;
+                statsList.appendChild(nightSleepItem);
+            }
+            
+            if (entry.deepSleep) {
+                const deepSleepItem = document.createElement('li');
+                deepSleepItem.textContent = `Deep Sleep: ${formatTime(entry.deepSleep)}`;
+                statsList.appendChild(deepSleepItem);
+            }
+            
+            if (entry.lightSleep) {
+                const lightSleepItem = document.createElement('li');
+                lightSleepItem.textContent = `Light Sleep: ${formatTime(entry.lightSleep)}`;
+                statsList.appendChild(lightSleepItem);
+            }
+            
+            if (entry.remSleep) {
+                const remSleepItem = document.createElement('li');
+                remSleepItem.textContent = `REM Sleep: ${formatTime(entry.remSleep)}`;
+                statsList.appendChild(remSleepItem);
+            }
+            
+            statsSection.appendChild(statsList);
+            previewContent.appendChild(statsSection);
+        }
+        
+        // Show modal
+        elements.entryPreviewModal.style.display = 'block';
+    }
+    
+    function showSettingsModal() {
+        // Fill form with settings data
+        document.getElementById('reference-date').value = state.settings.referenceDate;
+        document.getElementById('calories-goal').value = state.settings.caloriesGoal;
+        document.getElementById('steps-goal').value = state.settings.stepsGoal;
+        
+        // Set sleep thresholds
+        document.getElementById('sleep-red-hours').value = state.settings.sleepThresholds.totalSleep.red.hours;
+        document.getElementById('sleep-red-minutes').value = state.settings.sleepThresholds.totalSleep.red.minutes;
+        
+        document.getElementById('sleep-yellow-hours').value = state.settings.sleepThresholds.totalSleep.yellow.hours;
+        document.getElementById('sleep-yellow-minutes').value = state.settings.sleepThresholds.totalSleep.yellow.minutes;
+        
+        document.getElementById('sleep-darkgreen-hours').value = state.settings.sleepThresholds.totalSleep.darkGreen.hours;
+        document.getElementById('sleep-darkgreen-minutes').value = state.settings.sleepThresholds.totalSleep.darkGreen.minutes;
+        
+        document.getElementById('deep-min-hours').value = state.settings.sleepThresholds.deepSleep.minimum.hours;
+        document.getElementById('deep-min-minutes').value = state.settings.sleepThresholds.deepSleep.minimum.minutes;
+        
+        document.getElementById('light-min-hours').value = state.settings.sleepThresholds.lightSleep.minimum.hours;
+        document.getElementById('light-min-minutes').value = state.settings.sleepThresholds.lightSleep.minimum.minutes;
+        
+        document.getElementById('light-max-hours').value = state.settings.sleepThresholds.lightSleep.maximum.hours;
+        document.getElementById('light-max-minutes').value = state.settings.sleepThresholds.lightSleep.maximum.minutes;
+        
+        document.getElementById('rem-red-hours').value = state.settings.sleepThresholds.remSleep.red.hours;
+        document.getElementById('rem-red-minutes').value = state.settings.sleepThresholds.remSleep.red.minutes;
+        
+        document.getElementById('rem-yellow-hours').value = state.settings.sleepThresholds.remSleep.yellow.hours;
+        document.getElementById('rem-yellow-minutes').value = state.settings.sleepThresholds.remSleep.yellow.minutes;
+        
+        // Set theme
+        document.getElementById('theme-selector').value = state.settings.theme;
+        
+        // Show existing tags
+        const tagsContainer = document.getElementById('tags-list');
+        tagsContainer.innerHTML = '';
+        
+        state.tags.forEach(tag => {
+            const tagElement = document.createElement('div');
+            tagElement.classList.add('tag-item');
+            
+            const tagName = document.createElement('span');
+            tagName.textContent = tag.name;
+            tagName.style.backgroundColor = tag.color;
+            
+            // Adjust text color for better contrast
+            const luminance = getLuminance(tag.color);
+            if (luminance < 0.5) {
+                tagName.style.color = 'white';
+            } else {
+                tagName.style.color = 'black';
+            }
+            
+            tagElement.appendChild(tagName);
+            
+            const colorPicker = document.createElement('input');
+            colorPicker.type = 'color';
+            colorPicker.value = tag.color;
+            colorPicker.addEventListener('change', function() {
+                tag.color = this.value;
+                tagName.style.backgroundColor = this.value;
+                
+                // Adjust text color for better contrast
+                const luminance = getLuminance(this.value);
+                if (luminance < 0.5) {
+                    tagName.style.color = 'white';
+                } else {
+                    tagName.style.color = 'black';
+                }
+                
+                saveData();
+                renderEntries();
+                updateTagsRow();
+            });
+            tagElement.appendChild(colorPicker);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-tag-btn');
+            deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+            deleteBtn.addEventListener('click', function() {
+                state.tags = state.tags.filter(t => t.id !== tag.id);
+                saveData();
+                updateTagFilter();
+                renderEntries();
+                updateTagsRow();
+                showSettingsModal(); // Refresh settings modal
+            });
+            tagElement.appendChild(deleteBtn);
+            
+            tagsContainer.appendChild(tagElement);
+        });
+        
+        // Show modal
+        elements.settingsModal.style.display = 'block';
+    }
+    
+    function addNewTag() {
+        const tagName = document.getElementById('new-tag').value.trim();
+        const tagColor = document.getElementById('tag-color').value;
+        
+        if (!tagName) return;
+        
+        // Check if tag already exists
+        if (state.tags.find(t => t.name === tagName)) {
+            alert('Tag already exists!');
+            return;
+        }
+        
+        // Add new tag
+        state.tags.push({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+            name: tagName,
+            color: tagColor
+        });
+        
+        // Save data
+        saveData();
+        
+        // Refresh display
+        updateTagFilter();
+        renderEntries();
+        updateTagsRow();
+        
+        // Refresh settings modal
+        showSettingsModal();
+        
+        // Clear input
+        document.getElementById('new-tag').value = '';
+    }
+    
+    function deleteEntry(entryId) {
+        if (confirm('Are you sure you want to delete this entry?')) {
+            state.entries = state.entries.filter(e => e.id !== entryId);
+            saveData();
+            renderEntries();
+            updateTodayInfo();
+            updateStatistics();
+        }
+    }
+    
+    // Initialize the application
+    init();
+});
+Container.children.length === 0) {
+            eventsContainer.textContent = 'No events for this period.';
+        }
+        
+        // Generate insights based on the data
+        generateSleepInsights(entries);
+    }
 
     function updateStatistics() {
         // Get the start and end dates of the current week
@@ -1324,5 +1215,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             elements.avgLightSleep.textContent = 'No Data';
         }
+        
+        // Update dashboard charts if dashboard is visible
+        if (elements.dashboardModal.style.display === 'block') {
+            updateDashboardCharts(weekEntries);
+        }
     }
-
