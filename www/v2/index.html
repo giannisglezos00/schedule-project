@@ -6,10 +6,6 @@
     <title>Sleep Tracker</title>
     <!-- Link to our CSS file -->
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,20 +17,20 @@
             <div class="date-sidebar">
                 <div class="date-display">
                     <h2 id="current-date">Thursday Mar 20 2025</h2>
-                    <!-- Display days since reference date -->
+                    <!-- Display days since reference date as per Goal #1 -->
                     <span id="days-count">136 days since 4/11/24, 4.5 months</span>
                 </div>
                 
-                <!-- Today's tasks section -->
+                <!-- Today's tasks section as requested in Goal #1 -->
                 <div class="today-container">
-                    <h3><i class="fas fa-tasks"></i> Today's Tasks</h3>
+                    <h3>Today's Tasks</h3>
                     <ul id="today-tasks" class="today-tasks-list">
                         <!-- Tasks will be dynamically populated from events/notes -->
                     </ul>
                     
-                    <!-- Today's tags section -->
+                    <!-- Today's tags section as mentioned in Goal #1 -->
                     <div class="today-tags">
-                        <h3><i class="fas fa-tags"></i> Today's Tags</h3>
+                        <h3>Today's Tags</h3>
                         <div id="today-tags-list" class="tags-container">
                             <!-- Tags will be dynamically populated -->
                         </div>
@@ -46,16 +42,16 @@
             <div class="main-content">
                 <!-- Header section -->
                 <header>
-                    <h1><i class="fas fa-moon"></i> Sleep Tracker</h1>
+                    <h1>Sleep Tracker</h1>
                     
-                    <!-- Controls for adding new entries and filtering -->
+                    <!-- Controls for adding new entries and filtering - Reorganized per Goal #12 -->
                     <div class="controls">
                         <div class="buttons-group">
                             <button id="add-entry-btn" class="primary-btn">
                                 <i class="fas fa-plus"></i> Add New Entry
                             </button>
                             
-                            <!-- Month selector -->
+                            <!-- Month selector moved next to add entry button per Goal #12 -->
                             <div class="month-selector">
                                 <button id="prev-month" class="month-btn"><i class="fas fa-chevron-left"></i></button>
                                 <span id="current-month">March 2025</span>
@@ -66,7 +62,7 @@
                                 <i class="fas fa-chart-line"></i> Dashboard
                             </button>
                             
-                            <!-- Settings moved to far right -->
+                            <!-- Settings moved to far right per Goal #12 -->
                             <button id="settings-btn" class="secondary-btn">
                                 <i class="fas fa-cog"></i> Settings
                             </button>
@@ -86,6 +82,7 @@
                         <table id="sleep-table">
                             <thead>
                                 <tr>
+                                    <!-- Added days from today column as per Goal #10 -->
                                     <th>Day #</th>
                                     <th class="days-from-today-header">Days from Today</th>
                                     <th>Date</th>
@@ -100,6 +97,7 @@
                                     <th>Shake</th>
                                     <th>Seizure</th>
                                     <th>Events/Notes</th>
+                                    <!-- Moved Afro away from medical issues per Goal #5 -->
                                     <th>Afro.</th>
                                     <th>Kcal</th>
                                     <th>Steps</th>
@@ -108,7 +106,7 @@
                                     <th>Pills</th>
                                     <th>Actions</th>
                                 </tr>
-                                <!-- Separate row for tags -->
+                                <!-- Added separate row for tags as per Goal #3 -->
                                 <tr id="tags-row">
                                     <th colspan="3">Tags</th>
                                     <td colspan="18" id="tags-container">
@@ -122,7 +120,7 @@
                         </table>
                     </div>
 
-                    <!-- Statistics section - for current week stats -->
+                    <!-- Statistics section - modified to show current week stats as per Goal #7 -->
                     <div class="statistics">
                         <h2>Current Week Statistics</h2>
                         <div class="stats-grid">
@@ -266,7 +264,7 @@
                     <textarea id="events-notes" rows="3"></textarea>
                 </div>
                 
-                <!-- Task system implementation -->
+                <!-- Added task system implementation (Goal #2) -->
                 <div class="form-group">
                     <label for="tasks">Tasks:</label>
                     <div class="task-input-container">
@@ -348,7 +346,7 @@
             <form id="settings-form">
                 <!-- Reference Date Section -->
                 <div class="settings-section">
-                    <h3><i class="fas fa-calendar-alt"></i> Reference Date</h3>
+                    <h3>Reference Date</h3>
                     <div class="form-group">
                         <label for="reference-date">Count days/months from this date:</label>
                         <input type="date" id="reference-date" required>
@@ -358,7 +356,7 @@
                 
                 <!-- Goals Section -->
                 <div class="settings-section">
-                    <h3><i class="fas fa-bullseye"></i> Daily Goals</h3>
+                    <h3>Daily Goals</h3>
                     <div class="form-group">
                         <label for="calories-goal">Calories Goal:</label>
                         <div class="goal-input">
@@ -378,7 +376,7 @@
                 
                 <!-- Sleep Thresholds Section -->
                 <div class="settings-section">
-                    <h3><i class="fas fa-bed"></i> Sleep Quality Thresholds</h3>
+                    <h3>Sleep Quality Thresholds</h3>
                     
                     <div class="form-group">
                         <label>Total Sleep Duration:</label>
@@ -475,14 +473,14 @@
                     </div>
                 </div>
                 
-                <!-- Tags Management Section with modern circle close button -->
+                <!-- Tags Management Section - with modern circle close button (Goal #8) -->
                 <div class="settings-section">
-                    <h3><i class="fas fa-tags"></i> Tags Management</h3>
+                    <h3>Tags Management</h3>
                     <div class="form-group">
                         <label for="new-tag">Create New Tag:</label>
                         <div class="tag-input-group">
                             <input type="text" id="new-tag" placeholder="Enter new tag name">
-                            <input type="color" id="tag-color" value="#6366f1">
+                            <input type="color" id="tag-color" value="#3498db">
                             <button type="button" id="add-tag-btn" class="secondary-btn">Add</button>
                         </div>
                         <small>You can set custom colors for your tags</small>
@@ -495,7 +493,7 @@
                 
                 <!-- Appearance Settings -->
                 <div class="settings-section">
-                    <h3><i class="fas fa-paint-brush"></i> Appearance</h3>
+                    <h3>Appearance</h3>
                     <div class="form-group">
                         <label for="theme-selector">Theme:</label>
                         <select id="theme-selector">
@@ -525,11 +523,11 @@
         </div>
     </div>
     
-    <!-- Dashboard Modal -->
+    <!-- Dashboard Modal - Updated for functional usage (Goal #14) -->
     <div id="dashboard-modal" class="modal">
         <div class="modal-content dashboard-modal-content">
             <span class="close-btn">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-chart-pie"></i> Sleep Dashboard</h2>
+            <h2 class="modal-title">Sleep Dashboard</h2>
             
             <div class="dashboard-controls">
                 <div class="date-range-selector">
@@ -604,7 +602,7 @@
             </div>
             
             <div class="dashboard-insights">
-                <h3><i class="fas fa-lightbulb"></i> Sleep Insights</h3>
+                <h3>Sleep Insights</h3>
                 <div class="insights-container" id="sleep-insights">
                     <!-- Insights will be dynamically generated -->
                 </div>
@@ -619,7 +617,7 @@
         </div>
     </div>
 
-    <!-- Entry Preview Modal -->
+    <!-- New Entry Preview Modal (Goal #11 - improved from hover) -->
     <div id="entry-preview-modal" class="modal">
         <div class="modal-content preview-modal-content">
             <span class="close-btn">&times;</span>
