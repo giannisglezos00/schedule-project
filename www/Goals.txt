@@ -4,6 +4,58 @@ this will be used on a computer on a self hosted web app
 
 Problems/changes:
 
+1.About the vertical list, i want it to be all the way to the left of the screen and i want it to contain,
+ 1a. A logo for the sleep tracker app
+ 1b.today's date
+ 1c.How many days since 4/11/2025 under that how many months it's been
+ 1d.A list of today's tasks
+ 1e.The display of today's tags
+ 1f.The add new entry button
+ 1g.The dashboard button
+ 1e.The settings button
+
+ 2.Current day statistics can take the header section and should fit
+  2b.Average sleep duration of the last 7 days
+  2c.Average steps taken of the last 7 days
+  2d.Average calories burned of the last 7 days
+  2e.Average standing hours of the last 7 days
+ 
+ 3.Under it should be a table full of the current month's entries along with controls for switching to the next month, a search section, a sort by section that shorts the displayed results by day,sleep time , tags, calories burnt, steps taken
+ under that the table should display
+ Section 1: Day
+ 3a. days since today
+ 3b. day of the week and date example Thursday 20 Mar 2025
+ Section 2: Sleep
+ 3c. Sleep score
+ 3d. Total Sleep duration
+ 3e  Day Nap
+ 3f. wake ups
+ 3g. if i cut my sleep(boolean)
+ Section 3: Notes
+ 3h. Notes
+ 3i. tasks (can be many and they should be all displayed)
+ 3j, Tags
+ 3k. Afro (boolean) if my girlfriend stayed over , could be a heart instead of a check mark
+ Section 4: Statistics about my day
+ 3l. Calories burnt
+ 3m. Steps taken
+ 3n. Standing hours
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
 1.
 and under it a vertical list of tasks i need to do for today (from events/notes) along with today's tags
 there shouldn't be different ta
