@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Tracker</title>
+    <!-- Link to our CSS file -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-accent="blue">
+    <div class="container">
+        <div class="main-layout">
+            <!-- Left sidebar with date and today's tasks -->
+            <div class="date-sidebar">
+                <div class="date-display">
+                    <h2 id="current-date">Thursday Mar 20 2025</h2>
+                    <!-- Display days since reference date -->
+                    <span id="days-count">136 days since 4/11/24, 4.5 months</span>
+                </div>
+                
+                <!-- Today's tasks section -->
+                <div class="today-container">
+                    <h3><i class="fas fa-tasks"></i> Today's Tasks</h3>
+                    <ul id="today-tasks" class="today-tasks-list">
+                        <!-- Tasks will be dynamically populated from events/notes -->
+                    </ul>
+                    
+                    <!-- Today's tags section -->
+                    <div class="today-tags">
+                        <h3><i class="fas fa-tags"></i> Today's Tags</h3>
+                        <div id="today-tags-list" class="tags-container">
+                            <!-- Tags will be dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="main-content">
+                <!-- Header section -->
+                <header>
+                    <h1><i class="fas fa-moon"></i> Sleep Tracker</h1>
+                    
+                    <!-- Controls for adding new entries and filtering -->
+                    <div class="controls">
+                        <div class="buttons-group">
+                            <button id="add-entry-btn" class="primary-btn">
+                                <i class="fas fa-plus"></i> Add New Entry
+                            </button>
+                            
+                            <!-- Month selector -->
+                            <div class="month-selector">
+                                <button id="prev-month" class="month-btn"><i class="fas fa-chevron-left"></i></button>
+                                <span id="current-month">March 2025</span>
+                                <button id="next-month" class="month-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            
+                            <button id="dashboard-btn" class="accent-btn">
+                                <i class="fas fa-chart-line"></i> Dashboard
+                            </button>
+                            
+                            <!-- Settings moved to far right -->
+                            <button id="settings-btn" class="secondary-btn">
+                                <i class="fas fa-cog"></i> Settings
+                            </button>
+                        </div>
+                        
+                        <div class="filter-controls">
+                            <input type="text" id="search-input" placeholder="Search events...">
+                            <select id="tag-filter">
+                                <option value="">All Tags</option>
+                                <!-- Tags will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Main table to display all sleep tracking data -->
+                    <div class="table-container">
+                        <table id="sleep-table">
+                            <thead>
+                                <tr>
+                                    <th>Day #</th>
+                                    <th class="days-from-today-header">Days from Today</th>
+                                    <th>Date</th>
+                                    <th>Sleep Score</th>
+                                    <th>Night Sleep</th>
+                                    <th>Day Nap</th>
+                                    <th>Deep Sleep</th>
+                                    <th>Light Sleep</th>
+                                    <th>REM Sleep</th>
+                                    <th>Wake Ups</th>
+                                    <th>Cut Sleep</th>
+                                    <th>Shake</th>
+                                    <th>Seizure</th>
+                                    <th>Events/Notes</th>
+                                    <th>Afro.</th>
+                                    <th>Kcal</th>
+                                    <th>Steps</th>
+                                    <th>Weight</th>
+                                    <th>Standing</th>
+                                    <th>Pills</th>
+                                    <th>Actions</th>
+                                </tr>
+                                <!-- Separate row for tags -->
+                                <tr id="tags-row">
+                                    <th colspan="3">Tags</th>
+                                    <td colspan="18" id="tags-container">
+                                        <!-- Tags will be dynamically populated -->
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody id="sleep-data">
+                                <!-- Data will be populated dynamically here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Statistics section - for current week stats -->
+                    <div class="statistics">
+                        <h2>Current Week Statistics</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Average Sleep Score</h3>
+                                <div class="stat-value" id="avg-sleep-score">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Average Sleep Duration</h3>
+                                <div class="stat-value" id="avg-sleep-duration">0h 0m</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Average Steps</h3>
+                                <div class="stat-value" id="avg-steps">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Deep Sleep Average</h3>
+                                <div class="stat-value" id="avg-deep-sleep">0h 0m</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>REM Sleep Average</h3>
+                                <div class="stat-value" id="avg-rem-sleep">0h 0m</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Light Sleep Average</h3>
+                                <div class="stat-value" id="avg-light-sleep">0h 0m</div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing entries -->
+    <div id="entry-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title" class="modal-title">Add New Entry</h2>
+            
+            <form id="entry-form">
+                <input type="hidden" id="entry-id">
+                
+                <div class="form-group">
+                    <label for="entry-date">Date:</label>
+                    <input type="date" id="entry-date" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sleep-score">Sleep Score:</label>
+                        <input type="number" id="sleep-score" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="night-sleep">Night Sleep Duration:</label>
+                        <div class="time-input">
+                            <input type="number" id="night-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="night-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="day-nap">Day Nap:</label>
+                        <div class="time-input">
+                            <input type="number" id="day-nap-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="day-nap-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deep-sleep">Deep Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="deep-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="deep-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="light-sleep">Light Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="light-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="light-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rem-sleep">REM Sleep:</label>
+                        <div class="time-input">
+                            <input type="number" id="rem-sleep-hours" min="0" max="23" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="rem-sleep-minutes" min="0" max="59" placeholder="m">
+                            <span>m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="wake-ups">Wake Ups:</label>
+                        <input type="number" id="wake-ups" min="0" max="20">
+                    </div>
+                </div>
+                
+                <div class="form-row checkbox-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="cut-sleep">
+                        <label for="cut-sleep">Cut Sleep</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="shake">
+                        <label for="shake">Shake</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="seizure">
+                        <label for="seizure">Seizure</label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="afr">
+                        <label for="afr">Girlfriend</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="events-notes">Events/Notes:</label>
+                    <textarea id="events-notes" rows="3"></textarea>
+                </div>
+                
+                <!-- Task system implementation -->
+                <div class="form-group">
+                    <label for="tasks">Tasks:</label>
+                    <div class="task-input-container">
+                        <div class="task-input-row">
+                            <input type="text" id="new-task" class="task-input" placeholder="Add a task...">
+                            <button type="button" id="add-task-btn" class="add-task-btn">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <div class="tasks-list" id="tasks-list">
+                            <!-- Tasks will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags">Tags (comma separated):</label>
+                    <input type="text" id="tags" placeholder="anniversary, outing, etc.">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="calories">Calories (kcal):</label>
+                        <input type="number" id="calories" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steps">Steps:</label>
+                        <input type="number" id="steps" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weight">Weight:</label>
+                        <input type="number" id="weight" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="standing">Standing Hours:</label>
+                        <input type="number" id="standing" min="0" max="24">
+                    </div>
+                </div>
+                
+                <div class="form-row checkbox-group">
+                    <label>Pills Taken:</label>
+                    <div class="pill-checkboxes">
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-1">
+                            <label for="pill-1">Pill 1</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-2">
+                            <label for="pill-2">Pill 2</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="pill-3">
+                            <label for="pill-3">Pill 3</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="save-btn" class="primary-btn">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 class="modal-title">Settings</h2>
+            
+            <form id="settings-form">
+                <!-- Reference Date Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Reference Date</h3>
+                    <div class="form-group">
+                        <label for="reference-date">Count days/months from this date:</label>
+                        <input type="date" id="reference-date" required>
+                        <small>This date will be used to calculate how many days/months have passed in the header display.</small>
+                    </div>
+                </div>
+                
+                <!-- Goals Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-bullseye"></i> Daily Goals</h3>
+                    <div class="form-group">
+                        <label for="calories-goal">Calories Goal:</label>
+                        <div class="goal-input">
+                            <input type="number" id="calories-goal" min="0" step="50">
+                            <span>kcal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steps-goal">Steps Goal:</label>
+                        <div class="goal-input">
+                            <input type="number" id="steps-goal" min="0" step="500">
+                            <span>steps</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sleep Thresholds Section -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-bed"></i> Sleep Quality Thresholds</h3>
+                    
+                    <div class="form-group">
+                        <label>Total Sleep Duration:</label>
+                        <div class="threshold-settings">
+                            <div class="threshold-item">
+                                <span class="threshold-label">Poor (Red):</span>
+                                <div class="time-input">
+                                    <input type="number" id="sleep-red-hours" min="0" max="23" value="6" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="sleep-red-minutes" min="0" max="59" value="20" placeholder="m">
+                                    <span>m or less</span>
+                                </div>
+                            </div>
+                            <div class="threshold-item">
+                                <span class="threshold-label">Moderate (Yellow):</span>
+                                <div class="time-input">
+                                    <input type="number" id="sleep-yellow-hours" min="0" max="23" value="7" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="sleep-yellow-minutes" min="0" max="59" value="0" placeholder="m">
+                                    <span>m or less</span>
+                                </div>
+                            </div>
+                            <div class="threshold-item">
+                                <span class="threshold-label">Excellent (Dark Green):</span>
+                                <div class="time-input">
+                                    <input type="number" id="sleep-darkgreen-hours" min="0" max="23" value="8" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="sleep-darkgreen-minutes" min="0" max="59" value="30" placeholder="m">
+                                    <span>m or more</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Deep Sleep:</label>
+                        <div class="threshold-settings">
+                            <div class="threshold-item">
+                                <span class="threshold-label">Minimum (20-25%):</span>
+                                <div class="time-input">
+                                    <input type="number" id="deep-min-hours" min="0" max="23" value="1" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="deep-min-minutes" min="0" max="59" value="30" placeholder="m">
+                                    <span>m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Light Sleep:</label>
+                        <div class="threshold-settings">
+                            <div class="threshold-item">
+                                <span class="threshold-label">Ideal Range (50-60%):</span>
+                                <div class="range-input">
+                                    <div class="time-input">
+                                        <input type="number" id="light-min-hours" min="0" max="23" value="3" placeholder="h">
+                                        <span>h</span>
+                                        <input type="number" id="light-min-minutes" min="0" max="59" value="0" placeholder="m">
+                                    </div>
+                                    <span>to</span>
+                                    <div class="time-input">
+                                        <input type="number" id="light-max-hours" min="0" max="23" value="5" placeholder="h">
+                                        <span>h</span>
+                                        <input type="number" id="light-max-minutes" min="0" max="59" value="0" placeholder="m">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>REM Sleep:</label>
+                        <div class="threshold-settings">
+                            <div class="threshold-item">
+                                <span class="threshold-label">Poor (Red):</span>
+                                <div class="time-input">
+                                    <input type="number" id="rem-red-hours" min="0" max="23" value="0" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="rem-red-minutes" min="0" max="59" value="50" placeholder="m">
+                                    <span>m or less</span>
+                                </div>
+                            </div>
+                            <div class="threshold-item">
+                                <span class="threshold-label">Moderate (Yellow):</span>
+                                <div class="time-input">
+                                    <input type="number" id="rem-yellow-hours" min="0" max="23" value="1" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="rem-yellow-minutes" min="0" max="59" value="2" placeholder="m">
+                                    <span>m or less</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tags Management Section with modern circle close button -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-tags"></i> Tags Management</h3>
+                    <div class="form-group">
+                        <label for="new-tag">Create New Tag:</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="new-tag" placeholder="Enter new tag name">
+                            <input type="color" id="tag-color" value="#6366f1">
+                            <button type="button" id="add-tag-btn" class="secondary-btn">Add</button>
+                        </div>
+                        <small>You can set custom colors for your tags</small>
+                    </div>
+                    
+                    <div class="tags-management" id="tags-list">
+                        <!-- Tags will be populated here dynamically with modern circle close buttons -->
+                    </div>
+                </div>
+                
+                <!-- Appearance Settings -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-paint-brush"></i> Appearance</h3>
+                    <div class="form-group">
+                        <label for="theme-selector">Theme:</label>
+                        <select id="theme-selector">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="auto">System Default</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accent-color">Accent Color:</label>
+                        <div class="color-options">
+                            <div class="color-option blue selected" data-color="blue"></div>
+                            <div class="color-option purple" data-color="purple"></div>
+                            <div class="color-option teal" data-color="teal"></div>
+                            <div class="color-option orange" data-color="orange"></div>
+                            <div class="color-option pink" data-color="pink"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="settings-cancel-btn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="settings-save-btn" class="primary-btn">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Dashboard Modal -->
+    <div id="dashboard-modal" class="modal">
+        <div class="modal-content dashboard-modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 class="modal-title"><i class="fas fa-chart-pie"></i> Sleep Dashboard</h2>
+            
+            <div class="dashboard-controls">
+                <div class="date-range-selector">
+                    <button class="range-btn active" data-range="week">Week</button>
+                    <button class="range-btn" data-range="month">Month</button>
+                    <button class="range-btn" data-range="year">Year</button>
+                    <button class="range-btn" data-range="all">All Time</button>
+                </div>
+                <div class="chart-type-selector">
+                    <select id="chart-metric">
+                        <option value="sleepScore">Sleep Score</option>
+                        <option value="nightSleep">Night Sleep</option>
+                        <option value="deepSleep">Deep Sleep</option>
+                        <option value="lightSleep">Light Sleep</option>
+                        <option value="remSleep">REM Sleep</option>
+                        <option value="steps">Steps</option>
+                        <option value="calories">Calories</option>
+                        <option value="weight">Weight</option>
+                        <option value="standing">Standing Hours</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="chart-container large">
+                    <h3>Sleep Quality Trends</h3>
+                    <div id="sleep-trend-chart" class="chart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Sleep Composition</h3>
+                    <div id="composition-chart" class="chart"></div>
+                    <div class="color-legend">
+                        <div class="legend-item">
+                            <span class="color-box deep-sleep"></span>
+                            <span>Deep Sleep</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="color-box light-sleep"></span>
+                            <span>Light Sleep</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="color-box rem-sleep"></span>
+                            <span>REM Sleep</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Activity Metrics</h3>
+                    <div id="activity-chart" class="chart"></div>
+                    <div class="color-legend">
+                        <div class="legend-item">
+                            <span class="color-box calories"></span>
+                            <span>Calories</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="color-box steps"></span>
+                            <span>Steps</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="color-box standing"></span>
+                            <span>Standing Hours</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Health Events Timeline</h3>
+                    <div id="events-timeline" class="chart"></div>
+                </div>
+            </div>
+            
+            <div class="dashboard-insights">
+                <h3><i class="fas fa-lightbulb"></i> Sleep Insights</h3>
+                <div class="insights-container" id="sleep-insights">
+                    <!-- Insights will be dynamically generated -->
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" id="dashboard-close-btn" class="secondary-btn">Close</button>
+                <button type="button" id="export-btn" class="primary-btn">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entry Preview Modal -->
+    <div id="entry-preview-modal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 class="modal-title">Entry Details</h2>
+            <div id="entry-preview-content">
+                <!-- Entry details will be populated here -->
+            </div>
+            <div class="form-actions">
+                <button type="button" id="preview-close-btn" class="secondary-btn">Close</button>
+                <button type="button" id="preview-edit-btn" class="primary-btn">Edit Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript file link -->
+    <script src="script.js"></script>
+</body>
+</html>

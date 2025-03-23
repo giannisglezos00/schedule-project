@@ -502,57 +502,8 @@ document.addEventListener('DOMContentLoaded', function() {
         sleepTrendChart: document.getElementById('sleep-trend-chart'),
         compositionChart: document.getElementById('composition-chart'),
         activityChart: document.getElementById('activity-chart'),
-        eventsTimeline: document.getElementById('events-timeline'),
-        
-        // Add mobile menu elements
-        mobileMenuToggle: document.querySelector('.mobile-menu-toggle'),
-        dateSidebar: document.querySelector('.date-sidebar'),
+        eventsTimeline: document.getElementById('events-timeline')
     };
-
-    // Set current month to today's date
-    state.currentMonth = new Date();
-    state.currentDate = new Date();
-
-    // Debug log to check if elements are properly initialized
-    console.log('Add Entry Button:', elements.addEntryBtn);
-    console.log('Entry Modal:', elements.entryModal);
-
-    // Set up mobile menu toggle
-    if (elements.mobileMenuToggle && elements.dateSidebar) {
-        elements.mobileMenuToggle.addEventListener('click', function(event) {
-            event.stopPropagation();
-            elements.dateSidebar.classList.toggle('show');
-            // Change icon based on menu state
-            const icon = this.querySelector('i');
-            if (elements.dateSidebar.classList.contains('show')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-                document.body.style.overflow = ''; // Restore scrolling
-            }
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!elements.dateSidebar.contains(event.target) && 
-                !elements.mobileMenuToggle.contains(event.target) && 
-                elements.dateSidebar.classList.contains('show')) {
-                elements.dateSidebar.classList.remove('show');
-                const icon = elements.mobileMenuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-                document.body.style.overflow = ''; // Restore scrolling
-            }
-        });
-
-        // Prevent clicks inside sidebar from closing it
-        elements.dateSidebar.addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-    }
 
     // Initialize the app
     loadData();
@@ -567,62 +518,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Auto-fill empty entries for the whole month
     autoFillEmptyEntries();
-
-    // Scroll to today's row on initial load
-    scrollToToday();
 });
-
-// Add keyboard shortcut for scrolling to today
-document.addEventListener('keydown', function(event) {
-    if (event.key.toLowerCase() === 'c') {
-        scrollToToday();
-    }
-});
-
-function scrollToToday() {
-    const todayRow = document.querySelector('.today-row');
-    if (todayRow) {
-        todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
 
 // Helper Functions
-function formatDate(date) {
-    const options = { 
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    };
-    return date.toLocaleDateString('en-US', options);
-}
-
-function formatTimeCompact(hours, minutes) {
-    return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
-}
-
-function createCell(content, type = 'text') {
+function createCell(content, color = '') {
     const cell = document.createElement('td');
+    cell.textContent = content;
     
-    switch(type) {
-        case 'date':
-            cell.textContent = formatDate(content);
-            break;
-        case 'time':
-            cell.textContent = formatTimeCompact(content.hours, content.minutes);
-            break;
-        case 'checkbox':
-            cell.textContent = content ? '✓' : '';
-            cell.style.textAlign = 'center';
-            break;
-        case 'number':
-            cell.textContent = content.toLocaleString();
-            cell.style.textAlign = 'right';
-            break;
-        default:
-            cell.textContent = content;
+    // Mark empty cells with white background
+    if (content === '') {
+        cell.classList.add('empty-cell');
     }
     
+    if (color) {
+        cell.style.backgroundColor = color;
+        
+        // Adjust text color for better contrast
+        const luminance = getLuminance(color);
+        if (luminance < 0.5) {
+            cell.style.color = 'white';
+        } else {
+            cell.style.color = 'black';
+        }
+    }
     return cell;
 }
 
@@ -799,7 +717,6 @@ function loadData() {
 
     // Update tag filter
     updateTagFilter();
-    updateTodayInfo();
 }
 
 // Function to save data to localStorage
@@ -815,40 +732,18 @@ function addTask() {
     const taskText = elements.newTask.value.trim();
     if (!taskText) return;
     
-    // Create new task
-    const newTask = {
+    // Add task to current tasks
+    state.currentTasks.push({
         id: Date.now().toString(),
         text: taskText,
         completed: false
-    };
-    
-    // Add task to current tasks
-    state.currentTasks.push(newTask);
-    
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-    
-    // If we're editing today's entry, update the tasks in state.tasks
-    const entryDate = elements.entryDate.value;
-    if (entryDate === todayString) {
-        if (!state.tasks[todayString]) {
-            state.tasks[todayString] = [];
-        }
-        state.tasks[todayString].push(newTask);
-        
-        // Update the sidebar immediately
-        updateTodayInfo();
-    }
+    });
     
     // Clear input
     elements.newTask.value = '';
     
-    // Render tasks in modal
+    // Render tasks
     renderTasks();
-    
-    // Save data to ensure persistence
-    saveData();
 }
 
 function renderTasks() {
@@ -959,15 +854,7 @@ function setupEventListeners() {
     elements.nextMonthBtn.addEventListener('click', navigateToNextMonth);
     
     // Add entry button
-    if (elements.addEntryBtn) {
-        console.log('Setting up add entry button event listener');
-        elements.addEntryBtn.addEventListener('click', () => {
-            console.log('Add entry button clicked');
-            showAddEntryModal();
-        });
-    } else {
-        console.error('Add entry button not found in elements object');
-    }
+    elements.addEntryBtn.addEventListener('click', showAddEntryModal);
     
     // Settings button
     elements.settingsBtn.addEventListener('click', showSettingsModal);
@@ -1265,38 +1152,66 @@ function renderEntries() {
         const daysDiff = Math.floor((entryDate - referenceDate) / (1000 * 60 * 60 * 24));
         const daysDiffFromToday = Math.floor((entryDate - today) / (1000 * 60 * 60 * 24));
         
+        // Determine day color based on difference from today
+        let dayColor = '';
+        if (daysDiffFromToday < 0) {
+            dayColor = 'red-day'; // Past
+        } else if (daysDiffFromToday > 0) {
+            dayColor = 'green-day'; // Future
+        } else {
+            dayColor = 'today-day'; // Today
+        }
+        
+        // Determine week number for shading
+        let weekShade = '';
+        if (daysDiffFromToday < 0) {
+            const weeksAgo = Math.floor(Math.abs(daysDiffFromToday) / 7) + 1;
+            if (weeksAgo <= 4) {
+                weekShade = `week-${weeksAgo}-past`;
+            }
+        } else if (daysDiffFromToday > 0) {
+            const weeksAhead = Math.floor(daysDiffFromToday / 7) + 1;
+            if (weeksAhead <= 4) {
+                weekShade = `week-${weeksAhead}-future`;
+            }
+        }
+        
+        // Determine if this is a week separator
+        const isWeekSeparator = entryDate.getDay() === 0; // Sunday
+        
         // Create row
         const row = document.createElement('tr');
         if (daysDiffFromToday === 0) {
             row.classList.add('today-row');
-            row.id = 'today-row'; // Add ID for easier targeting
+        }
+        
+        if (isWeekSeparator) {
+            row.classList.add('week-separator');
+        }
+        
+        if (weekShade) {
+            row.classList.add(weekShade);
         }
         
         // Cell for day number
         const dayCell = document.createElement('td');
-        dayCell.classList.add('day-num');
+        dayCell.classList.add('day-num', dayColor);
         dayCell.textContent = daysDiff;
         row.appendChild(dayCell);
         
-        // Cell for days from today - new column with color
+        // Cell for days from today - new column
         const daysFromTodayCell = document.createElement('td');
         daysFromTodayCell.classList.add('days-from-today');
         
         if (daysDiffFromToday < 0) {
             daysFromTodayCell.textContent = daysDiffFromToday;
             daysFromTodayCell.classList.add('days-past');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#FF5733' : '#FF5733';
-            daysFromTodayCell.style.color = 'white';
         } else if (daysDiffFromToday > 0) {
             daysFromTodayCell.textContent = `+${daysDiffFromToday}`;
             daysFromTodayCell.classList.add('days-future');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#2E7D32' : '#2E7D32';
-            daysFromTodayCell.style.color = 'white';
         } else {
             daysFromTodayCell.textContent = '0';
             daysFromTodayCell.classList.add('days-today');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#4A6BFF' : '#4A6BFF';
-            daysFromTodayCell.style.color = 'white';
         }
         row.appendChild(daysFromTodayCell);
         
@@ -1316,18 +1231,6 @@ function renderEntries() {
         const totalSleepCell = createCell(formatTime(entry.nightSleep), getSleepColor(entry.nightSleep));
         row.appendChild(totalSleepCell);
         
-        // Cell for deep sleep
-        const deepSleepCell = createCell(formatTime(entry.deepSleep), getDeepSleepColor(entry.deepSleep, entry.nightSleep));
-        row.appendChild(deepSleepCell);
-        
-        // Cell for light sleep
-        const lightSleepCell = createCell(formatTime(entry.lightSleep), getLightSleepColor(entry.lightSleep, entry.nightSleep));
-        row.appendChild(lightSleepCell);
-        
-        // Cell for REM sleep
-        const remSleepCell = createCell(formatTime(entry.remSleep), getRemSleepColor(entry.remSleep));
-        row.appendChild(remSleepCell);
-        
         // Cell for day nap
         const dayNapCell = createCell(formatTime(entry.dayNap));
         row.appendChild(dayNapCell);
@@ -1343,18 +1246,10 @@ function renderEntries() {
         // Cell for events/notes
         const eventsCell = document.createElement('td');
         eventsCell.classList.add('events-cell');
-        
-        if (entry.eventsNotes && entry.eventsNotes.trim()) {
-            // Set the full text as a data attribute
-            eventsCell.setAttribute('data-full-text', entry.eventsNotes.trim());
-            
-            // Set the truncated text as the visible content
-            const truncatedText = entry.eventsNotes.length > 20 ? 
-                entry.eventsNotes.substring(0, 20) + '...' : 
-                entry.eventsNotes;
-            eventsCell.textContent = truncatedText;
-            
-            // Add click handler for entry preview
+        if (entry.eventsNotes) {
+            eventsCell.textContent = entry.eventsNotes.length > 20 ? 
+                entry.eventsNotes.substring(0, 20) + '...' : entry.eventsNotes;
+            eventsCell.classList.add('has-content');
             eventsCell.addEventListener('click', () => showEntryPreview(entry.id));
         } else {
             eventsCell.textContent = '';
@@ -1455,7 +1350,7 @@ function renderEntries() {
     if (filteredEntries.length === 0) {
         const placeholderRow = document.createElement('tr');
         const placeholderCell = document.createElement('td');
-        placeholderCell.colSpan = 16;
+        placeholderCell.colSpan = 16; // Update column count
         placeholderCell.textContent = 'No entries for this month. Click the "Add New Entry" button to add one.';
         placeholderCell.classList.add('placeholder-cell');
         placeholderRow.appendChild(placeholderCell);
@@ -1506,31 +1401,17 @@ function saveEntry(event) {
         tags: elements.tags.value.split(',').map(tag => tag.trim()).filter(tag => tag)
     };
     
-    // Remove isEmpty flag if it exists
-    if (entry.tags.length > 0 || state.currentTasks.length > 0) {
-        entry.isEmpty = false;
-    }
-    
     // Update or add entry
     const existingIndex = state.entries.findIndex(e => e.id === entryId);
     if (existingIndex >= 0) {
         state.entries[existingIndex] = { ...state.entries[existingIndex], ...entry };
     } else {
-        // Remove any existing empty entry for this date before adding the new one
-        state.entries = state.entries.filter(e => e.date !== entry.date);
         state.entries.push(entry);
     }
     
     // Save tasks for this date
     if (state.currentTasks.length > 0) {
-        state.tasks[entryDate] = [...state.currentTasks];
-        
-        // If this is today's entry, update the sidebar immediately
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0];
-        if (entryDate === todayString) {
-            updateTodayInfo();
-        }
+        state.tasks[entryDate] = state.currentTasks;
     } else {
         delete state.tasks[entryDate];
     }

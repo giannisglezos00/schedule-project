@@ -3,147 +3,20 @@ no need for mobile design
 this will be used on a computer on a self hosted web app
 
 Problems/changes:
+General problems:
+1.The header of the rendered items should be always visible and not scroll with the list
+search entries tags and sort by date should be stacked horizontal and not vertically
+2.The tags filter should show all tags and new tags dynamically
+3.I think you need to make all the fonts smaller
+4.You shouldn't design for mobile it will never be used on mobile
 
-1.About the vertical list, i want it to be all the way to the left of the screen and i want it to contain,
- 1a. A logo for the sleep tracker app
- 1b.today's date
- 1c.How many days since 4/11/2025 under that how many months it's been
- 1d.A list of today's tasks
- 1e.The display of today's tags
- 1f.The add new entry button
- 1g.The dashboard button
- 1e.The settings button
+Sidebar:
+1.Today's tasks section should display today's tasks from today's entry and should update dynamically
 
- 2.Current day statistics can take the header section and should fit
-  2b.Average sleep duration of the last 7 days
-  2c.Average steps taken of the last 7 days
-  2d.Average calories burned of the last 7 days
-  2e.Average standing hours of the last 7 days
- 
- 3.Under it should be a table full of the current month's entries along with controls for switching to the next month, a search section, a sort by section that shorts the displayed results by day,sleep time , tags, calories burnt, steps taken
- under that the table should display
- Section 1: Day
- 3a. days since today
- 3b. day of the week and date example Thursday 20 Mar 2025
- Section 2: Sleep
- 3c. Sleep score
- 3d. Total Sleep duration
- 3e  Day Nap
- 3f. wake ups
- 3g. if i cut my sleep(boolean)
- Section 3: Notes
- 3h. Notes
- 3i. tasks (can be many and they should be all displayed)
- 3j, Tags
- 3k. Afro (boolean) if my girlfriend stayed over , could be a heart instead of a check mark
- Section 4: Statistics about my day
- 3l. Calories burnt
- 3m. Steps taken
- 3n. Standing hours
- 
+There should be a separate "add new task" button under add new entry
 
+2.Dashboard is not working lets remove it
 
-
-
-
- 
-
-
-
-
-
-
-
-
-
-1.
-and under it a vertical list of tasks i need to do for today (from events/notes) along with today's tags
-there shouldn't be different ta
-there should be today's tasks 
-2.
-There should be a task system when adding an entry, similar to tags
-3.collumns shouldn't be the same size, date should fit inside the whole thing
-4.background doesn't change in dark mode
-5.Accent color doesn't apply
-6.rem sleep is not supposed to be yellow, it should be #3DD3CB
-7.you don't see a list of the whole month ahead of you, maybe it should autofill the whole month with empty entries
-8.Today's date should be highlighted
-9.Empty fields should be white
-10.i think there should be a column next to day # that shows how many days each entry is away from today (dynamically updating ofc)
-11.Events/notes popup should maybe be on hover and should just show the full events notes
-12.The controls for the month should be next to add new entry and dashboard, settings should be moved all the way to the right of the screen
-12.Everything should have rounded edges and a modern design
-13.The results shouldn't have that much width
-14.the dashboard is not functional and should display statistics
-15.the popups should use all the horizontal space
-16. hover effects are much appreciated
-
-4.Tags should be colored either randomly or you should be able to change a tag's color in the settings
-
-7.Statistics should be for the current week
-8.in tags management we need a better styling for the close button, modern circle would do the job
-9.Everything should have it's own color so it can be be easily recognized
-
-deep sleep: #4A6BFF
-light sleep: #2C7DD4
-rem sleep: #3DD3CB
-
-calories: #EF8A2B
-steps: #E0CB08
-standing hours: #43C677
-
-
-## UI/UX Improvements
-1. Left Sidebar Layout:
-   - Prominently display current date with days since reference date (changeable in settings)
-   - Show today's tasks and tags below date
-   - Make date format: "Thursday Mar 20 2025" with smaller text "136 days since 4/11/24, 4.5 months"
-
-2. Navigation & Organization:
-   - Separate entries into month-based pages
-   - Add clear date/week indicators in the table
-   - Highlight today's row
-   - Show days from today (future=green, past=red, with shade changes every 7 days)
-   - Display weekday indicator
-
-3. Table Improvements:
-   - Create separate row for tags (color coded)
-   - Reposition "Afro" column away from medical issues
-   - Add subtle hover effects over table content
-   - Allow clicking on events/notes preview to see full content as popup
-
-4. Styling & Visual Elements:
-   - Modern circle close buttons for tag management
-   - Consistent color scheme for different metrics
-     * Deep sleep: #4A6BFF
-     * Light sleep: #2C7DD4
-     * REM sleep: #3DD3CB
-     * Calories: #EF8A2B
-     * Steps: #E0CB08
-     * Standing hours: #43C677
-
-## Dashboard & Statistics
-1. Functional dashboard with relevant statistics
-2. Weekly stats (current week) instead of all-time stats
-3. Sleep quality thresholds (configurable in settings):
-   - Total sleep:
-     * Red: <6h20m
-     * Yellow: <7h
-     * Green: >7h
-     * Dark green: >8h30m
-   - Deep sleep:
-     * Good: 20-25% or at least 1h30m (blue)
-     * Poor: <20% (red)
-   - Light sleep:
-     * Good: 50-60% or 3-5 hours (light blue)
-     * Poor: outside range (red)
-   - REM sleep:
-     * Red: <50m
-     * Yellow: <1h2m
-     * Green: >1h2m
-
-## Other Requirements
-- Modern, consistent design throughout the app
-- Responsive UI that works on different screen sizes
-- Data persistence between sessions
-- Dynamic tag creation and management
+Weekly statistics:(last 7 days)
+What it needs to have is 
+Average total sleep duration, average deep sleep duration, average light sleep duration, Average Rem sleep, Average steps, average calories, Average wake ups
