@@ -4,19 +4,16 @@ this will be used on a computer on a self hosted web app
 
 Problems/changes:
 General problems:
-1.The header of the rendered items should be always visible and not scroll with the list
-search entries tags and sort by date should be stacked horizontal and not vertically
+
+The list isn't being filled on it's own
+
 2.The tags filter should show all tags and new tags dynamically
-3.I think you need to make all the fonts smaller
-4.You shouldn't design for mobile it will never be used on mobile
+3.You shouldn't design for mobile it will never be used on mobile
+4.Add new Task does nothing
 
 Sidebar:
-1.Today's tasks section should display today's tasks from today's entry and should update dynamically
+1.clicking in the side bar's today's task section should open the task and see it's details and tags, 
+Instead of view all tags we should have a + button next to the tags allowing you to make a new tag and clicking on a tag should be able ot 
 
-There should be a separate "add new task" button under add new entry
 
-2.Dashboard is not working lets remove it
-
-Weekly statistics:(last 7 days)
-What it needs to have is 
-Average total sleep duration, average deep sleep duration, average light sleep duration, Average Rem sleep, Average steps, average calories, Average wake ups
+Clicking in the rendered list tasks you should be able to open the tasks section for that entry's date
