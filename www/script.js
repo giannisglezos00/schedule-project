@@ -1,5 +1,68 @@
 // Global variables
-let elements = {};
+let elements = {
+    // Sidebar elements
+    currentDate: document.getElementById('current-date'),
+    daysCount: document.getElementById('days-count'),
+    todayTasks: document.getElementById('today-tasks'),
+    todayTagsList: document.getElementById('today-tags-list'),
+    addEntryBtn: document.getElementById('add-entry-btn'),
+    addTaskStandaloneBtn: document.getElementById('add-task-standalone-btn'),
+    settingsBtn: document.getElementById('settings-btn'),
+    
+    // Statistics elements
+    avgSleepDuration: document.getElementById('avg-sleep-duration'),
+    avgDeepSleep: document.getElementById('avg-deep-sleep'),
+    avgLightSleep: document.getElementById('avg-light-sleep'),
+    avgRemSleep: document.getElementById('avg-rem-sleep'),
+    avgWakeups: document.getElementById('avg-wakeups'),
+    avgSteps: document.getElementById('avg-steps'),
+    avgCalories: document.getElementById('avg-calories'),
+    avgStanding: document.getElementById('avg-standing'),
+    
+    // Filter and control elements
+    currentMonth: document.getElementById('current-month'),
+    prevMonth: document.getElementById('prev-month'),
+    nextMonth: document.getElementById('next-month'),
+    searchInput: document.getElementById('search-input'),
+    tagFilter: document.getElementById('tag-filter'),
+    sortBy: document.getElementById('sort-by'),
+    
+    // Table elements
+    sleepTable: document.getElementById('sleep-table'),
+    sleepData: document.getElementById('sleep-data'),
+    
+    // Modal elements
+    entryModal: document.getElementById('entry-modal'),
+    settingsModal: document.getElementById('settings-modal'),
+    entryPreviewModal: document.getElementById('entry-preview-modal'),
+    modalTitle: document.getElementById('modal-title'),
+    
+    // Chart elements
+    sleepTrendChart: document.getElementById('sleep-trend-chart'),
+    compositionChart: document.getElementById('composition-chart'),
+    activityChart: document.getElementById('activity-chart'),
+    eventsTimeline: document.getElementById('events-timeline'),
+    
+    // Form elements
+    entryForm: document.getElementById('entry-form'),
+    entryId: document.getElementById('entry-id'),
+    entryDate: document.getElementById('entry-date'),
+    newTask: document.getElementById('new-task'),
+    tasksList: document.getElementById('tasks-list'),
+    addTaskBtn: document.getElementById('add-task-btn'),
+    availableTags: document.getElementById('available-tags'),
+    cancelBtn: document.getElementById('cancel-btn'),
+    
+    // Settings form elements
+    settingsForm: document.getElementById('settings-form'),
+    referenceDate: document.getElementById('reference-date'),
+    themeSelector: document.getElementById('theme-selector'),
+    colorOptions: document.querySelectorAll('.color-option'),
+    addTagBtn: document.getElementById('add-tag-btn'),
+    previewEditBtn: document.getElementById('preview-edit-btn'),
+    previewCloseBtn: document.getElementById('preview-close-btn'),
+    settingsCancelBtn: document.getElementById('settings-cancel-btn')
+};
 let state = {
     entries: [],
     tasks: {}, // Tasks organized by date
@@ -520,7 +583,10 @@ document.addEventListener('DOMContentLoaded', function() {
         referenceDate: document.getElementById('reference-date'),
         themeSelector: document.getElementById('theme-selector'),
         colorOptions: document.querySelectorAll('.color-option'),
-        addTagBtn: document.getElementById('add-tag-btn')
+        addTagBtn: document.getElementById('add-tag-btn'),
+        previewEditBtn: document.getElementById('preview-edit-btn'),
+        previewCloseBtn: document.getElementById('preview-close-btn'),
+        settingsCancelBtn: document.getElementById('settings-cancel-btn')
     };
     
     // Setup event listeners
@@ -719,31 +785,36 @@ function getLuminance(hexColor) {
 
 // Function to update tag filter select dropdown
 function updateTagFilter() {
+    // Get reference to the tag filter dropdown
     const tagFilter = document.getElementById('tag-filter');
-    tagFilter.innerHTML = '<option value="">All Tags</option>';
     
-    // Get all unique tags from all entries
-    const allTagsSet = new Set();
+    // Clear existing options
+    tagFilter.innerHTML = '';
     
-    // First add tags from state.tags (these are created in settings)
-    state.tags.forEach(tag => {
-        allTagsSet.add(tag.name);
-    });
+    // Add "All Tags" option
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = 'All Tags';
+    tagFilter.appendChild(allOption);
     
-    // Then add any tags used in entries that might not be in state.tags
+    // Create a Set to collect unique tags
+    const tagsSet = new Set();
+    
+    // Add tags from state.tags
+    state.tags.forEach(tag => tagsSet.add(tag.name));
+    
+    // Add tags from entries that may not be in state.tags
     state.entries.forEach(entry => {
         if (entry.tags && Array.isArray(entry.tags)) {
-            entry.tags.forEach(tag => {
-                allTagsSet.add(tag);
-            });
+            entry.tags.forEach(tag => tagsSet.add(tag));
         }
     });
     
-    // Sort tags alphabetically
-    const allTags = Array.from(allTagsSet).sort();
+    // Convert Set to Array and sort alphabetically
+    const uniqueTags = Array.from(tagsSet).sort();
     
-    // Add options to select
-    allTags.forEach(tag => {
+    // Create an option for each tag
+    uniqueTags.forEach(tag => {
         const option = document.createElement('option');
         option.value = tag;
         option.textContent = tag;
@@ -944,36 +1015,22 @@ function autoFillEmptyEntries() {
 }
 
 function setupEventListeners() {
-    // Month navigation
-    elements.prevMonth.addEventListener('click', navigateToPreviousMonth);
-    elements.nextMonth.addEventListener('click', navigateToNextMonth);
-    
-    // Add entry button
-    if (elements.addEntryBtn) {
-        console.log('Setting up add entry button event listener');
-        elements.addEntryBtn.addEventListener('click', () => {
-            console.log('Add entry button clicked');
-            showAddEntryModal();
-        });
-    } else {
-        console.error('Add entry button not found in elements object');
-    }
+    // Add Entry button
+    elements.addEntryBtn.addEventListener('click', () => {
+        console.log('Add entry button clicked');
+        showAddEntryModal();
+    });
     
     // Add task standalone button
-    if (elements.addTaskStandaloneBtn) {
-        console.log('Setting up add task standalone button event listener');
-        elements.addTaskStandaloneBtn.addEventListener('click', () => {
-            console.log('Add task standalone button clicked');
-            showAddTaskModal();
-        });
-    } else {
-        console.error('Add task standalone button not found in elements object');
-    }
+    elements.addTaskStandaloneBtn.addEventListener('click', () => {
+        console.log('Add task standalone button clicked');
+        showAddTaskModal();
+    });
     
     // Settings button
     elements.settingsBtn.addEventListener('click', showSettingsModal);
     
-    // Entry form
+    // Entry form submit
     elements.entryForm.addEventListener('submit', saveEntry);
     
     // Search and filter
@@ -981,79 +1038,52 @@ function setupEventListeners() {
     elements.tagFilter.addEventListener('change', filterEntries);
     elements.sortBy.addEventListener('change', sortEntries);
     
+    // Month navigation
+    elements.prevMonth.addEventListener('click', navigateToPreviousMonth);
+    elements.nextMonth.addEventListener('click', navigateToNextMonth);
+    
     // Modal close buttons
-    document.querySelectorAll('.close-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.closest('.modal').id;
-            document.getElementById(modalId).style.display = 'none';
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.modal').classList.remove('visible');
         });
     });
     
-    // Cancel buttons
+    // Cancel buttons in modals
     elements.cancelBtn.addEventListener('click', function() {
-        elements.entryModal.style.display = 'none';
+        elements.entryModal.classList.remove('visible');
     });
     
-    elements.settingsModal.querySelector('#settings-cancel-btn').addEventListener('click', function() {
-        elements.settingsModal.style.display = 'none';
+    elements.settingsCancelBtn.addEventListener('click', function() {
+        elements.settingsModal.classList.remove('visible');
     });
     
-    elements.dashboardModal.querySelector('#dashboard-close-btn').addEventListener('click', function() {
-        elements.dashboardModal.style.display = 'none';
-    });
+    // Add task button in modal
+    elements.addTaskBtn.addEventListener('click', addTask);
     
-    elements.entryPreviewModal.querySelector('#preview-close-btn').addEventListener('click', function() {
-        elements.entryPreviewModal.style.display = 'none';
-    });
-    
-    elements.entryPreviewModal.querySelector('#preview-edit-btn').addEventListener('click', function() {
-        elements.entryPreviewModal.style.display = 'none';
-        showEditEntryModal(state.selectedEntryId);
-    });
-    
-    // Settings form
+    // Settings form submit
     elements.settingsForm.addEventListener('submit', saveSettings);
     
-    // Add new tag
+    // Add tag button in settings
     elements.addTagBtn.addEventListener('click', addNewTag);
     
-    // Tasks system
-    if (elements.addTaskBtn) {
-        elements.addTaskBtn.addEventListener('click', addTask);
-        
-        if (elements.newTask) {
-            elements.newTask.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTask();
-                }
-            });
-        }
-    }
-    
-    // Accent color selection
-    elements.colorOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            elements.colorOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            const color = this.getAttribute('data-color');
-            state.settings.accentColor = color;
-            applyAccentColor();
-        });
-    });
-    
-    // When clicking outside modals, close them
-    window.addEventListener('click', function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = 'none';
-        }
-    });
-
-    // Set up theme toggle
+    // Theme selector
     elements.themeSelector.addEventListener('change', function() {
         state.settings.theme = this.value;
         applyTheme();
         saveData();
+    });
+    
+    // Preview edit button
+    elements.previewEditBtn.addEventListener('click', function() {
+        const entryId = this.getAttribute('data-entry-id');
+        elements.entryPreviewModal.classList.remove('visible');
+        showEditEntryModal(entryId);
+    });
+    
+    // Preview close button
+    elements.previewCloseBtn.addEventListener('click', function() {
+        elements.entryPreviewModal.classList.remove('visible');
     });
 }
 
@@ -1138,7 +1168,7 @@ function updateTodayInfo() {
 }
 
 function updateStatistics() {
-    // Get entries for the last 7 days
+    // Get entries from the last 7 days
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 7);
@@ -1148,98 +1178,91 @@ function updateStatistics() {
         return entryDate >= sevenDaysAgo && entryDate <= today;
     });
     
-    // Calculate average sleep duration
+    // Initialize totals
     let totalSleepMinutes = 0;
-    let deepSleepMinutes = 0;
-    let lightSleepMinutes = 0;
-    let remSleepMinutes = 0;
+    let totalDeepSleepMinutes = 0;
+    let totalLightSleepMinutes = 0;
+    let totalRemSleepMinutes = 0;
     let totalWakeUps = 0;
     let totalSteps = 0;
     let totalCalories = 0;
-    let totalStanding = 0;
+    let totalStandingHours = 0;
     
+    // Calculate totals
     recentEntries.forEach(entry => {
-        // Add night sleep
+        // Sleep data
         if (entry.nightSleep) {
-            const nightSleepMinutes = (entry.nightSleep.hours || 0) * 60 + (entry.nightSleep.minutes || 0);
-            totalSleepMinutes += nightSleepMinutes;
+            totalSleepMinutes += (entry.nightSleep.hours * 60) + entry.nightSleep.minutes;
         }
-        
-        // Add deep sleep
         if (entry.deepSleep) {
-            deepSleepMinutes += (entry.deepSleep.hours || 0) * 60 + (entry.deepSleep.minutes || 0);
+            totalDeepSleepMinutes += (entry.deepSleep.hours * 60) + entry.deepSleep.minutes;
         }
-        
-        // Add light sleep
         if (entry.lightSleep) {
-            lightSleepMinutes += (entry.lightSleep.hours || 0) * 60 + (entry.lightSleep.minutes || 0);
+            totalLightSleepMinutes += (entry.lightSleep.hours * 60) + entry.lightSleep.minutes;
         }
-        
-        // Add REM sleep
         if (entry.remSleep) {
-            remSleepMinutes += (entry.remSleep.hours || 0) * 60 + (entry.remSleep.minutes || 0);
+            totalRemSleepMinutes += (entry.remSleep.hours * 60) + entry.remSleep.minutes;
         }
         
-        // Add wake ups
+        // Other metrics
         if (entry.wakeUps) {
             totalWakeUps += entry.wakeUps;
         }
-        
-        // Add day nap if present
-        if (entry.dayNap) {
-            const dayNapMinutes = (entry.dayNap.hours || 0) * 60 + (entry.dayNap.minutes || 0);
-            totalSleepMinutes += dayNapMinutes;
-        }
-        
-        // Add steps
         if (entry.steps) {
             totalSteps += entry.steps;
         }
-        
-        // Add calories
         if (entry.calories) {
             totalCalories += entry.calories;
         }
-        
-        // Add standing hours
         if (entry.standing) {
-            totalStanding += entry.standing;
+            totalStandingHours += entry.standing;
         }
     });
     
-    const count = recentEntries.length || 1; // Avoid division by zero
+    // Calculate averages, avoiding division by zero
+    const entryCount = recentEntries.length || 1; // Use 1 if no entries to avoid division by zero
     
-    // Calculate averages
-    const avgSleepMinutes = totalSleepMinutes / count;
+    const avgSleepMinutes = totalSleepMinutes / entryCount;
+    const avgDeepSleepMinutes = totalDeepSleepMinutes / entryCount;
+    const avgLightSleepMinutes = totalLightSleepMinutes / entryCount;
+    const avgRemSleepMinutes = totalRemSleepMinutes / entryCount;
+    const avgWakeUps = totalWakeUps / entryCount;
+    const avgSteps = totalSteps / entryCount;
+    const avgCalories = totalCalories / entryCount;
+    const avgStandingHours = totalStandingHours / entryCount;
+    
+    // Update UI elements
+    // Sleep Duration
     const avgSleepHours = Math.floor(avgSleepMinutes / 60);
-    const avgSleepMins = Math.round(avgSleepMinutes % 60);
+    const avgSleepRemainingMinutes = Math.round(avgSleepMinutes % 60);
+    document.getElementById('avg-sleep-duration').textContent = `${avgSleepHours}h ${avgSleepRemainingMinutes}m`;
     
-    const avgDeepMinutes = deepSleepMinutes / count;
-    const avgDeepHours = Math.floor(avgDeepMinutes / 60);
-    const avgDeepMins = Math.round(avgDeepMinutes % 60);
+    // Deep Sleep
+    const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
+    const avgDeepSleepRemainingMinutes = Math.round(avgDeepSleepMinutes % 60);
+    document.getElementById('avg-deep-sleep').textContent = `${avgDeepSleepHours}h ${avgDeepSleepRemainingMinutes}m`;
     
-    const avgLightMinutes = lightSleepMinutes / count;
-    const avgLightHours = Math.floor(avgLightMinutes / 60);
-    const avgLightMins = Math.round(avgLightMinutes % 60);
+    // Light Sleep
+    const avgLightSleepHours = Math.floor(avgLightSleepMinutes / 60);
+    const avgLightSleepRemainingMinutes = Math.round(avgLightSleepMinutes % 60);
+    document.getElementById('avg-light-sleep').textContent = `${avgLightSleepHours}h ${avgLightSleepRemainingMinutes}m`;
     
-    const avgRemMinutes = remSleepMinutes / count;
-    const avgRemHours = Math.floor(avgRemMinutes / 60);
-    const avgRemMins = Math.round(avgRemMinutes % 60);
+    // REM Sleep
+    const avgRemSleepHours = Math.floor(avgRemSleepMinutes / 60);
+    const avgRemSleepRemainingMinutes = Math.round(avgRemSleepMinutes % 60);
+    document.getElementById('avg-rem-sleep').textContent = `${avgRemSleepHours}h ${avgRemSleepRemainingMinutes}m`;
     
-    const avgWakeUps = Math.round(totalWakeUps / count);
-    const avgSteps = Math.round(totalSteps / count);
-    const avgCalories = Math.round(totalCalories / count);
-    const avgStanding = Math.round(totalStanding * 10 / count) / 10; // One decimal place
+    // Wake Ups
+    document.getElementById('avg-wakeups').textContent = Math.round(avgWakeUps);
     
-    // Display statistics
-    elements.avgSleepDuration.textContent = `${avgSleepHours}h ${avgSleepMins}m`;
-    elements.avgDeepSleep.textContent = `${avgDeepHours}h ${avgDeepMins}m`;
-    elements.avgLightSleep.textContent = `${avgLightHours}h ${avgLightMins}m`;
-    elements.avgRemSleep.textContent = `${avgRemHours}h ${avgRemMins}m`;
-    elements.avgWakeups.textContent = avgWakeUps;
-    elements.avgSteps.textContent = avgSteps;
-    elements.avgCalories.textContent = avgCalories;
-    elements.avgStanding.textContent = avgStanding;
+    // Steps
+    document.getElementById('avg-steps').textContent = Math.round(avgSteps).toLocaleString();
+    
+    // Calories
+    document.getElementById('avg-calories').textContent = Math.round(avgCalories).toLocaleString();
+    
+    // Standing Hours
+    document.getElementById('avg-standing').textContent = Math.round(avgStandingHours);
 }
 
 function renderEntries() {
@@ -1641,18 +1664,19 @@ function filterEntries() {
     const searchTerm = elements.searchInput.value.toLowerCase();
     const selectedTag = elements.tagFilter.value;
     
-    // Filter entries based on search term and selected tag
     const filteredEntries = state.entries.filter(entry => {
-        const matchesSearch = !searchTerm || 
+        // Check if entry matches search term
+        const matchesSearch = entry.date.includes(searchTerm) || 
             (entry.eventsNotes && entry.eventsNotes.toLowerCase().includes(searchTerm));
         
+        // Check if entry has the selected tag
         const matchesTag = !selectedTag || 
             (entry.tags && entry.tags.includes(selectedTag));
         
+        // Return true if both conditions are met
         return matchesSearch && matchesTag;
     });
     
-    // Update display
     renderEntries(filteredEntries);
 }
 
@@ -1665,22 +1689,24 @@ function showAddTaskModal() {
     const today = new Date();
     const todayString = today.toISOString().split('T')[0];
     
-    // Check if today's entry exists
+    // Check if we already have an entry for today
     const todayEntry = state.entries.find(entry => entry.date === todayString);
     
     if (todayEntry) {
-        // If entry exists, edit it
+        // If today's entry exists, show edit modal with focus on tasks
         showEditEntryModal(todayEntry.id);
-        // Focus on the task input field
+        
+        // Focus on task input after modal is fully visible
         setTimeout(() => {
-            document.getElementById('new-task').focus();
+            elements.newTask.focus();
         }, 300);
     } else {
-        // If no entry exists, create a new one
+        // If no entry exists for today, create a new one
         showAddEntryModal(todayString);
-        // Focus on the task input field
+        
+        // Focus on task input after modal is fully visible
         setTimeout(() => {
-            document.getElementById('new-task').focus();
+            elements.newTask.focus();
         }, 300);
     }
 }

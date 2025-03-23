@@ -261,8 +261,10 @@ body {
 /* Styles for empty message */
 .today-tasks-list .empty-message,
 .tags-container .empty-tag {
-    color: var(--text-muted);
+    color: #94a3b8;
     font-style: italic;
+    font-weight: normal;
+    padding: 5px 0;
 }
 
 /* Tags Section */
@@ -480,8 +482,8 @@ header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  flex-wrap: nowrap;
+  gap: 10px;
 }
 
 .month-selector {
@@ -523,21 +525,21 @@ header {
 
 .filter-controls {
   display: flex;
-  gap: 0.75rem;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 1rem;
   align-items: center;
-  margin-top: 0;
 }
 
 #search-input, #tag-filter, #sort-by {
-  flex: 1;
-  min-width: 0;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 1rem;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 13px;
-  color: var(--text-primary);
-  background-color: var(--card-bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  transition: all 0.2s ease;
 }
 
 #search-input:focus, #tag-filter:focus, #sort-by:focus {
@@ -559,13 +561,15 @@ header {
   width: 100%;
   overflow-x: auto;
   margin-top: 1rem;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
 }
 
 #sleep-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   table-layout: fixed;
   overflow: hidden;
 }
@@ -605,22 +609,22 @@ header {
 }
 
 #sleep-table tbody tr.today-row {
-  background-color: var(--today);
-  font-weight: 500;
+  background-color: rgba(99, 102, 241, 0.1);
+  font-weight: 600;
 }
 
 /* Header styles */
 #sleep-table thead {
   position: sticky;
   top: 0;
-  z-index: 5;
-  background-color: var(--bg-color);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-theme #sleep-table thead {
-  background-color: var(--dark-bg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  background-color: var(--card-bg-dark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Cell styles */
@@ -1538,8 +1542,8 @@ body.dark-theme #sleep-table tbody tr:hover td {
 }
 
 body.dark-theme #sleep-table tbody tr.today-row {
-  background-color: var(--today-dark);
-  color: var(--dark-text);
+  background-color: rgba(99, 102, 241, 0.2);
+  font-weight: 600;
 }
 
 body.dark-theme #sleep-table tbody tr.today-row td:nth-child(1),
@@ -1559,6 +1563,11 @@ body.dark-theme select,
 body.dark-theme textarea {
   background-color: var(--dark-hover-bg);
   color: var(--dark-text);
+}
+
+body.dark-theme .today-tasks-list .empty-message,
+body.dark-theme .tags-container .empty-tag {
+    color: #64748b;
 }
 
 /* Responsive design */
@@ -1686,21 +1695,22 @@ body[data-accent="pink"] {
 
 /* Override sticky header styles to ensure proper display */
 #sleep-table th {
+    padding: 0.8rem 0.5rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--heading-color);
+    border-bottom: 2px solid var(--border-color);
+    background-color: var(--card-bg);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
     position: sticky;
     top: 0;
-    font-weight: 600;
-    font-size: 13px;
-    text-align: center;
-    padding: 0.75rem 0.5rem;
-    background-color: var(--bg-color);
-    border-bottom: 2px solid var(--border-color);
-    white-space: nowrap;
-    letter-spacing: -0.02em;
     z-index: 10;
 }
 
 body.dark-theme #sleep-table th {
-    background-color: var(--dark-bg);
-    color: var(--dark-text);
-    border-bottom-color: var(--dark-border);
+    background-color: var(--card-bg-dark);
+    color: var(--heading-color-dark);
+    border-bottom-color: var(--border-color-dark);
 }
