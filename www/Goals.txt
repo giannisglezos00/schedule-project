@@ -5,11 +5,10 @@ this will be used on a computer on a self hosted web app
 Problems/changes:
 General problems:
 
-The list isn't being filled on it's own
-
-2.The tags filter should show all tags and new tags dynamically
+2.The tags filter should show all tags and new tags dynamically 
 3.You shouldn't design for mobile it will never be used on mobile
 4.Add new Task does nothing
+5.When you select only 1 tag it doesn't show only the results with that tag
 
 Sidebar:
 1.clicking in the side bar's today's task section should open the task and see it's details and tags, 
@@ -17,3 +16,6 @@ Instead of view all tags we should have a + button next to the tags allowing you
 
 
 Clicking in the rendered list tasks you should be able to open the tasks section for that entry's date
+also the rendered list and it's top row are not aligned at all
+
+the header showing what each section is should be always visible and the contents should scroll
