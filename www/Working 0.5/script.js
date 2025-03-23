@@ -443,6 +443,9 @@ document.addEventListener('DOMContentLoaded', function() {
         daysCount: document.getElementById('days-count'),
         todayTasks: document.getElementById('today-tasks'),
         todayTagsList: document.getElementById('today-tags-list'),
+        addEntryBtn: document.getElementById('add-entry-btn'),
+        addTaskStandaloneBtn: document.getElementById('add-task-standalone-btn'),
+        settingsBtn: document.getElementById('settings-btn'),
         
         // Statistics elements
         avgSleepDuration: document.getElementById('avg-sleep-duration'),
@@ -469,7 +472,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Modal elements
         entryModal: document.getElementById('entry-modal'),
         settingsModal: document.getElementById('settings-modal'),
-        previewModal: document.getElementById('entry-preview-modal'),
+        dashboardModal: document.getElementById('dashboard-modal'),
+        entryPreviewModal: document.getElementById('entry-preview-modal'),
         
         // Chart elements (dashboard)
         sleepTrendChart: document.getElementById('sleep-trend-chart'),
@@ -515,7 +519,8 @@ document.addEventListener('DOMContentLoaded', function() {
         settingsForm: document.getElementById('settings-form'),
         referenceDate: document.getElementById('reference-date'),
         themeSelector: document.getElementById('theme-selector'),
-        colorOptions: document.querySelectorAll('.color-option')
+        colorOptions: document.querySelectorAll('.color-option'),
+        addTagBtn: document.getElementById('add-tag-btn')
     };
     
     // Setup event listeners
@@ -954,11 +959,19 @@ function setupEventListeners() {
         console.error('Add entry button not found in elements object');
     }
     
+    // Add task standalone button
+    if (elements.addTaskStandaloneBtn) {
+        console.log('Setting up add task standalone button event listener');
+        elements.addTaskStandaloneBtn.addEventListener('click', () => {
+            console.log('Add task standalone button clicked');
+            showAddTaskModal();
+        });
+    } else {
+        console.error('Add task standalone button not found in elements object');
+    }
+    
     // Settings button
     elements.settingsBtn.addEventListener('click', showSettingsModal);
-    
-    // Dashboard button
-    elements.dashboardBtn.addEventListener('click', showDashboardModal);
     
     // Entry form
     elements.entryForm.addEventListener('submit', saveEntry);
@@ -981,20 +994,20 @@ function setupEventListeners() {
         elements.entryModal.style.display = 'none';
     });
     
-    elements.settingsModal.querySelector('.settings-cancel-btn').addEventListener('click', function() {
+    elements.settingsModal.querySelector('#settings-cancel-btn').addEventListener('click', function() {
         elements.settingsModal.style.display = 'none';
     });
     
-    elements.dashboardModal.querySelector('.dashboard-close-btn').addEventListener('click', function() {
+    elements.dashboardModal.querySelector('#dashboard-close-btn').addEventListener('click', function() {
         elements.dashboardModal.style.display = 'none';
     });
     
-    elements.previewModal.querySelector('.preview-close-btn').addEventListener('click', function() {
-        elements.previewModal.style.display = 'none';
+    elements.entryPreviewModal.querySelector('#preview-close-btn').addEventListener('click', function() {
+        elements.entryPreviewModal.style.display = 'none';
     });
     
-    elements.previewModal.querySelector('.preview-edit-btn').addEventListener('click', function() {
-        elements.previewModal.style.display = 'none';
+    elements.entryPreviewModal.querySelector('#preview-edit-btn').addEventListener('click', function() {
+        elements.entryPreviewModal.style.display = 'none';
         showEditEntryModal(state.selectedEntryId);
     });
     
@@ -1042,9 +1055,6 @@ function setupEventListeners() {
         applyTheme();
         saveData();
     });
-
-    // Add new task button
-    elements.addTaskBtn.addEventListener('click', showAddTaskModal);
 }
 
 function applyTheme() {
@@ -1605,8 +1615,8 @@ function saveSettings(event) {
 }
 
 function addNewTag() {
-    const tagName = document.getElementById('new-tag-name').value.trim();
-    const tagColor = document.getElementById('new-tag-color').value;
+    const tagName = document.getElementById('new-tag').value.trim();
+    const tagColor = document.getElementById('tag-color').value;
     
     if (!tagName) return;
     
@@ -1621,7 +1631,7 @@ function addNewTag() {
     updateTagFilter();
     
     // Clear input
-    document.getElementById('new-tag-name').value = '';
+    document.getElementById('new-tag').value = '';
     
     // Save data
     saveData();
