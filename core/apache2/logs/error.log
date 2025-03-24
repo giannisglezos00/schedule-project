@@ -173,3 +173,24 @@
 [Fri Mar 21 15:40:55.215577 2025] [mpm_winnt:notice] [pid 1168:tid 540] AH00418: Parent: Created child process 48652
 [Fri Mar 21 15:40:56.270861 2025] [mpm_winnt:notice] [pid 48652:tid 524] AH00354: Child: Starting 150 worker threads.
 [Fri Mar 21 15:40:57.904037 2025] [php:error] [pid 48652:tid 1896] [client ::1:59223] script 'C:/Users/John/Documents/GitHub/schedule-project/www/index.php' not found or unable to stat
+[Sat Mar 22 23:10:12.438062 2025] [core:warn] [pid 28112:tid 520] AH00098: pid file C:/Users/John/Documents/GitHub/schedule-project/core/apache2/logs/httpd.pid overwritten -- Unclean shutdown of previous Apache run?
+[Sat Mar 22 23:10:12.691503 2025] [mpm_winnt:notice] [pid 28112:tid 520] AH00455: Apache/2.4.58 (Win64) PHP/8.3.0 configured -- resuming normal operations
+[Sat Mar 22 23:10:12.691503 2025] [mpm_winnt:notice] [pid 28112:tid 520] AH00456: Apache Lounge VS17 Server built: Oct 18 2023 13:03:18
+[Sat Mar 22 23:10:12.691503 2025] [core:notice] [pid 28112:tid 520] AH00094: Command line: 'C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\bin\\httpd_z.exe -d C:/Users/John/Documents/GitHub/schedule-project/core/apache2 -f C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\conf\\httpd.conf -d C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2'
+[Sat Mar 22 23:10:12.711121 2025] [mpm_winnt:notice] [pid 28112:tid 520] AH00418: Parent: Created child process 27760
+[Sat Mar 22 23:10:13.475551 2025] [mpm_winnt:notice] [pid 27760:tid 516] AH00354: Child: Starting 150 worker threads.
+[Sat Mar 22 23:10:13.495821 2025] [php:error] [pid 27760:tid 1888] [client ::1:51306] script 'C:/Users/John/Documents/GitHub/schedule-project/www/index.php' not found or unable to stat
+[Sun Mar 23 13:33:53.362537 2025] [core:warn] [pid 32392:tid 548] AH00098: pid file C:/Users/John/Documents/GitHub/schedule-project/core/apache2/logs/httpd.pid overwritten -- Unclean shutdown of previous Apache run?
+[Sun Mar 23 13:33:53.462064 2025] [mpm_winnt:notice] [pid 32392:tid 548] AH00455: Apache/2.4.58 (Win64) PHP/8.3.0 configured -- resuming normal operations
+[Sun Mar 23 13:33:53.462064 2025] [mpm_winnt:notice] [pid 32392:tid 548] AH00456: Apache Lounge VS17 Server built: Oct 18 2023 13:03:18
+[Sun Mar 23 13:33:53.462064 2025] [core:notice] [pid 32392:tid 548] AH00094: Command line: 'C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\bin\\httpd_z.exe -d C:/Users/John/Documents/GitHub/schedule-project/core/apache2 -f C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\conf\\httpd.conf -d C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2'
+[Sun Mar 23 13:33:53.478528 2025] [mpm_winnt:notice] [pid 32392:tid 548] AH00418: Parent: Created child process 31840
+[Sun Mar 23 13:33:54.347168 2025] [mpm_winnt:notice] [pid 31840:tid 544] AH00354: Child: Starting 150 worker threads.
+[Sun Mar 23 13:33:54.351755 2025] [php:error] [pid 31840:tid 1900] [client ::1:62375] script 'C:/Users/John/Documents/GitHub/schedule-project/www/index.php' not found or unable to stat
+[Mon Mar 24 07:35:06.791104 2025] [core:warn] [pid 30660:tid 520] AH00098: pid file C:/Users/John/Documents/GitHub/schedule-project/core/apache2/logs/httpd.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Mar 24 07:35:06.907903 2025] [mpm_winnt:notice] [pid 30660:tid 520] AH00455: Apache/2.4.58 (Win64) PHP/8.3.0 configured -- resuming normal operations
+[Mon Mar 24 07:35:06.907903 2025] [mpm_winnt:notice] [pid 30660:tid 520] AH00456: Apache Lounge VS17 Server built: Oct 18 2023 13:03:18
+[Mon Mar 24 07:35:06.907903 2025] [core:notice] [pid 30660:tid 520] AH00094: Command line: 'C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\bin\\httpd_z.exe -d C:/Users/John/Documents/GitHub/schedule-project/core/apache2 -f C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2\\conf\\httpd.conf -d C:\\Users\\John\\Documents\\GitHub\\schedule-project\\core\\apache2'
+[Mon Mar 24 07:35:06.926439 2025] [mpm_winnt:notice] [pid 30660:tid 520] AH00418: Parent: Created child process 28236
+[Mon Mar 24 07:35:08.731430 2025] [mpm_winnt:notice] [pid 28236:tid 516] AH00354: Child: Starting 150 worker threads.
+[Mon Mar 24 07:35:08.735926 2025] [php:error] [pid 28236:tid 1896] [client ::1:56592] script 'C:/Users/John/Documents/GitHub/schedule-project/www/index.php' not found or unable to stat

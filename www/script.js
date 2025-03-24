@@ -1,10 +1,43 @@
 // Global variables
-let elements = {
+let state = {
+    entries: [],
+    tasks: {},
+    tags: [],
+    settings: {
+        referenceDate: '2024-04-11',
+        caloriesGoal: 2500,
+        stepsGoal: 10000,
+        sleepThresholds: {
+            red: { hours: 6, minutes: 20 },
+            yellow: { hours: 7, minutes: 0 },
+            darkGreen: { hours: 8, minutes: 30 }
+        },
+        deepSleepMin: { hours: 1, minutes: 30 },
+        lightSleepRange: { 
+            min: { hours: 3, minutes: 0 },
+            max: { hours: 5, minutes: 0 }
+        },
+        remThresholds: {
+            red: { hours: 0, minutes: 50 },
+            yellow: { hours: 1, minutes: 2 }
+        },
+        theme: 'light',
+        accentColor: 'blue'
+    },
+    currentMonth: new Date(),
+    lastEntryId: 0
+};
+
+// Initialize element references
+const elements = {
     // Sidebar elements
     currentDate: document.getElementById('current-date'),
     daysCount: document.getElementById('days-count'),
     todayTasks: document.getElementById('today-tasks'),
     todayTagsList: document.getElementById('today-tags-list'),
+    addTagQuickBtn: document.getElementById('add-tag-quick-btn'),
+    
+    // Navigation buttons
     addEntryBtn: document.getElementById('add-entry-btn'),
     addTaskStandaloneBtn: document.getElementById('add-task-standalone-btn'),
     settingsBtn: document.getElementById('settings-btn'),
@@ -14,15 +47,15 @@ let elements = {
     avgDeepSleep: document.getElementById('avg-deep-sleep'),
     avgLightSleep: document.getElementById('avg-light-sleep'),
     avgRemSleep: document.getElementById('avg-rem-sleep'),
-    avgWakeups: document.getElementById('avg-wakeups'),
     avgSteps: document.getElementById('avg-steps'),
     avgCalories: document.getElementById('avg-calories'),
+    avgWakeups: document.getElementById('avg-wakeups'),
     avgStanding: document.getElementById('avg-standing'),
     
     // Filter and control elements
-    currentMonth: document.getElementById('current-month'),
     prevMonth: document.getElementById('prev-month'),
     nextMonth: document.getElementById('next-month'),
+    currentMonth: document.getElementById('current-month'),
     searchInput: document.getElementById('search-input'),
     tagFilter: document.getElementById('tag-filter'),
     sortBy: document.getElementById('sort-by'),
@@ -34,66 +67,81 @@ let elements = {
     // Modal elements
     entryModal: document.getElementById('entry-modal'),
     settingsModal: document.getElementById('settings-modal'),
+    dashboardModal: document.getElementById('dashboard-modal'),
     entryPreviewModal: document.getElementById('entry-preview-modal'),
-    modalTitle: document.getElementById('modal-title'),
+    entryPreviewContent: document.getElementById('entry-preview-content'),
+    previewEditBtn: document.getElementById('preview-edit-btn'),
+    previewCloseBtn: document.getElementById('preview-close-btn'),
     
     // Chart elements
     sleepTrendChart: document.getElementById('sleep-trend-chart'),
     compositionChart: document.getElementById('composition-chart'),
     activityChart: document.getElementById('activity-chart'),
     eventsTimeline: document.getElementById('events-timeline'),
+    sleepInsights: document.getElementById('sleep-insights'),
     
     // Form elements
     entryForm: document.getElementById('entry-form'),
     entryId: document.getElementById('entry-id'),
     entryDate: document.getElementById('entry-date'),
+    sleepScore: document.getElementById('sleep-score'),
+    nightSleepHours: document.getElementById('night-sleep-hours'),
+    nightSleepMinutes: document.getElementById('night-sleep-minutes'),
+    dayNapHours: document.getElementById('day-nap-hours'),
+    dayNapMinutes: document.getElementById('day-nap-minutes'),
+    deepSleepHours: document.getElementById('deep-sleep-hours'),
+    deepSleepMinutes: document.getElementById('deep-sleep-minutes'),
+    lightSleepHours: document.getElementById('light-sleep-hours'),
+    lightSleepMinutes: document.getElementById('light-sleep-minutes'),
+    remSleepHours: document.getElementById('rem-sleep-hours'),
+    remSleepMinutes: document.getElementById('rem-sleep-minutes'),
+    wakeUps: document.getElementById('wake-ups'),
+    cutSleep: document.getElementById('cut-sleep'),
+    seizure: document.getElementById('seizure'),
+    shake: document.getElementById('shake'),
+    afr: document.getElementById('afr'),
+    eventsNotes: document.getElementById('events-notes'),
     newTask: document.getElementById('new-task'),
-    tasksList: document.getElementById('tasks-list'),
     addTaskBtn: document.getElementById('add-task-btn'),
+    tasksList: document.getElementById('tasks-list'),
+    tags: document.getElementById('tags'),
     availableTags: document.getElementById('available-tags'),
+    calories: document.getElementById('calories'),
+    steps: document.getElementById('steps'),
+    weight: document.getElementById('weight'),
+    standing: document.getElementById('standing'),
+    saveBtn: document.getElementById('save-btn'),
     cancelBtn: document.getElementById('cancel-btn'),
     
     // Settings form elements
     settingsForm: document.getElementById('settings-form'),
     referenceDate: document.getElementById('reference-date'),
+    caloriesGoal: document.getElementById('calories-goal'),
+    stepsGoal: document.getElementById('steps-goal'),
+    sleepRedHours: document.getElementById('sleep-red-hours'),
+    sleepRedMinutes: document.getElementById('sleep-red-minutes'),
+    sleepYellowHours: document.getElementById('sleep-yellow-hours'),
+    sleepYellowMinutes: document.getElementById('sleep-yellow-minutes'),
+    sleepDarkGreenHours: document.getElementById('sleep-darkgreen-hours'),
+    sleepDarkGreenMinutes: document.getElementById('sleep-darkgreen-minutes'),
+    deepMinHours: document.getElementById('deep-min-hours'),
+    deepMinMinutes: document.getElementById('deep-min-minutes'),
+    lightMinHours: document.getElementById('light-min-hours'),
+    lightMinMinutes: document.getElementById('light-min-minutes'),
+    lightMaxHours: document.getElementById('light-max-hours'),
+    lightMaxMinutes: document.getElementById('light-max-minutes'),
+    remRedHours: document.getElementById('rem-red-hours'),
+    remRedMinutes: document.getElementById('rem-red-minutes'),
+    remYellowHours: document.getElementById('rem-yellow-hours'),
+    remYellowMinutes: document.getElementById('rem-yellow-minutes'),
+    newTag: document.getElementById('new-tag'),
+    tagColor: document.getElementById('tag-color'),
+    addTagBtn: document.getElementById('add-tag-btn'),
+    tagsList: document.getElementById('tags-list'),
     themeSelector: document.getElementById('theme-selector'),
     colorOptions: document.querySelectorAll('.color-option'),
-    addTagBtn: document.getElementById('add-tag-btn'),
-    previewEditBtn: document.getElementById('preview-edit-btn'),
-    previewCloseBtn: document.getElementById('preview-close-btn'),
+    settingsSaveBtn: document.getElementById('settings-save-btn'),
     settingsCancelBtn: document.getElementById('settings-cancel-btn')
-};
-let state = {
-    entries: [],
-    tasks: {}, // Tasks organized by date
-    tags: [],
-    settings: {
-        referenceDate: '2024-04-11',
-        caloriesGoal: 2000,
-        stepsGoal: 10000,
-        sleepThresholds: {
-            totalSleep: {
-                red: { hours: 6, minutes: 20 },
-                yellow: { hours: 7, minutes: 0 },
-                darkGreen: { hours: 8, minutes: 30 }
-            },
-            deepSleep: { minimum: { hours: 1, minutes: 30 } },
-            lightSleep: { 
-                minimum: { hours: 3, minutes: 0 },
-                maximum: { hours: 5, minutes: 0 }
-            },
-            remSleep: {
-                red: { hours: 0, minutes: 50 },
-                yellow: { hours: 1, minutes: 2 }
-            }
-        },
-        theme: 'light',
-        accentColor: 'blue'
-    },
-    currentDate: new Date(),
-    currentMonth: new Date(),
-    selectedEntryId: null,
-    currentTasks: [] // Tasks for the entry being edited
 };
 
 // Dashboard charts update function
@@ -407,7 +455,7 @@ function showAddEntryModal(date = null) {
     }
     
     // Show modal
-    elements.entryModal.style.display = 'block';
+    elements.entryModal.classList.add('visible');
 }
 
 function showEditEntryModal(entryId) {
@@ -443,7 +491,7 @@ function showEditEntryModal(entryId) {
     renderTasks();
     
     // Show modal
-    elements.entryModal.style.display = 'block';
+    elements.entryModal.classList.add('visible');
 }
 
 function showEntryPreview(entryId) {
@@ -474,18 +522,41 @@ function showEntryPreview(entryId) {
     `;
     
     // Show modal
-    elements.entryPreviewModal.style.display = 'block';
+    elements.entryPreviewModal.classList.add('visible');
 }
 
 function showSettingsModal() {
-    // Populate settings form with current values
+    // Fill form with current settings
     document.getElementById('reference-date').value = state.settings.referenceDate;
     document.getElementById('calories-goal').value = state.settings.caloriesGoal;
     document.getElementById('steps-goal').value = state.settings.stepsGoal;
+    
+    // Set theme selector
     document.getElementById('theme-selector').value = state.settings.theme;
     
+    // Set accent color
+    document.querySelectorAll('.color-option').forEach(option => {
+        if (option.getAttribute('data-color') === state.settings.accentColor) {
+            option.classList.add('selected');
+        } else {
+            option.classList.remove('selected');
+        }
+    });
+    
+    // Render tags list
+    renderTagsList();
+    
+    // Setup color presets
+    setupTagColorPresets();
+    
+    // Set first color preset as selected initially
+    const firstPreset = document.querySelector('.preset-color');
+    if (firstPreset) {
+        firstPreset.classList.add('selected');
+    }
+    
     // Show modal
-    elements.settingsModal.style.display = 'block';
+    elements.settingsModal.classList.add('visible');
 }
 
 function showDashboardModal() {
@@ -494,333 +565,110 @@ function showDashboardModal() {
     updateSleepInsights(state.entries);
     
     // Show modal
-    elements.dashboardModal.style.display = 'block';
+    elements.dashboardModal.classList.add('visible');
 }
 
-// Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize element references
-    elements = {
-        // Sidebar elements
-        currentDate: document.getElementById('current-date'),
-        daysCount: document.getElementById('days-count'),
-        todayTasks: document.getElementById('today-tasks'),
-        todayTagsList: document.getElementById('today-tags-list'),
-        addEntryBtn: document.getElementById('add-entry-btn'),
-        addTaskStandaloneBtn: document.getElementById('add-task-standalone-btn'),
-        settingsBtn: document.getElementById('settings-btn'),
-        
-        // Statistics elements
-        avgSleepDuration: document.getElementById('avg-sleep-duration'),
-        avgDeepSleep: document.getElementById('avg-deep-sleep'),
-        avgLightSleep: document.getElementById('avg-light-sleep'),
-        avgRemSleep: document.getElementById('avg-rem-sleep'),
-        avgWakeups: document.getElementById('avg-wakeups'),
-        avgSteps: document.getElementById('avg-steps'),
-        avgCalories: document.getElementById('avg-calories'),
-        avgStanding: document.getElementById('avg-standing'),
-        
-        // Filter and control elements
-        currentMonth: document.getElementById('current-month'),
-        prevMonth: document.getElementById('prev-month'),
-        nextMonth: document.getElementById('next-month'),
-        searchInput: document.getElementById('search-input'),
-        tagFilter: document.getElementById('tag-filter'),
-        sortBy: document.getElementById('sort-by'),
-        
-        // Table elements
-        sleepTable: document.getElementById('sleep-table'),
-        sleepData: document.getElementById('sleep-data'),
-        
-        // Modal elements
-        entryModal: document.getElementById('entry-modal'),
-        settingsModal: document.getElementById('settings-modal'),
-        dashboardModal: document.getElementById('dashboard-modal'),
-        entryPreviewModal: document.getElementById('entry-preview-modal'),
-        
-        // Chart elements (dashboard)
-        sleepTrendChart: document.getElementById('sleep-trend-chart'),
-        compositionChart: document.getElementById('composition-chart'),
-        activityChart: document.getElementById('activity-chart'),
-        eventsTimeline: document.getElementById('events-timeline'),
-        sleepInsights: document.getElementById('sleep-insights'),
-        
-        // Form elements
-        entryForm: document.getElementById('entry-form'),
-        entryId: document.getElementById('entry-id'),
-        entryDate: document.getElementById('entry-date'),
-        sleepScore: document.getElementById('sleep-score'),
-        nightSleepHours: document.getElementById('night-sleep-hours'),
-        nightSleepMinutes: document.getElementById('night-sleep-minutes'),
-        dayNapHours: document.getElementById('day-nap-hours'),
-        dayNapMinutes: document.getElementById('day-nap-minutes'),
-        deepSleepHours: document.getElementById('deep-sleep-hours'),
-        deepSleepMinutes: document.getElementById('deep-sleep-minutes'),
-        lightSleepHours: document.getElementById('light-sleep-hours'),
-        lightSleepMinutes: document.getElementById('light-sleep-minutes'),
-        remSleepHours: document.getElementById('rem-sleep-hours'),
-        remSleepMinutes: document.getElementById('rem-sleep-minutes'),
-        wakeUps: document.getElementById('wake-ups'),
-        cutSleep: document.getElementById('cut-sleep'),
-        seizure: document.getElementById('seizure'),
-        shake: document.getElementById('shake'),
-        afr: document.getElementById('afr'),
-        eventsNotes: document.getElementById('events-notes'),
-        newTask: document.getElementById('new-task'),
-        addTaskBtn: document.getElementById('add-task-btn'),
-        tasksList: document.getElementById('tasks-list'),
-        tags: document.getElementById('tags'),
-        availableTags: document.getElementById('available-tags'),
-        calories: document.getElementById('calories'),
-        steps: document.getElementById('steps'),
-        weight: document.getElementById('weight'),
-        standing: document.getElementById('standing'),
-        cancelBtn: document.getElementById('cancel-btn'),
-        saveBtn: document.getElementById('save-btn'),
-        
-        // Settings form elements
-        settingsForm: document.getElementById('settings-form'),
-        referenceDate: document.getElementById('reference-date'),
-        themeSelector: document.getElementById('theme-selector'),
-        colorOptions: document.querySelectorAll('.color-option'),
-        addTagBtn: document.getElementById('add-tag-btn'),
-        previewEditBtn: document.getElementById('preview-edit-btn'),
-        previewCloseBtn: document.getElementById('preview-close-btn'),
-        settingsCancelBtn: document.getElementById('settings-cancel-btn')
-    };
+function showAddTaskModal() {
+    // Reset form but keep most fields empty
+    elements.entryForm.reset();
+    elements.entryId.value = '';
+    state.currentTasks = [];
+    renderTasks();
     
-    // Setup event listeners
-    setupEventListeners();
+    // Set today's date
+    elements.entryDate.value = new Date().toISOString().split('T')[0];
     
-    // Load data from localStorage
-    loadData();
+    // Focus on the tasks section
+    setTimeout(() => {
+        elements.newTask.focus();
+    }, 300);
     
-    // Initialize UI
-    updateDateDisplay();
-    updateTodayInfo();
-    updateStatistics();
-    renderEntries();
-    updateTagFilter();
-    
-    // Set initial theme
-    applyTheme();
-});
-
-// Add keyboard shortcut for scrolling to today
-document.addEventListener('keydown', function(event) {
-    if (event.key.toLowerCase() === 'c') {
-        scrollToToday();
-    }
-});
-
-function scrollToToday() {
-    const todayRow = document.querySelector('.today-row');
-    if (todayRow) {
-        todayRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    // Show modal
+    elements.entryModal.classList.add('visible');
 }
 
-// Helper Functions
-function formatDate(date) {
-    const options = { 
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    };
-    return date.toLocaleDateString('en-US', options);
-}
-
-function formatTimeCompact(hours, minutes) {
-    return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
-}
-
-function createCell(content, type = 'text') {
-    const cell = document.createElement('td');
+// Initialize the application once the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Sleep Tracker initializing...');
     
-    switch(type) {
-        case 'date':
-            cell.textContent = formatDate(content);
-            break;
-        case 'time':
-            cell.textContent = formatTimeCompact(content.hours, content.minutes);
-            break;
-        case 'checkbox':
-            cell.textContent = content ? '✓' : '';
-            cell.style.textAlign = 'center';
-            break;
-        case 'number':
-            cell.textContent = content.toLocaleString();
-            cell.style.textAlign = 'right';
-            break;
-        default:
-            cell.textContent = content;
-    }
-    
-    return cell;
-}
-
-function formatTime(timeObj) {
-    if (!timeObj || (!timeObj.hours && !timeObj.minutes)) return '';
-    const hours = timeObj.hours || 0;
-    const minutes = timeObj.minutes || 0;
-    return `${hours}h ${minutes}m`;
-}
-
-function getScoreColor(score) {
-    if (!score) return '';
-    if (score < 50) return '#FF5733'; // Red
-    if (score < 70) return '#FFC300'; // Yellow
-    if (score < 90) return '#DAF7A6'; // Light green
-    return '#57C84D'; // Dark green
-}
-
-function getSleepColor(sleepTime) {
-    if (!sleepTime) return '';
-    
-    const thresholds = state.settings.sleepThresholds.totalSleep;
-    const totalMinutes = (sleepTime.hours || 0) * 60 + (sleepTime.minutes || 0);
-    
-    const redThreshold = thresholds.red.hours * 60 + thresholds.red.minutes;
-    const yellowThreshold = thresholds.yellow.hours * 60 + thresholds.yellow.minutes;
-    const darkGreenThreshold = thresholds.darkGreen.hours * 60 + thresholds.darkGreen.minutes;
-    
-    if (totalMinutes <= redThreshold) return '#FF5733'; // Red
-    if (totalMinutes <= yellowThreshold) return '#FFC300'; // Yellow
-    if (totalMinutes >= darkGreenThreshold) return '#2E7D32'; // Dark green
-    return '#57C84D'; // Regular green
-}
-
-function getDeepSleepColor(deepSleep, totalSleep) {
-    if (!deepSleep || !totalSleep) return '';
-    
-    const deepMinutes = (deepSleep.hours || 0) * 60 + (deepSleep.minutes || 0);
-    const totalMinutes = (totalSleep.hours || 0) * 60 + (totalSleep.minutes || 0);
-    
-    const minDeepSleep = state.settings.sleepThresholds.deepSleep.minimum;
-    const minDeepMinutes = minDeepSleep.hours * 60 + minDeepSleep.minutes;
-    
-    // Calculate percentage of deep sleep
-    const percentage = (deepMinutes / totalMinutes) * 100;
-    
-    if (deepMinutes < minDeepMinutes || percentage < 20) return '#FF5733'; // Red
-    return '#4A6BFF'; // Blue (good) - updated per requirements
-}
-
-function getLightSleepColor(lightSleep, totalSleep) {
-    if (!lightSleep || !totalSleep) return '';
-    
-    const lightMinutes = (lightSleep.hours || 0) * 60 + (lightSleep.minutes || 0);
-    const totalMinutes = (totalSleep.hours || 0) * 60 + (totalSleep.minutes || 0);
-    
-    const minLightSleep = state.settings.sleepThresholds.lightSleep.minimum;
-    const maxLightSleep = state.settings.sleepThresholds.lightSleep.maximum;
-    
-    const minLightMinutes = minLightSleep.hours * 60 + minLightSleep.minutes;
-    const maxLightMinutes = maxLightSleep.hours * 60 + maxLightSleep.minutes;
-    
-    // Calculate percentage of light sleep
-    const percentage = (lightMinutes / totalMinutes) * 100;
-    
-    if (lightMinutes < minLightMinutes || percentage < 50) return '#FF5733'; // Red
-    if (lightMinutes > maxLightMinutes || percentage > 60) return '#FF5733'; // Red
-    return '#2C7DD4'; // Light blue (ideal) - updated per requirements
-}
-
-function getRemSleepColor(remSleep) {
-    if (!remSleep) return '';
-    
-    const remMinutes = (remSleep.hours || 0) * 60 + (remSleep.minutes || 0);
-    
-    const redThreshold = state.settings.sleepThresholds.remSleep.red.hours * 60 + 
-                      state.settings.sleepThresholds.remSleep.red.minutes;
-    const yellowThreshold = state.settings.sleepThresholds.remSleep.yellow.hours * 60 + 
-                         state.settings.sleepThresholds.remSleep.yellow.minutes;
-    
-    if (remMinutes <= redThreshold) return '#FF5733'; // Red
-    if (remMinutes <= yellowThreshold) return '#FFC300'; // Yellow
-    return '#3DD3CB'; // Turquoise (good) - updated per requirements
-}
-
-function getCaloriesColor(calories) {
-    if (!calories) return '';
-    
-    const goal = state.settings.caloriesGoal;
-    
-    if (calories < goal * 0.7) return '#FF5733'; // Red (too low)
-    if (calories > goal * 1.3) return '#FF5733'; // Red (too high)
-    if (calories < goal * 0.9 || calories > goal * 1.1) return '#FFC300'; // Yellow
-    return '#EF8A2B'; // Orange (on target) - updated per requirements
-}
-
-function getStepsColor(steps) {
-    if (!steps) return '';
-    
-    const goal = state.settings.stepsGoal;
-    
-    if (steps < goal * 0.5) return '#FF5733'; // Red
-    if (steps < goal * 0.8) return '#FFC300'; // Yellow
-    if (steps > goal * 1.2) return '#2E7D32'; // Dark green
-    return '#E0CB08'; // Yellow-green (on target) - updated per requirements
-}
-
-function getStandingColor(hours) {
-    if (!hours) return '';
-    
-    if (hours < 6) return '#FF5733'; // Red
-    if (hours < 8) return '#FFC300'; // Yellow
-    if (hours > 12) return '#2E7D32'; // Dark green
-    return '#43C677'; // Green (on target) - updated per requirements
-}
-
-function getLuminance(hexColor) {
-    // Convert hex to RGB
-    const r = parseInt(hexColor.substr(1, 2), 16) / 255;
-    const g = parseInt(hexColor.substr(3, 2), 16) / 255;
-    const b = parseInt(hexColor.substr(5, 2), 16) / 255;
-    
-    // Calculate luminance
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-// Function to update tag filter select dropdown
-function updateTagFilter() {
-    // Get reference to the tag filter dropdown
-    const tagFilter = document.getElementById('tag-filter');
-    
-    // Clear existing options
-    tagFilter.innerHTML = '';
-    
-    // Add "All Tags" option
-    const allOption = document.createElement('option');
-    allOption.value = '';
-    allOption.textContent = 'All Tags';
-    tagFilter.appendChild(allOption);
-    
-    // Create a Set to collect unique tags
-    const tagsSet = new Set();
-    
-    // Add tags from state.tags
-    state.tags.forEach(tag => tagsSet.add(tag.name));
-    
-    // Add tags from entries that may not be in state.tags
-    state.entries.forEach(entry => {
-        if (entry.tags && Array.isArray(entry.tags)) {
-            entry.tags.forEach(tag => tagsSet.add(tag));
+    try {
+        // Validate required DOM elements exist
+        if (validateElements()) {
+            console.log('All elements validated successfully!');
+            
+            // Load data from localStorage first
+            loadData();
+            
+            // Setup event listeners for user interaction
+            setupEventListeners();
+            
+            // Initialize modals
+            initializeModals();
+            
+            // Setup tag color presets in settings
+            setupTagColorPresets();
+            
+            // Update UI displays
+            updateDateDisplay();
+            updateMonthDisplay();
+            updateTodayInfo();
+            updateTagFilter();
+            
+            // Set theme based on settings
+            applyTheme();
+            
+            // Set accent color based on settings
+            applyAccentColor();
+            
+            // Check for scheduling conflicts
+            console.log('Checking for scheduling conflicts...');
+            const conflicts = detectConflicts();
+            
+            if (conflicts.length > 0) {
+                console.warn(`Found ${conflicts.length} potential conflicts:`);
+                conflicts.forEach(conflict => console.warn(`- ${conflict.message}`));
+                console.log('Found', conflicts.length, 'conflicts in the data. Check console for details.');
+                
+                // Count specific conflicts related to duplicate dates
+                const duplicateDateConflicts = conflicts.filter(conflict => 
+                    conflict.type === 'duplicate_date'
+                );
+                
+                if (duplicateDateConflicts.length > 0) {
+                    // Ask user if they want to automatically fix duplicate entries
+                    const shouldFix = confirm(`Found ${duplicateDateConflicts.length} dates with multiple entries. Would you like to automatically resolve these issues by keeping only the most complete entry for each date?`);
+                    
+                    if (shouldFix) {
+                        // Resolve duplicate entries
+                        console.log('Checking for duplicate entries...');
+                        resolveEntryDuplicates();
+                    } else {
+                        // Show notification to user
+                        showConflictsNotification(conflicts);
+                    }
+                } else {
+                    // Show notification for other types of conflicts
+                    showConflictsNotification(conflicts);
+                }
+            }
+            
+            // Render entries
+            console.log('Rendering entries...');
+            renderEntries();
+            
+            // Update statistics
+            updateStatistics();
+            
+            // Scroll to today's entry if it exists
+            setTimeout(scrollToToday, 100);
+            
+            console.log('✅ Sleep Tracker initialized successfully');
         }
-    });
-    
-    // Convert Set to Array and sort alphabetically
-    const uniqueTags = Array.from(tagsSet).sort();
-    
-    // Create an option for each tag
-    uniqueTags.forEach(tag => {
-        const option = document.createElement('option');
-        option.value = tag;
-        option.textContent = tag;
-        tagFilter.appendChild(option);
-    });
-}
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        alert('There was an error initializing the Sleep Tracker. Please check the console for details.');
+    }
+});
 
 // Function to load data from localStorage
 function loadData() {
@@ -871,176 +719,55 @@ function saveData() {
     localStorage.setItem('sleepSettings', JSON.stringify(state.settings));
 }
 
-// Task functions
-function addTask() {
-    const taskText = elements.newTask.value.trim();
-    if (!taskText) return;
-    
-    // Create new task
-    const newTask = {
-        id: Date.now().toString(),
-        text: taskText,
-        completed: false
-    };
-    
-    // Add task to current tasks
-    state.currentTasks.push(newTask);
-    
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-    
-    // If we're editing today's entry, update the tasks in state.tasks
-    const entryDate = elements.entryDate.value;
-    if (entryDate === todayString) {
-        if (!state.tasks[todayString]) {
-            state.tasks[todayString] = [];
-        }
-        state.tasks[todayString].push(newTask);
-        
-        // Update the sidebar immediately
-        updateTodayInfo();
-    }
-    
-    // Clear input
-    elements.newTask.value = '';
-    
-    // Render tasks in modal
-    renderTasks();
-    
-    // Save data to ensure persistence
-    saveData();
-}
-
-function renderTasks() {
-    if (!elements.tasksList) return;
-    
-    elements.tasksList.innerHTML = '';
-    
-    state.currentTasks.forEach(task => {
-        const taskItem = document.createElement('div');
-        taskItem.classList.add('task-item');
-        
-        const taskText = document.createElement('span');
-        taskText.classList.add('task-text');
-        taskText.textContent = task.text;
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.classList.add('delete-task-btn');
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.addEventListener('click', () => {
-            state.currentTasks = state.currentTasks.filter(t => t.id !== task.id);
-            renderTasks();
-        });
-        
-        taskItem.appendChild(taskText);
-        taskItem.appendChild(deleteBtn);
-        
-        elements.tasksList.appendChild(taskItem);
-    });
-}
-
-function updateDateDisplay() {
-    const today = new Date();
-    
-    // Format current date
-    const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
-    elements.currentDate.textContent = today.toLocaleDateString('en-US', options);
-    
-    // Calculate days since reference date
-    const referenceDate = new Date(state.settings.referenceDate);
-    const daysDiff = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
-    const monthsDiff = (today.getFullYear() - referenceDate.getFullYear()) * 12 + 
-                      (today.getMonth() - referenceDate.getMonth()) + 
-                      (today.getDate() >= referenceDate.getDate() ? 0 : -1);
-    const monthsDecimal = monthsDiff + (today.getDate() / 30);
-    
-    elements.daysCount.textContent = `${daysDiff} days since ${referenceDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}, ${monthsDecimal.toFixed(1)} months`;
-}
-
-function updateMonthDisplay() {
-    const options = { month: 'long', year: 'numeric' };
-    elements.currentMonth.textContent = state.currentMonth.toLocaleDateString('en-US', options);
-}
-
-function navigateToPreviousMonth() {
-    state.currentMonth.setMonth(state.currentMonth.getMonth() - 1);
-    updateMonthDisplay();
-    renderEntries();
-    
-    // Auto-fill empty entries for the whole month
-    autoFillEmptyEntries();
-}
-
-function navigateToNextMonth() {
-    state.currentMonth.setMonth(state.currentMonth.getMonth() + 1);
-    updateMonthDisplay();
-    renderEntries();
-    
-    // Auto-fill empty entries for the whole month
-    autoFillEmptyEntries();
-}
-
-function autoFillEmptyEntries() {
-    const currentYear = state.currentMonth.getFullYear();
-    const currentMonth = state.currentMonth.getMonth();
-    
-    // Get days in month
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    
-    // Check if each day has an entry
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(currentYear, currentMonth, day);
-        const dateString = date.toISOString().split('T')[0];
-        
-        // Check if entry exists
-        const entryExists = state.entries.some(entry => entry.date === dateString);
-        
-        // If not, create an empty entry
-        if (!entryExists) {
-            const emptyEntry = {
-                id: `empty-${dateString}-${Math.random().toString(36).substr(2, 9)}`,
-                date: dateString,
-                isEmpty: true,
-                tags: []
-            };
-            
-            state.entries.push(emptyEntry);
-        }
-    }
-    
-    // Save and re-render
-    saveData();
-    renderEntries();
-}
-
+// Set up all event listeners
 function setupEventListeners() {
     // Add Entry button
-    elements.addEntryBtn.addEventListener('click', () => {
-        console.log('Add entry button clicked');
-        showAddEntryModal();
-    });
+    if (elements.addEntryBtn) {
+        elements.addEntryBtn.addEventListener('click', () => {
+            console.log('Add entry button clicked');
+            showAddEntryModal();
+        });
+    }
     
     // Add task standalone button
-    elements.addTaskStandaloneBtn.addEventListener('click', () => {
-        console.log('Add task standalone button clicked');
-        showAddTaskModal();
-    });
+    if (elements.addTaskStandaloneBtn) {
+        elements.addTaskStandaloneBtn.addEventListener('click', () => {
+            console.log('Add task standalone button clicked');
+            showAddTaskModal();
+        });
+    }
     
     // Settings button
-    elements.settingsBtn.addEventListener('click', showSettingsModal);
+    if (elements.settingsBtn) {
+        elements.settingsBtn.addEventListener('click', showSettingsModal);
+    }
     
     // Entry form submit
-    elements.entryForm.addEventListener('submit', saveEntry);
+    if (elements.entryForm) {
+        elements.entryForm.addEventListener('submit', saveEntry);
+    }
     
     // Search and filter
-    elements.searchInput.addEventListener('input', filterEntries);
-    elements.tagFilter.addEventListener('change', filterEntries);
-    elements.sortBy.addEventListener('change', sortEntries);
+    if (elements.searchInput) {
+        elements.searchInput.addEventListener('input', filterEntries);
+    }
+    
+    if (elements.tagFilter) {
+        elements.tagFilter.addEventListener('change', filterEntries);
+    }
+    
+    if (elements.sortBy) {
+        elements.sortBy.addEventListener('change', sortEntries);
+    }
     
     // Month navigation
-    elements.prevMonth.addEventListener('click', navigateToPreviousMonth);
-    elements.nextMonth.addEventListener('click', navigateToNextMonth);
+    if (elements.prevMonth) {
+        elements.prevMonth.addEventListener('click', navigateToPreviousMonth);
+    }
+    
+    if (elements.nextMonth) {
+        elements.nextMonth.addEventListener('click', navigateToNextMonth);
+    }
     
     // Modal close buttons
     document.querySelectorAll('.close-btn').forEach(btn => {
@@ -1050,663 +777,1340 @@ function setupEventListeners() {
     });
     
     // Cancel buttons in modals
-    elements.cancelBtn.addEventListener('click', function() {
-        elements.entryModal.classList.remove('visible');
-    });
+    if (elements.cancelBtn) {
+        elements.cancelBtn.addEventListener('click', function() {
+            elements.entryModal.classList.remove('visible');
+        });
+    }
     
-    elements.settingsCancelBtn.addEventListener('click', function() {
-        elements.settingsModal.classList.remove('visible');
-    });
+    if (elements.settingsCancelBtn) {
+        elements.settingsCancelBtn.addEventListener('click', function() {
+            elements.settingsModal.classList.remove('visible');
+        });
+    }
     
     // Add task button in modal
-    elements.addTaskBtn.addEventListener('click', addTask);
+    if (elements.addTaskBtn) {
+        elements.addTaskBtn.addEventListener('click', addTask);
+    }
     
     // Settings form submit
-    elements.settingsForm.addEventListener('submit', saveSettings);
+    if (elements.settingsForm) {
+        elements.settingsForm.addEventListener('submit', saveSettings);
+    }
     
     // Add tag button in settings
-    elements.addTagBtn.addEventListener('click', addNewTag);
+    if (elements.addTagBtn) {
+        elements.addTagBtn.addEventListener('click', addNewTag);
+    }
     
     // Theme selector
-    elements.themeSelector.addEventListener('change', function() {
-        state.settings.theme = this.value;
-        applyTheme();
-        saveData();
-    });
+    if (elements.themeSelector) {
+        elements.themeSelector.addEventListener('change', function() {
+            state.settings.theme = this.value;
+            applyTheme();
+            saveData();
+        });
+    }
     
     // Preview edit button
-    elements.previewEditBtn.addEventListener('click', function() {
-        const entryId = this.getAttribute('data-entry-id');
-        elements.entryPreviewModal.classList.remove('visible');
-        showEditEntryModal(entryId);
-    });
+    if (elements.previewEditBtn) {
+        elements.previewEditBtn.addEventListener('click', function() {
+            const entryId = this.getAttribute('data-entry-id');
+            elements.entryPreviewModal.classList.remove('visible');
+            showEditEntryModal(entryId);
+        });
+    }
     
     // Preview close button
-    elements.previewCloseBtn.addEventListener('click', function() {
-        elements.entryPreviewModal.classList.remove('visible');
-    });
-}
-
-function applyTheme() {
-    // Apply theme to document body
-    if (state.settings.theme === 'dark') {
-        document.body.classList.add('dark-theme');
-        document.body.classList.remove('light-theme');
-    } else if (state.settings.theme === 'light') {
-        document.body.classList.add('light-theme');
-        document.body.classList.remove('dark-theme');
-    } else if (state.settings.theme === 'auto') {
-        // Check system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-            document.body.classList.add('dark-theme');
-            document.body.classList.remove('light-theme');
-        } else {
-            document.body.classList.add('light-theme');
-            document.body.classList.remove('dark-theme');
-        }
-    }
-}
-
-function applyAccentColor() {
-    // Apply accent color to document body
-    document.body.setAttribute('data-accent', state.settings.accentColor);
-}
-
-function updateTodayInfo() {
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
-    
-    // Find today's entry
-    const todayEntry = state.entries.find(entry => entry.date === todayString);
-    
-    // Get today's tasks from state.tasks
-    const todayTasks = state.tasks[todayString] || [];
-    
-    // Display today's tasks in sidebar
-    const todayTasksList = document.getElementById('today-tasks');
-    todayTasksList.innerHTML = '';
-    
-    if (todayTasks.length === 0) {
-        const emptyMessage = document.createElement('li');
-        emptyMessage.classList.add('empty-message');
-        emptyMessage.textContent = 'No tasks for today';
-        todayTasksList.appendChild(emptyMessage);
-    } else {
-        todayTasks.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.textContent = task.text;
-            if (task.completed) {
-                taskItem.classList.add('completed');
-            }
-            todayTasksList.appendChild(taskItem);
+    if (elements.previewCloseBtn) {
+        elements.previewCloseBtn.addEventListener('click', function() {
+            elements.entryPreviewModal.classList.remove('visible');
         });
     }
-    
-    // Update today's tags
-    const todayTagsList = document.getElementById('today-tags-list');
-    todayTagsList.innerHTML = '';
-    
-    if (todayEntry && todayEntry.tags && todayEntry.tags.length > 0) {
-        todayEntry.tags.forEach(tagName => {
-            // Find the tag in state.tags to get its color
-            const tagInfo = state.tags.find(t => t.name === tagName) || { color: '#6366f1', name: tagName };
-            
-            const tagElement = document.createElement('span');
-            tagElement.classList.add('tag');
-            tagElement.textContent = tagInfo.name;
-            tagElement.style.backgroundColor = tagInfo.color;
-            
-            todayTagsList.appendChild(tagElement);
+
+    // Set up the add tag quick button if it exists
+    setupAddTagQuickButton();
+}
+
+// Initialize modal behaviors
+function initializeModals() {
+    // Close button handlers
+    document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.modal').classList.remove('visible');
         });
-    } else {
-        const emptyTag = document.createElement('span');
-        emptyTag.classList.add('tag', 'empty-tag');
-        emptyTag.textContent = 'No tags';
-        todayTagsList.appendChild(emptyTag);
-    }
-}
-
-function updateStatistics() {
-    // Get entries from the last 7 days
-    const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
-    
-    const recentEntries = state.entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate >= sevenDaysAgo && entryDate <= today;
     });
     
-    // Initialize totals
-    let totalSleepMinutes = 0;
-    let totalDeepSleepMinutes = 0;
-    let totalLightSleepMinutes = 0;
-    let totalRemSleepMinutes = 0;
-    let totalWakeUps = 0;
-    let totalSteps = 0;
-    let totalCalories = 0;
-    let totalStandingHours = 0;
-    
-    // Calculate totals
-    recentEntries.forEach(entry => {
-        // Sleep data
-        if (entry.nightSleep) {
-            totalSleepMinutes += (entry.nightSleep.hours * 60) + entry.nightSleep.minutes;
-        }
-        if (entry.deepSleep) {
-            totalDeepSleepMinutes += (entry.deepSleep.hours * 60) + entry.deepSleep.minutes;
-        }
-        if (entry.lightSleep) {
-            totalLightSleepMinutes += (entry.lightSleep.hours * 60) + entry.lightSleep.minutes;
-        }
-        if (entry.remSleep) {
-            totalRemSleepMinutes += (entry.remSleep.hours * 60) + entry.remSleep.minutes;
-        }
-        
-        // Other metrics
-        if (entry.wakeUps) {
-            totalWakeUps += entry.wakeUps;
-        }
-        if (entry.steps) {
-            totalSteps += entry.steps;
-        }
-        if (entry.calories) {
-            totalCalories += entry.calories;
-        }
-        if (entry.standing) {
-            totalStandingHours += entry.standing;
-        }
-    });
-    
-    // Calculate averages, avoiding division by zero
-    const entryCount = recentEntries.length || 1; // Use 1 if no entries to avoid division by zero
-    
-    const avgSleepMinutes = totalSleepMinutes / entryCount;
-    const avgDeepSleepMinutes = totalDeepSleepMinutes / entryCount;
-    const avgLightSleepMinutes = totalLightSleepMinutes / entryCount;
-    const avgRemSleepMinutes = totalRemSleepMinutes / entryCount;
-    const avgWakeUps = totalWakeUps / entryCount;
-    const avgSteps = totalSteps / entryCount;
-    const avgCalories = totalCalories / entryCount;
-    const avgStandingHours = totalStandingHours / entryCount;
-    
-    // Update UI elements
-    // Sleep Duration
-    const avgSleepHours = Math.floor(avgSleepMinutes / 60);
-    const avgSleepRemainingMinutes = Math.round(avgSleepMinutes % 60);
-    document.getElementById('avg-sleep-duration').textContent = `${avgSleepHours}h ${avgSleepRemainingMinutes}m`;
-    
-    // Deep Sleep
-    const avgDeepSleepHours = Math.floor(avgDeepSleepMinutes / 60);
-    const avgDeepSleepRemainingMinutes = Math.round(avgDeepSleepMinutes % 60);
-    document.getElementById('avg-deep-sleep').textContent = `${avgDeepSleepHours}h ${avgDeepSleepRemainingMinutes}m`;
-    
-    // Light Sleep
-    const avgLightSleepHours = Math.floor(avgLightSleepMinutes / 60);
-    const avgLightSleepRemainingMinutes = Math.round(avgLightSleepMinutes % 60);
-    document.getElementById('avg-light-sleep').textContent = `${avgLightSleepHours}h ${avgLightSleepRemainingMinutes}m`;
-    
-    // REM Sleep
-    const avgRemSleepHours = Math.floor(avgRemSleepMinutes / 60);
-    const avgRemSleepRemainingMinutes = Math.round(avgRemSleepMinutes % 60);
-    document.getElementById('avg-rem-sleep').textContent = `${avgRemSleepHours}h ${avgRemSleepRemainingMinutes}m`;
-    
-    // Wake Ups
-    document.getElementById('avg-wakeups').textContent = Math.round(avgWakeUps);
-    
-    // Steps
-    document.getElementById('avg-steps').textContent = Math.round(avgSteps).toLocaleString();
-    
-    // Calories
-    document.getElementById('avg-calories').textContent = Math.round(avgCalories).toLocaleString();
-    
-    // Standing Hours
-    document.getElementById('avg-standing').textContent = Math.round(avgStandingHours);
-}
-
-function renderEntries() {
-    // Clear existing entries
-    elements.sleepData.innerHTML = '';
-    
-    // Filter entries for current month
-    const currentYear = state.currentMonth.getFullYear();
-    const currentMonth = state.currentMonth.getMonth();
-    
-    let filteredEntries = state.entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate.getFullYear() === currentYear && entryDate.getMonth() === currentMonth;
-    });
-    
-    // Sort entries based on selected sort option
-    const sortOption = elements.sortBy.value;
-    
-    switch(sortOption) {
-        case 'date':
-            filteredEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
-            break;
-        case 'sleep':
-            filteredEntries.sort((a, b) => {
-                const aTime = a.nightSleep ? (a.nightSleep.hours || 0) * 60 + (a.nightSleep.minutes || 0) : 0;
-                const bTime = b.nightSleep ? (b.nightSleep.hours || 0) * 60 + (b.nightSleep.minutes || 0) : 0;
-                return bTime - aTime;
-            });
-            break;
-        case 'calories':
-            filteredEntries.sort((a, b) => (b.calories || 0) - (a.calories || 0));
-            break;
-        case 'steps':
-            filteredEntries.sort((a, b) => (b.steps || 0) - (a.steps || 0));
-            break;
-        case 'tags':
-            filteredEntries.sort((a, b) => {
-                const aTags = a.tags ? a.tags.length : 0;
-                const bTags = b.tags ? b.tags.length : 0;
-                return bTags - aTags;
-            });
-            break;
-        default:
-            filteredEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-    
-    // Define the reference date for day calculations
-    const referenceDate = new Date(state.settings.referenceDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Render entries
-    filteredEntries.forEach(entry => {
-        const entryDate = new Date(entry.date);
-        entryDate.setHours(0, 0, 0, 0);
-        const daysDiff = Math.floor((entryDate - referenceDate) / (1000 * 60 * 60 * 24));
-        const daysDiffFromToday = Math.floor((entryDate - today) / (1000 * 60 * 60 * 24));
-        
-        // Create row
-        const row = document.createElement('tr');
-        if (daysDiffFromToday === 0) {
-            row.classList.add('today-row');
-            row.id = 'today-row'; // Add ID for easier targeting
-        }
-        
-        // Cell for day number
-        const dayCell = document.createElement('td');
-        dayCell.classList.add('day-num');
-        dayCell.textContent = daysDiff;
-        row.appendChild(dayCell);
-        
-        // Cell for days from today - new column with color
-        const daysFromTodayCell = document.createElement('td');
-        daysFromTodayCell.classList.add('days-from-today');
-        
-        if (daysDiffFromToday < 0) {
-            daysFromTodayCell.textContent = daysDiffFromToday;
-            daysFromTodayCell.classList.add('days-past');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#FF5733' : '#FF5733';
-            daysFromTodayCell.style.color = 'white';
-        } else if (daysDiffFromToday > 0) {
-            daysFromTodayCell.textContent = `+${daysDiffFromToday}`;
-            daysFromTodayCell.classList.add('days-future');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#2E7D32' : '#2E7D32';
-            daysFromTodayCell.style.color = 'white';
-        } else {
-            daysFromTodayCell.textContent = '0';
-            daysFromTodayCell.classList.add('days-today');
-            daysFromTodayCell.style.backgroundColor = state.settings.theme === 'dark' ? '#4A6BFF' : '#4A6BFF';
-            daysFromTodayCell.style.color = 'white';
-        }
-        row.appendChild(daysFromTodayCell);
-        
-        // Cell for date
-        const dateCell = document.createElement('td');
-        dateCell.classList.add('date-cell');
-        const dayOfWeek = entryDate.toLocaleDateString('en-US', { weekday: 'short' });
-        const formattedDate = entryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        dateCell.innerHTML = `<span class="day-of-week">${dayOfWeek}</span> ${formattedDate}`;
-        row.appendChild(dateCell);
-        
-        // Cell for sleep score
-        const sleepScoreCell = createCell(entry.sleepScore || '', getScoreColor(entry.sleepScore));
-        row.appendChild(sleepScoreCell);
-        
-        // Cell for total sleep (night sleep)
-        const totalSleepCell = createCell(formatTime(entry.nightSleep), getSleepColor(entry.nightSleep));
-        row.appendChild(totalSleepCell);
-        
-        // Cell for deep sleep
-        const deepSleepCell = createCell(formatTime(entry.deepSleep), getDeepSleepColor(entry.deepSleep, entry.nightSleep));
-        row.appendChild(deepSleepCell);
-        
-        // Cell for light sleep
-        const lightSleepCell = createCell(formatTime(entry.lightSleep), getLightSleepColor(entry.lightSleep, entry.nightSleep));
-        row.appendChild(lightSleepCell);
-        
-        // Cell for REM sleep
-        const remSleepCell = createCell(formatTime(entry.remSleep), getRemSleepColor(entry.remSleep));
-        row.appendChild(remSleepCell);
-        
-        // Cell for day nap
-        const dayNapCell = createCell(formatTime(entry.dayNap));
-        row.appendChild(dayNapCell);
-        
-        // Cell for wake ups
-        const wakeUpsCell = createCell(entry.wakeUps || '');
-        row.appendChild(wakeUpsCell);
-        
-        // Cell for cut sleep
-        const cutSleepCell = createCell(entry.cutSleep ? '✓' : '');
-        row.appendChild(cutSleepCell);
-        
-        // Cell for events/notes
-        const eventsCell = document.createElement('td');
-        eventsCell.classList.add('events-cell');
-        
-        if (entry.eventsNotes && entry.eventsNotes.trim()) {
-            // Set the full text as a data attribute
-            eventsCell.setAttribute('data-full-text', entry.eventsNotes.trim());
-            
-            // Set the truncated text as the visible content
-            const truncatedText = entry.eventsNotes.length > 20 ? 
-                entry.eventsNotes.substring(0, 20) + '...' : 
-                entry.eventsNotes;
-            eventsCell.textContent = truncatedText;
-            
-            // Add click handler for entry preview
-            eventsCell.addEventListener('click', () => showEntryPreview(entry.id));
-        } else {
-            eventsCell.textContent = '';
-            if (entry.isEmpty) {
-                eventsCell.classList.add('empty-cell');
+    // Close modal when clicking on the backdrop
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(event) {
+            if (event.target === this) {
+                this.classList.remove('visible');
             }
-            eventsCell.addEventListener('click', () => showAddEntryModal(entryDate));
-        }
-        row.appendChild(eventsCell);
-        
-        // Cell for tasks
-        const tasksCell = document.createElement('td');
-        tasksCell.classList.add('tasks-cell');
-        const entryTasks = state.tasks[entry.date] || [];
-        if (entryTasks.length > 0) {
-            tasksCell.textContent = `${entryTasks.length} task${entryTasks.length > 1 ? 's' : ''}`;
-            tasksCell.title = entryTasks.map(task => task.text).join(', ');
-        } else {
-            tasksCell.textContent = '';
-            if (entry.isEmpty) {
-                tasksCell.classList.add('empty-cell');
-            }
-        }
-        row.appendChild(tasksCell);
-        
-        // Cell for tags
-        const tagsCell = document.createElement('td');
-        tagsCell.classList.add('tags-cell');
-        if (entry.tags && entry.tags.length > 0) {
-            entry.tags.forEach(tagName => {
-                const tagSpan = document.createElement('span');
-                tagSpan.classList.add('table-tag');
-                tagSpan.textContent = tagName;
-                
-                // Find tag color
-                const tag = state.tags.find(t => t.name === tagName);
-                if (tag) {
-                    tagSpan.style.backgroundColor = tag.color;
-                    
-                    // Adjust text color for better contrast
-                    const luminance = getLuminance(tag.color);
-                    if (luminance < 0.5) {
-                        tagSpan.style.color = 'white';
-                    } else {
-                        tagSpan.style.color = 'black';
-                    }
+        });
+    });
+    
+    // Prevent modal content clicks from closing the modal
+    document.querySelectorAll('.modal-content').forEach(content => {
+        content.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    });
+    
+    // ESC key to close modals
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.classList.contains('visible')) {
+                    modal.classList.remove('visible');
                 }
-                
-                tagsCell.appendChild(tagSpan);
             });
-        } else {
-            tagsCell.textContent = '';
-            if (entry.isEmpty) {
-                tagsCell.classList.add('empty-cell');
-            }
         }
-        row.appendChild(tagsCell);
-        
-        // Cell for girlfriend (afro)
-        const gfCell = createCell(entry.afr ? '❤️' : '');
-        row.appendChild(gfCell);
-        
-        // Cell for calories
-        const caloriesCell = createCell(entry.calories || '', getCaloriesColor(entry.calories));
-        row.appendChild(caloriesCell);
-        
-        // Cell for steps
-        const stepsCell = createCell(entry.steps ? entry.steps.toLocaleString() : '', getStepsColor(entry.steps));
-        row.appendChild(stepsCell);
-        
-        // Cell for standing
-        const standingCell = createCell(entry.standing || '', getStandingColor(entry.standing));
-        row.appendChild(standingCell);
-        
-        // Cell for actions
-        const actionsCell = document.createElement('td');
-        actionsCell.classList.add('actions-cell');
-        
-        const editBtn = document.createElement('button');
-        editBtn.classList.add('action-btn', 'edit-btn');
-        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-        editBtn.setAttribute('data-entry-id', entry.id);
-        editBtn.addEventListener('click', () => showEditEntryModal(entry.id));
-        actionsCell.appendChild(editBtn);
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.classList.add('action-btn', 'delete-btn');
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.addEventListener('click', () => deleteEntry(entry.id));
-        actionsCell.appendChild(deleteBtn);
-        
-        row.appendChild(actionsCell);
-        
-        elements.sleepData.appendChild(row);
     });
-    
-    // If no entries, show placeholder
-    if (filteredEntries.length === 0) {
-        const placeholderRow = document.createElement('tr');
-        const placeholderCell = document.createElement('td');
-        placeholderCell.colSpan = 16;
-        placeholderCell.textContent = 'No entries for this month. Click the "Add New Entry" button to add one.';
-        placeholderCell.classList.add('placeholder-cell');
-        placeholderRow.appendChild(placeholderCell);
-        elements.sleepData.appendChild(placeholderRow);
+}
+
+// Add this function to your setupEventListeners function
+function setupAddTagQuickButton() {
+    const addTagQuickBtn = document.getElementById('add-tag-quick-btn');
+    if (addTagQuickBtn) {
+        addTagQuickBtn.addEventListener('click', function() {
+            showSettingsModal();
+            // Focus on the new tag input after modal is visible
+            setTimeout(() => {
+                document.getElementById('new-tag').focus();
+            }, 300);
+        });
     }
 }
 
-function saveEntry(event) {
-    event.preventDefault();
+function setupTagColorPresets() {
+    const presetColors = document.querySelectorAll('.preset-color');
+    const tagColorInput = document.getElementById('tag-color');
     
-    const entryId = elements.entryId.value;
-    const entryDate = elements.entryDate.value;
-    const sleepScore = parseInt(elements.sleepScore.value) || null;
-    
-    // Create or update entry
-    const entry = {
-        id: entryId || `entry-${Date.now()}`,
-        date: entryDate,
-        sleepScore: sleepScore,
-        nightSleep: {
-            hours: parseInt(elements.nightSleepHours.value) || 0,
-            minutes: parseInt(elements.nightSleepMinutes.value) || 0
-        },
-        dayNap: {
-            hours: parseInt(elements.dayNapHours.value) || 0,
-            minutes: parseInt(elements.dayNapMinutes.value) || 0
-        },
-        deepSleep: {
-            hours: parseInt(document.getElementById('deep-sleep-hours').value) || 0,
-            minutes: parseInt(document.getElementById('deep-sleep-minutes').value) || 0
-        },
-        lightSleep: {
-            hours: parseInt(document.getElementById('light-sleep-hours').value) || 0,
-            minutes: parseInt(document.getElementById('light-sleep-minutes').value) || 0
-        },
-        remSleep: {
-            hours: parseInt(document.getElementById('rem-sleep-hours').value) || 0,
-            minutes: parseInt(document.getElementById('rem-sleep-minutes').value) || 0
-        },
-        wakeUps: parseInt(elements.wakeUps.value) || null,
-        cutSleep: elements.cutSleep.checked,
-        eventsNotes: elements.eventsNotes.value,
-        calories: parseInt(elements.calories.value) || null,
-        steps: parseInt(elements.steps.value) || null,
-        weight: parseFloat(document.getElementById('weight').value) || null,
-        standing: parseInt(elements.standing.value) || null,
-        afr: elements.afr.checked,
-        tags: elements.tags.value.split(',').map(tag => tag.trim()).filter(tag => tag)
-    };
-    
-    // Remove isEmpty flag if it exists
-    if (entry.tags.length > 0 || state.currentTasks.length > 0) {
-        entry.isEmpty = false;
+    if (presetColors.length > 0 && tagColorInput) {
+        presetColors.forEach(preset => {
+            preset.addEventListener('click', function() {
+                const color = this.getAttribute('data-color');
+                tagColorInput.value = color;
+                
+                // Update selected state
+                presetColors.forEach(p => p.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
     }
-    
-    // Update or add entry
-    const existingIndex = state.entries.findIndex(e => e.id === entryId);
-    if (existingIndex >= 0) {
-        state.entries[existingIndex] = { ...state.entries[existingIndex], ...entry };
-    } else {
-        // Remove any existing empty entry for this date before adding the new one
-        state.entries = state.entries.filter(e => e.date !== entry.date);
-        state.entries.push(entry);
-    }
-    
-    // Save tasks for this date
-    if (state.currentTasks.length > 0) {
-        state.tasks[entryDate] = [...state.currentTasks];
-        
-        // If this is today's entry, update the sidebar immediately
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0];
-        if (entryDate === todayString) {
-            updateTodayInfo();
-        }
-    } else {
-        delete state.tasks[entryDate];
-    }
-    
-    // Save data and update UI
-    saveData();
-    renderEntries();
-    updateTodayInfo();
-    updateStatistics();
-    
-    // Close modal
-    elements.entryModal.style.display = 'none';
-}
-
-function deleteEntry(entryId) {
-    if (!confirm('Are you sure you want to delete this entry?')) return;
-    
-    const entry = state.entries.find(e => e.id === entryId);
-    if (!entry) return;
-    
-    // Remove entry
-    state.entries = state.entries.filter(e => e.id !== entryId);
-    
-    // Remove associated tasks
-    delete state.tasks[entry.date];
-    
-    // Save data and update UI
-    saveData();
-    renderEntries();
-    updateTodayInfo();
-    updateStatistics();
-}
-
-function saveSettings(event) {
-    event.preventDefault();
-    
-    // Update settings
-    state.settings.referenceDate = document.getElementById('reference-date').value;
-    state.settings.caloriesGoal = parseInt(document.getElementById('calories-goal').value);
-    state.settings.stepsGoal = parseInt(document.getElementById('steps-goal').value);
-    
-    // Save data and update UI
-    saveData();
-    renderEntries();
-    updateDateDisplay();
-    
-    // Close modal
-    elements.settingsModal.style.display = 'none';
-}
-
-function addNewTag() {
-    const tagName = document.getElementById('new-tag').value.trim();
-    const tagColor = document.getElementById('tag-color').value;
-    
-    if (!tagName) return;
-    
-    // Add new tag
-    state.tags.push({
-        id: Date.now().toString(),
-        name: tagName,
-        color: tagColor
-    });
-    
-    // Update tag filter
-    updateTagFilter();
-    
-    // Clear input
-    document.getElementById('new-tag').value = '';
-    
-    // Save data
-    saveData();
 }
 
 function filterEntries() {
     const searchTerm = elements.searchInput.value.toLowerCase();
     const selectedTag = elements.tagFilter.value;
     
-    const filteredEntries = state.entries.filter(entry => {
-        // Check if entry matches search term
-        const matchesSearch = entry.date.includes(searchTerm) || 
+    // Create a filtered copy of entries
+    let filteredEntries = state.entries.filter(entry => {
+        // For search term, check both the date and notes
+        const matchesSearchTerm = searchTerm === '' || 
+            (entry.date && entry.date.toLowerCase().includes(searchTerm)) ||
             (entry.eventsNotes && entry.eventsNotes.toLowerCase().includes(searchTerm));
         
-        // Check if entry has the selected tag
-        const matchesTag = !selectedTag || 
-            (entry.tags && entry.tags.includes(selectedTag));
+        // For tags, check if the entry contains the selected tag
+        const matchesTag = selectedTag === '' || 
+            (Array.isArray(entry.tags) && entry.tags.includes(selectedTag));
         
-        // Return true if both conditions are met
-        return matchesSearch && matchesTag;
+        // Entry must match both filters
+        return matchesSearchTerm && matchesTag;
     });
     
+    // Apply sorting
+    sortEntries(filteredEntries);
+    
+    // Update the display
     renderEntries(filteredEntries);
-}
-
-function sortEntries() {
-    renderEntries();
-}
-
-// Function to show add task modal for today
-function showAddTaskModal() {
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0];
     
-    // Check if we already have an entry for today
-    const todayEntry = state.entries.find(entry => entry.date === todayString);
-    
-    if (todayEntry) {
-        // If today's entry exists, show edit modal with focus on tasks
-        showEditEntryModal(todayEntry.id);
-        
-        // Focus on task input after modal is fully visible
-        setTimeout(() => {
-            elements.newTask.focus();
-        }, 300);
-    } else {
-        // If no entry exists for today, create a new one
-        showAddEntryModal(todayString);
-        
-        // Focus on task input after modal is fully visible
-        setTimeout(() => {
-            elements.newTask.focus();
-        }, 300);
+    // If there's a search term, highlight it
+    if (searchTerm) {
+        highlightSearchTerms(searchTerm);
     }
+    
+    // Update the count
+    const countMsg = `Showing ${filteredEntries.length} of ${state.entries.length} entries`;
+    console.log(countMsg);
+}
+
+function highlightSearchTerms(searchTerm) {
+    // Only highlight text in notes cells and task cells
+    const noteCells = document.querySelectorAll('.events-cell');
+    const taskElements = document.querySelectorAll('.task-item-in-cell');
+    
+    // Function to highlight matches in a text node
+    function highlightMatches(node, term) {
+        const content = node.textContent;
+        const pattern = new RegExp(`(${term})`, 'gi');
+        const highlightedContent = content.replace(pattern, '<span class="highlight">$1</span>');
+        node.innerHTML = highlightedContent;
+    }
+    
+    // Highlight in note cells
+    noteCells.forEach(cell => {
+        if (cell.textContent.toLowerCase().includes(searchTerm)) {
+            highlightMatches(cell, searchTerm);
+        }
+    });
+    
+    // Highlight in task items
+    taskElements.forEach(task => {
+        if (task.textContent.toLowerCase().includes(searchTerm)) {
+            highlightMatches(task, searchTerm);
+        }
+    });
+}
+
+function sortEntries(entries = state.entries) {
+    const sortMethod = elements.sortBy.value;
+    
+    entries.sort((a, b) => {
+        switch (sortMethod) {
+            case 'date':
+                return new Date(b.date) - new Date(a.date); // Newest first
+                
+            case 'sleep':
+                const aSleep = a.nightSleep ? a.nightSleep.hours * 60 + a.nightSleep.minutes : 0;
+                const bSleep = b.nightSleep ? b.nightSleep.hours * 60 + b.nightSleep.minutes : 0;
+                return bSleep - aSleep; // More sleep first
+                
+            case 'calories':
+                const aCalories = a.calories || 0;
+                const bCalories = b.calories || 0;
+                return bCalories - aCalories; // More calories first
+                
+            case 'steps':
+                const aSteps = a.steps || 0;
+                const bSteps = b.steps || 0;
+                return bSteps - aSteps; // More steps first
+                
+            case 'tags':
+                const aTagCount = a.tags ? a.tags.length : 0;
+                const bTagCount = b.tags ? b.tags.length : 0;
+                return bTagCount - aTagCount; // More tags first
+                
+            default:
+                return new Date(b.date) - new Date(a.date); // Default to date
+        }
+    });
+    
+    return entries;
+}
+
+// Function to save entry data from the form
+function saveEntry(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const entryId = elements.entryId.value;
+    const entryDate = elements.entryDate.value;
+    const sleepScore = elements.sleepScore.value ? parseInt(elements.sleepScore.value) : null;
+    
+    // Check for duplicate date when adding a new entry
+    if (!entryId) {
+        const existingEntry = state.entries.find(entry => entry.date === entryDate);
+        if (existingEntry) {
+            // Show confirmation dialog
+            if (!confirm(`An entry already exists for ${formatDate(new Date(entryDate))}. Do you want to edit that entry instead?`)) {
+                return; // User canceled, don't save
+            } else {
+                // User wants to edit the existing entry instead
+                showEditEntryModal(existingEntry.id);
+                return;
+            }
+        }
+    }
+    
+    // Collect sleep times
+    const nightSleep = {
+        hours: elements.nightSleepHours.value ? parseInt(elements.nightSleepHours.value) : 0,
+        minutes: elements.nightSleepMinutes.value ? parseInt(elements.nightSleepMinutes.value) : 0
+    };
+    
+    const dayNap = {
+        hours: elements.dayNapHours.value ? parseInt(elements.dayNapHours.value) : 0,
+        minutes: elements.dayNapMinutes.value ? parseInt(elements.dayNapMinutes.value) : 0
+    };
+    
+    const deepSleep = {
+        hours: elements.deepSleepHours.value ? parseInt(elements.deepSleepHours.value) : 0,
+        minutes: elements.deepSleepMinutes.value ? parseInt(elements.deepSleepMinutes.value) : 0
+    };
+    
+    const lightSleep = {
+        hours: elements.lightSleepHours.value ? parseInt(elements.lightSleepHours.value) : 0,
+        minutes: elements.lightSleepMinutes.value ? parseInt(elements.lightSleepMinutes.value) : 0
+    };
+    
+    const remSleep = {
+        hours: elements.remSleepHours.value ? parseInt(elements.remSleepHours.value) : 0,
+        minutes: elements.remSleepMinutes.value ? parseInt(elements.remSleepMinutes.value) : 0
+    };
+    
+    // Get health indicators
+    const cutSleep = elements.cutSleep.checked;
+    const seizure = elements.seizure.checked;
+    const shake = elements.shake.checked;
+    const afr = elements.afr.checked;
+    
+    // Get notes and tasks
+    const eventsNotes = elements.eventsNotes.value;
+    const tasks = state.currentTasks || [];
+    
+    // Get tags
+    const tagsInput = elements.tags.value;
+    const customTags = tagsInput.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+    
+    // Get selected tags from interface
+    const selectedTags = Array.from(document.querySelectorAll('#available-tags .tag.selected'))
+        .map(tagElement => tagElement.textContent.trim());
+    
+    // Combine both tag sources
+    const allTags = [...new Set([...selectedTags, ...customTags])];
+    
+    // Get activity metrics
+    const calories = elements.calories.value ? parseInt(elements.calories.value) : null;
+    const steps = elements.steps.value ? parseInt(elements.steps.value) : null;
+    const weight = elements.weight.value ? parseFloat(elements.weight.value) : null;
+    const standing = elements.standing.value ? parseInt(elements.standing.value) : null;
+    
+    // Create entry object
+    const entry = {
+        id: entryId || `entry_${Date.now()}`,
+        date: entryDate,
+        sleepScore,
+        nightSleep,
+        dayNap,
+        deepSleep,
+        lightSleep,
+        remSleep,
+        wakeUps: elements.wakeUps.value ? parseInt(elements.wakeUps.value) : 0,
+        cutSleep,
+        seizure,
+        shake,
+        afr,
+        eventsNotes,
+        tasks,
+        tags: allTags,
+        calories,
+        steps,
+        weight,
+        standing
+    };
+    
+    // Update or add entry
+    if (entryId) {
+        // Update existing entry
+        const index = state.entries.findIndex(e => e.id === entryId);
+        if (index !== -1) {
+            state.entries[index] = entry;
+        }
+    } else {
+        // Add new entry
+        state.entries.push(entry);
+    }
+    
+    // Save and update UI
+    saveData();
+    renderEntries();
+    updateTodayInfo();
+    updateStatistics();
+    
+    // Close modal
+    elements.entryModal.classList.remove('visible');
+}
+
+// Function to save settings
+function saveSettings(e) {
+    e.preventDefault();
+    
+    // Get settings from form
+    const referenceDate = elements.referenceDate.value;
+    const caloriesGoal = elements.caloriesGoal.value ? parseInt(elements.caloriesGoal.value) : 2500;
+    const stepsGoal = elements.stepsGoal.value ? parseInt(elements.stepsGoal.value) : 10000;
+    
+    // Get sleep thresholds
+    const sleepThresholds = {
+        red: {
+            hours: elements.sleepRedHours.value ? parseInt(elements.sleepRedHours.value) : 6,
+            minutes: elements.sleepRedMinutes.value ? parseInt(elements.sleepRedMinutes.value) : 20
+        },
+        yellow: {
+            hours: elements.sleepYellowHours.value ? parseInt(elements.sleepYellowHours.value) : 7,
+            minutes: elements.sleepYellowMinutes.value ? parseInt(elements.sleepYellowMinutes.value) : 0
+        },
+        darkGreen: {
+            hours: elements.sleepDarkGreenHours.value ? parseInt(elements.sleepDarkGreenHours.value) : 8,
+            minutes: elements.sleepDarkGreenMinutes.value ? parseInt(elements.sleepDarkGreenMinutes.value) : 30
+        }
+    };
+    
+    // Get deep sleep minimum
+    const deepSleepMin = {
+        hours: elements.deepMinHours.value ? parseInt(elements.deepMinHours.value) : 1,
+        minutes: elements.deepMinMinutes.value ? parseInt(elements.deepMinMinutes.value) : 30
+    };
+    
+    // Get light sleep range
+    const lightSleepRange = {
+        min: {
+            hours: elements.lightMinHours.value ? parseInt(elements.lightMinHours.value) : 3,
+            minutes: elements.lightMinMinutes.value ? parseInt(elements.lightMinMinutes.value) : 0
+        },
+        max: {
+            hours: elements.lightMaxHours.value ? parseInt(elements.lightMaxHours.value) : 5,
+            minutes: elements.lightMaxMinutes.value ? parseInt(elements.lightMaxMinutes.value) : 0
+        }
+    };
+    
+    // Get REM thresholds
+    const remThresholds = {
+        red: {
+            hours: elements.remRedHours.value ? parseInt(elements.remRedHours.value) : 0,
+            minutes: elements.remRedMinutes.value ? parseInt(elements.remRedMinutes.value) : 50
+        },
+        yellow: {
+            hours: elements.remYellowHours.value ? parseInt(elements.remYellowHours.value) : 1,
+            minutes: elements.remYellowMinutes.value ? parseInt(elements.remYellowMinutes.value) : 2
+        }
+    };
+    
+    // Get theme settings
+    const theme = elements.themeSelector.value;
+    
+    // Get accent color
+    let accentColor = 'blue';
+    document.querySelectorAll('.color-option').forEach(option => {
+        if (option.classList.contains('selected')) {
+            accentColor = option.dataset.color;
+        }
+    });
+    
+    // Preserve any existing settings that we're not updating
+    const currentSettings = { ...state.settings };
+    
+    // Update settings
+    state.settings = {
+        ...currentSettings,
+        referenceDate,
+        caloriesGoal,
+        stepsGoal,
+        sleepThresholds,
+        deepSleepMin,
+        lightSleepRange,
+        remThresholds,
+        theme,
+        accentColor
+    };
+    
+    // Save settings and update UI
+    saveData();
+    updateDateDisplay();
+    updateDaysCount();
+    applyTheme();
+    applyAccentColor();
+    
+    // Close modal
+    elements.settingsModal.classList.remove('visible');
+}
+
+// Function to render all entries to the table
+function renderEntries() {
+    console.log('Rendering entries...');
+    const tbody = elements.sleepData;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Clear the table
+    tbody.innerHTML = '';
+    
+    // Filter entries based on current month and filters
+    let entriesToShow = state.entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate.getMonth() === state.currentMonth.getMonth() && 
+               entryDate.getFullYear() === state.currentMonth.getFullYear();
+    });
+    
+    // Sort entries by date (newest first by default)
+    entriesToShow.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+    
+    // If there are no entries for the current month, show placeholder
+    if (entriesToShow.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 21;
+        td.textContent = 'No entries for this month. Add a new entry to get started.';
+        td.style.textAlign = 'center';
+        td.style.padding = '2rem';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+    
+    // Render each entry
+    entriesToShow.forEach((entry, index) => {
+        const entryDate = new Date(entry.date);
+        const isToday = entryDate.toDateString() === today.toDateString();
+        
+        const tr = document.createElement('tr');
+        if (isToday) {
+            tr.classList.add('today-row');
+        }
+        
+        // Calculate week offset for visual indication
+        const diffTime = Math.abs(today - entryDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffWeeks = Math.floor(diffDays / 7);
+        
+        if (entryDate < today && diffWeeks <= 4) {
+            tr.classList.add(`week-${diffWeeks}-past`);
+        } else if (entryDate > today && diffWeeks <= 4) {
+            tr.classList.add(`week-${diffWeeks}-future`);
+        }
+        
+        // Day number (calculating from the first entry)
+        const dayCell = createCell(index + 1);
+        tr.appendChild(dayCell);
+        
+        // Offset days (calculating from the reference date)
+        const referenceDate = new Date(state.settings.referenceDate);
+        const offsetDays = Math.floor((entryDate - referenceDate) / (1000 * 60 * 60 * 24));
+        const offsetCell = createCell(offsetDays >= 0 ? `+${offsetDays}` : offsetDays);
+        tr.appendChild(offsetCell);
+        
+        // Date
+        const dateDisplay = formatDate(entryDate);
+        const dateCell = createCell(dateDisplay);
+        tr.appendChild(dateCell);
+        
+        // Sleep Score
+        const scoreColor = getScoreColor(entry.sleepScore);
+        const scoreCell = createCell(entry.sleepScore || '-', 'score', scoreColor);
+        tr.appendChild(scoreCell);
+        
+        // Total Sleep Duration
+        let totalSleepMinutes = 0;
+        if (entry.nightSleep) {
+            totalSleepMinutes += (entry.nightSleep.hours || 0) * 60 + (entry.nightSleep.minutes || 0);
+        }
+        
+        const totalSleepDisplay = formatTimeCompact(
+            Math.floor(totalSleepMinutes / 60),
+            totalSleepMinutes % 60
+        );
+        
+        const totalSleepColor = getSleepColor({ 
+            hours: Math.floor(totalSleepMinutes / 60), 
+            minutes: totalSleepMinutes % 60 
+        });
+        
+        const totalSleepCell = createCell(totalSleepDisplay, 'sleep', totalSleepColor);
+        tr.appendChild(totalSleepCell);
+        
+        // Deep Sleep
+        const deepSleepDisplay = entry.deepSleep ? 
+            formatTimeCompact(entry.deepSleep.hours || 0, entry.deepSleep.minutes || 0) : '-';
+        
+        const deepSleepColor = getDeepSleepColor(
+            entry.deepSleep,
+            { hours: Math.floor(totalSleepMinutes / 60), minutes: totalSleepMinutes % 60 }
+        );
+        
+        const deepSleepCell = createCell(deepSleepDisplay, 'sleep', deepSleepColor);
+        tr.appendChild(deepSleepCell);
+        
+        // Light Sleep
+        const lightSleepDisplay = entry.lightSleep ? 
+            formatTimeCompact(entry.lightSleep.hours || 0, entry.lightSleep.minutes || 0) : '-';
+        
+        const lightSleepColor = getLightSleepColor(
+            entry.lightSleep,
+            { hours: Math.floor(totalSleepMinutes / 60), minutes: totalSleepMinutes % 60 }
+        );
+        
+        const lightSleepCell = createCell(lightSleepDisplay, 'sleep', lightSleepColor);
+        tr.appendChild(lightSleepCell);
+        
+        // REM Sleep
+        const remSleepDisplay = entry.remSleep ? 
+            formatTimeCompact(entry.remSleep.hours || 0, entry.remSleep.minutes || 0) : '-';
+        
+        const remSleepColor = getRemSleepColor(entry.remSleep);
+        
+        const remSleepCell = createCell(remSleepDisplay, 'sleep', remSleepColor);
+        tr.appendChild(remSleepCell);
+        
+        // Day Nap
+        const napDisplay = entry.dayNap ? 
+            formatTimeCompact(entry.dayNap.hours || 0, entry.dayNap.minutes || 0) : '-';
+        
+        const napCell = createCell(napDisplay, 'sleep');
+        tr.appendChild(napCell);
+        
+        // Wake Ups
+        const wakeUpsCell = createCell(entry.wakeUps || '-');
+        tr.appendChild(wakeUpsCell);
+        
+        // Cut Sleep (checkbox)
+        const cutSleepCell = createCell(entry.cutSleep ? '✓' : '-', 'indicator', entry.cutSleep ? 'red' : null);
+        tr.appendChild(cutSleepCell);
+        
+        // GF (Afrodite) checkbox
+        const afrCell = createCell(entry.afr ? '✓' : '-', 'indicator', entry.afr ? 'pink' : null);
+        tr.appendChild(afrCell);
+        
+        // Shake checkbox
+        const shakeCell = createCell(entry.shake ? '✓' : '-', 'indicator', entry.shake ? 'orange' : null);
+        tr.appendChild(shakeCell);
+        
+        // Seizure checkbox
+        const seizureCell = createCell(entry.seizure ? '✓' : '-', 'indicator', entry.seizure ? 'red' : null);
+        tr.appendChild(seizureCell);
+        
+        // Events/Notes
+        const eventsCell = document.createElement('td');
+        eventsCell.classList.add('events-cell');
+        if (entry.eventsNotes) {
+            eventsCell.textContent = entry.eventsNotes;
+            if (entry.eventsNotes.length > 100) {
+                eventsCell.classList.add('truncated');
+                eventsCell.title = entry.eventsNotes;
+            }
+        } else {
+            eventsCell.textContent = '-';
+            eventsCell.classList.add('empty-cell');
+        }
+        tr.appendChild(eventsCell);
+        
+        // Tasks
+        const tasksCell = document.createElement('td');
+        tasksCell.classList.add('tasks-cell');
+        
+        if (entry.tasks && entry.tasks.length > 0) {
+            const taskList = document.createElement('ul');
+            taskList.classList.add('task-list-in-cell');
+            
+            entry.tasks.forEach(task => {
+                const taskItem = document.createElement('li');
+                taskItem.classList.add('task-item-in-cell');
+                if (task.completed) {
+                    taskItem.classList.add('completed');
+                }
+                taskItem.textContent = task.text;
+                taskList.appendChild(taskItem);
+            });
+            
+            tasksCell.appendChild(taskList);
+        } else {
+            tasksCell.textContent = '-';
+            tasksCell.classList.add('empty-cell');
+        }
+        tr.appendChild(tasksCell);
+        
+        // Tags
+        const tagsCell = document.createElement('td');
+        
+        if (entry.tags && entry.tags.length > 0) {
+            const tagsContainer = document.createElement('div');
+            tagsContainer.classList.add('tags-container');
+            
+            entry.tags.forEach(tagName => {
+                const tagObj = state.tags.find(t => t.name === tagName);
+                const tagColor = tagObj ? tagObj.color : '#6366f1';
+                
+                const tag = document.createElement('span');
+                tag.classList.add('tag');
+                tag.textContent = tagName;
+                tag.style.backgroundColor = tagColor;
+                
+                // Ensure contrast by checking color luminance
+                if (getLuminance(tagColor) > 0.5) {
+                    tag.style.color = '#000';
+                }
+                
+                tagsContainer.appendChild(tag);
+            });
+            
+            tagsCell.appendChild(tagsContainer);
+        } else {
+            tagsCell.textContent = '-';
+            tagsCell.classList.add('empty-cell');
+        }
+        tr.appendChild(tagsCell);
+        
+        // Calories
+        const caloriesCell = createCell(
+            entry.calories || '-', 
+            'metric', 
+            entry.calories ? getCaloriesColor(entry.calories) : null
+        );
+        tr.appendChild(caloriesCell);
+        
+        // Steps
+        const stepsCell = createCell(
+            entry.steps || '-', 
+            'metric', 
+            entry.steps ? getStepsColor(entry.steps) : null
+        );
+        tr.appendChild(stepsCell);
+        
+        // Standing Hours
+        const standingCell = createCell(
+            entry.standing || '-', 
+            'metric', 
+            entry.standing ? getStandingColor(entry.standing) : null
+        );
+        tr.appendChild(standingCell);
+        
+        // Actions
+        const actionsCell = document.createElement('td');
+        actionsCell.classList.add('actions-cell');
+        
+        // View button
+        const viewButton = document.createElement('button');
+        viewButton.classList.add('view-btn');
+        viewButton.innerHTML = '<i class="fas fa-search"></i>';
+        viewButton.title = 'View Details';
+        viewButton.setAttribute('aria-label', 'View Details');
+        viewButton.addEventListener('click', () => showEntryPreview(entry.id));
+        actionsCell.appendChild(viewButton);
+        
+        // Edit button
+        const editButton = document.createElement('button');
+        editButton.classList.add('edit-btn');
+        editButton.innerHTML = '<i class="fas fa-pen"></i>';
+        editButton.title = 'Edit Entry';
+        editButton.setAttribute('aria-label', 'Edit Entry');
+        editButton.addEventListener('click', () => showEditEntryModal(entry.id));
+        actionsCell.appendChild(editButton);
+        
+        // Delete button
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete-btn');
+        deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteButton.title = 'Delete Entry';
+        deleteButton.setAttribute('aria-label', 'Delete Entry');
+        deleteButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                deleteEntry(entry.id);
+            }
+        });
+        actionsCell.appendChild(deleteButton);
+        
+        tr.appendChild(actionsCell);
+        
+        // Add row to table
+        tbody.appendChild(tr);
+    });
+    
+    // Apply any active search filters
+    if (elements.searchInput.value) {
+        highlightSearchTerms(elements.searchInput.value);
+    }
+}
+
+// Function to add a new tag
+function addNewTag() {
+    const tagName = elements.newTag.value.trim().toLowerCase();
+    const tagColor = elements.tagColor.value;
+    
+    if (!tagName) {
+        alert('Please enter a tag name');
+        return;
+    }
+    
+    // Check if tag already exists
+    const existingTag = state.tags.find(tag => tag.name === tagName);
+    if (existingTag) {
+        alert('This tag already exists');
+        return;
+    }
+    
+    // Add new tag
+    const newTag = {
+        id: Date.now(),
+        name: tagName,
+        color: tagColor
+    };
+    
+    state.tags.push(newTag);
+    saveData();
+    
+    // Update tag management UI
+    renderTagsManagement();
+    
+    // Clear input fields
+    elements.newTag.value = '';
+}
+
+// Function to delete an entry
+function deleteEntry(entryId) {
+    state.entries = state.entries.filter(entry => entry.id !== entryId);
+    saveData();
+    renderEntries();
+    updateTodayInfo();
+    updateStatistics();
+}
+
+// Function to render tags in the tag management section
+function renderTagsManagement() {
+    const tagsList = elements.tagsList;
+    tagsList.innerHTML = '';
+    
+    state.tags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.classList.add('managed-tag');
+        
+        const colorPreview = document.createElement('span');
+        colorPreview.classList.add('tag-color-preview');
+        colorPreview.style.backgroundColor = tag.color;
+        tagElement.appendChild(colorPreview);
+        
+        const tagName = document.createElement('span');
+        tagName.classList.add('tag-name');
+        tagName.textContent = tag.name;
+        tagElement.appendChild(tagName);
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('tag-delete-btn');
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.addEventListener('click', () => {
+            deleteTag(tag.id);
+        });
+        tagElement.appendChild(deleteBtn);
+        
+        tagsList.appendChild(tagElement);
+    });
+    
+    // Update the tag filter dropdown
+    updateTagFilter();
+}
+
+// Function to delete a tag
+function deleteTag(tagId) {
+    if (confirm('Are you sure you want to delete this tag? It will be removed from all entries.')) {
+        state.tags = state.tags.filter(tag => tag.id !== tagId);
+        
+        // Remove this tag from all entries
+        state.entries.forEach(entry => {
+            if (entry.tags) {
+                const tagToRemove = state.tags.find(t => t.id === tagId);
+                if (tagToRemove) {
+                    entry.tags = entry.tags.filter(t => t !== tagToRemove.name);
+                }
+            }
+        });
+        
+        saveData();
+        renderTagsManagement();
+        renderEntries();
+        updateTodayInfo();
+    }
+}
+
+// Function to render available tags in the settings modal
+function renderTagsList() {
+    const availableTags = document.querySelector('#available-tags');
+    if (!availableTags) return;
+    
+    // Clear current tags
+    availableTags.innerHTML = '';
+    
+    // Render each tag as a selectable element
+    state.tags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.classList.add('tag');
+        tagElement.textContent = tag.name;
+        tagElement.style.backgroundColor = tag.color;
+        
+        // Ensure text contrast
+        if (getLuminance(tag.color) > 0.5) {
+            tagElement.style.color = '#000';
+        }
+        
+        // Make the tag selectable
+        tagElement.addEventListener('click', function() {
+            this.classList.toggle('selected');
+        });
+        
+        availableTags.appendChild(tagElement);
+    });
+}
+
+// Debug function to validate DOM elements
+function validateElements() {
+    console.log('Validating DOM elements...');
+    
+    // Initialize any missing elements
+    if (!elements.colorOptions) {
+        elements.colorOptions = document.querySelectorAll('.color-option');
+    }
+    
+    const elementChecks = {
+        'Current Date': elements.currentDate,
+        'Days Count': elements.daysCount,
+        'Today Tasks': elements.todayTasks,
+        'Today Tags List': elements.todayTagsList,
+        'Add Entry Button': elements.addEntryBtn,
+        'Settings Button': elements.settingsBtn,
+        'Sleep Table': elements.sleepTable,
+        'Sleep Data': elements.sleepData,
+        'Entry Modal': elements.entryModal,
+        'Settings Modal': elements.settingsModal,
+        'Entry Form': elements.entryForm,
+        'Settings Form': elements.settingsForm,
+        'Reference Date': elements.referenceDate,
+        'Tag Filter': elements.tagFilter,
+        'Sort By': elements.sortBy,
+        'Search Input': elements.searchInput
+    };
+    
+    let missingElements = [];
+    
+    for (const [name, element] of Object.entries(elementChecks)) {
+        if (!element) {
+            console.error(`Missing required element: ${name}`);
+            missingElements.push(name);
+        }
+    }
+    
+    // Check form elements that might not be critical
+    const formElements = {
+        'Calories Goal': elements.caloriesGoal,
+        'Steps Goal': elements.stepsGoal,
+        'Sleep Red Hours': elements.sleepRedHours,
+        'Sleep Red Minutes': elements.sleepRedMinutes,
+        'Sleep Yellow Hours': elements.sleepYellowHours, 
+        'Sleep Yellow Minutes': elements.sleepYellowMinutes,
+        'Sleep Dark Green Hours': elements.sleepDarkGreenHours,
+        'Sleep Dark Green Minutes': elements.sleepDarkGreenMinutes,
+        'Deep Min Hours': elements.deepMinHours,
+        'Deep Min Minutes': elements.deepMinMinutes,
+        'Light Min Hours': elements.lightMinHours,
+        'Light Min Minutes': elements.lightMinMinutes,
+        'Light Max Hours': elements.lightMaxHours,
+        'Light Max Minutes': elements.lightMaxMinutes,
+        'REM Red Hours': elements.remRedHours,
+        'REM Red Minutes': elements.remRedMinutes,
+        'REM Yellow Hours': elements.remYellowHours,
+        'REM Yellow Minutes': elements.remYellowMinutes,
+        'Theme Selector': elements.themeSelector
+    };
+    
+    let missingFormElements = [];
+    
+    for (const [name, element] of Object.entries(formElements)) {
+        if (!element) {
+            console.warn(`Missing form element: ${name}`);
+            missingFormElements.push(name);
+        }
+    }
+    
+    if (missingElements.length > 0) {
+        console.error(`Found ${missingElements.length} missing critical elements. Application may not function correctly.`);
+        return false;
+    }
+    
+    if (missingFormElements.length > 0) {
+        console.warn(`Found ${missingFormElements.length} missing form elements. Some features may not work properly.`);
+        // Still continue with the application, but some features might be limited
+    }
+    
+    console.log('All elements validated successfully!');
+    return true;
+}
+
+// Call validation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Execute after initialization
+    setTimeout(validateElements, 1000);
+});
+
+// Function to detect scheduling conflicts between entries
+function detectConflicts() {
+    console.log('Checking for scheduling conflicts...');
+    
+    const conflicts = [];
+    
+    // Check for duplicate dates (multiple entries on the same day)
+    const dateMap = {};
+    
+    state.entries.forEach(entry => {
+        if (!entry.date) return;
+        
+        if (dateMap[entry.date]) {
+            dateMap[entry.date].push(entry);
+        } else {
+            dateMap[entry.date] = [entry];
+        }
+    });
+    
+    // Identify dates with multiple entries
+    for (const [date, entries] of Object.entries(dateMap)) {
+        if (entries.length > 1) {
+            conflicts.push({
+                type: 'duplicate_date',
+                date,
+                entries,
+                message: `Multiple entries (${entries.length}) found for date ${formatDate(new Date(date))}`,
+                resolve: () => {
+                    const entriesToShow = entries.map((entry, index) => 
+                        `Entry ${index + 1}: ${entry.eventsNotes ? `"${entry.eventsNotes.substring(0, 30)}${entry.eventsNotes.length > 30 ? '...' : ''}"` : 'No notes'}`
+                    ).join('\n');
+                    
+                    const shouldResolve = confirm(`${entries.length} entries found for ${formatDate(new Date(date))}:\n\n${entriesToShow}\n\nWould you like to keep only the most complete entry and delete the others?`);
+                    
+                    if (shouldResolve) {
+                        // Score each entry based on completeness
+                        const scoredEntries = entries.map(entry => {
+                            let score = 0;
+                            
+                            // Add points for each filled field
+                            score += entry.sleepScore ? 1 : 0;
+                            score += (entry.nightSleep && (entry.nightSleep.hours > 0 || entry.nightSleep.minutes > 0)) ? 1 : 0;
+                            score += (entry.deepSleep && (entry.deepSleep.hours > 0 || entry.deepSleep.minutes > 0)) ? 1 : 0;
+                            score += (entry.lightSleep && (entry.lightSleep.hours > 0 || entry.lightSleep.minutes > 0)) ? 1 : 0;
+                            score += (entry.remSleep && (entry.remSleep.hours > 0 || entry.remSleep.minutes > 0)) ? 1 : 0;
+                            score += entry.wakeUps ? 1 : 0;
+                            score += entry.eventsNotes ? 1 : 0;
+                            score += entry.tasks && entry.tasks.length > 0 ? 1 : 0;
+                            score += entry.tags && entry.tags.length > 0 ? 1 : 0;
+                            score += entry.calories ? 1 : 0;
+                            score += entry.steps ? 1 : 0;
+                            score += entry.weight ? 1 : 0;
+                            score += entry.standing ? 1 : 0;
+                            
+                            return { entry, score };
+                        });
+                        
+                        // Sort by score (descending)
+                        scoredEntries.sort((a, b) => b.score - a.score);
+                        
+                        // Keep only the entry with highest score
+                        const entriesToRemove = scoredEntries.slice(1).map(item => item.entry.id);
+                        
+                        // Remove duplicate entries
+                        state.entries = state.entries.filter(entry => !entriesToRemove.includes(entry.id));
+                        
+                        // Save changes
+                        saveData();
+                        
+                        // Update UI
+                        renderEntries();
+                        updateStatistics();
+                        
+                        alert(`Kept the most complete entry and removed ${entriesToRemove.length} duplicates.`);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+    
+    // Look for inconsistent sequential data (missing days between entries)
+    const sortedDates = Object.keys(dateMap).sort();
+    if (sortedDates.length > 1) {
+        for (let i = 1; i < sortedDates.length; i++) {
+            const prevDate = new Date(sortedDates[i-1]);
+            const currentDate = new Date(sortedDates[i]);
+            
+            // Calculate days difference
+            const diffTime = Math.abs(currentDate - prevDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            // If more than 1 day difference, it's a gap
+            if (diffDays > 1) {
+                conflicts.push({
+                    type: 'date_gap',
+                    startDate: prevDate,
+                    endDate: currentDate,
+                    daysMissing: diffDays - 1,
+                    message: `Gap of ${diffDays - 1} days detected between ${formatDate(prevDate)} and ${formatDate(currentDate)}`
+                });
+            }
+        }
+    }
+    
+    // Check for entries with scores outside reasonable range
+    state.entries.forEach(entry => {
+        if (entry.sleepScore && (entry.sleepScore < 0 || entry.sleepScore > 100)) {
+            conflicts.push({
+                type: 'invalid_score',
+                entry,
+                message: `Entry on ${formatDate(new Date(entry.date))} has an invalid sleep score: ${entry.sleepScore}`
+            });
+        }
+    });
+    
+    // Log all conflicts
+    if (conflicts.length > 0) {
+        console.warn(`Found ${conflicts.length} potential conflicts:`);
+        conflicts.forEach(conflict => {
+            console.warn(`- ${conflict.message}`);
+        });
+    } else {
+        console.log('No conflicts found in schedule data.');
+    }
+    
+    return conflicts;
+}
+
+// Function to show conflicts in the UI
+function showConflictsNotification(conflicts) {
+    if (!conflicts || conflicts.length === 0) return;
+    
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = 'notification error';
+    
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'notification-header';
+    header.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Scheduling Conflicts Detected (${conflicts.length})`;
+    notification.appendChild(header);
+    
+    // Create content
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+    
+    // Get duplicate date conflicts
+    const duplicateConflicts = conflicts.filter(conflict => conflict.type === 'duplicate_date');
+    
+    // Add summary of conflicts
+    const summaryMsg = document.createElement('p');
+    if (duplicateConflicts.length > 0) {
+        summaryMsg.innerHTML = `Found <strong>${duplicateConflicts.length}</strong> dates with duplicate entries.`;
+    } else {
+        summaryMsg.textContent = 'Conflicts detected in your schedule data.';
+    }
+    content.appendChild(summaryMsg);
+    
+    // Add first three conflicts as examples
+    const conflictsToShow = conflicts.slice(0, 3);
+    const list = document.createElement('ul');
+    conflictsToShow.forEach(conflict => {
+        const item = document.createElement('li');
+        item.textContent = conflict.message;
+        list.appendChild(item);
+    });
+    
+    if (conflicts.length > 3) {
+        const more = document.createElement('li');
+        more.textContent = `... and ${conflicts.length - 3} more issues`;
+        list.appendChild(more);
+    }
+    
+    content.appendChild(list);
+    notification.appendChild(content);
+    
+    // Create actions
+    const actions = document.createElement('div');
+    actions.className = 'notification-actions';
+    
+    // Add resolve all button
+    const resolveAllBtn = document.createElement('button');
+    resolveAllBtn.className = 'notification-btn primary';
+    resolveAllBtn.innerHTML = '<i class="fas fa-magic"></i> Fix All';
+    resolveAllBtn.addEventListener('click', () => {
+        const resolved = resolveAllConflicts();
+        if (resolved > 0) {
+            alert(`Successfully resolved ${resolved} conflicts.`);
+        } else {
+            alert('No conflicts could be automatically resolved.');
+        }
+        notification.classList.add('notification-hide');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+    actions.appendChild(resolveAllBtn);
+    
+    // Add specific fix for duplicates if needed
+    if (duplicateConflicts.length > 0) {
+        const fixDuplicatesBtn = document.createElement('button');
+        fixDuplicatesBtn.className = 'notification-btn';
+        fixDuplicatesBtn.innerHTML = '<i class="fas fa-clone"></i> Fix Duplicates';
+        fixDuplicatesBtn.addEventListener('click', () => {
+            resolveEntryDuplicates();
+            notification.classList.add('notification-hide');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        });
+        actions.appendChild(fixDuplicatesBtn);
+    }
+    
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'notification-btn';
+    viewBtn.innerHTML = '<i class="fas fa-eye"></i> View All';
+    viewBtn.addEventListener('click', () => {
+        console.table(conflicts);
+        alert('Full details are available in the browser console (F12)');
+    });
+    actions.appendChild(viewBtn);
+    
+    const dismissBtn = document.createElement('button');
+    dismissBtn.className = 'notification-btn';
+    dismissBtn.innerHTML = '<i class="fas fa-times"></i> Dismiss';
+    dismissBtn.addEventListener('click', () => {
+        notification.classList.add('notification-hide');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+    actions.appendChild(dismissBtn);
+    
+    notification.appendChild(actions);
+    
+    // Add to container
+    notificationContainer.appendChild(notification);
+    
+    // Auto dismiss after 10 seconds
+    setTimeout(() => {
+        notification.classList.add('notification-hide');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 10000);
+}
+
+// Function to detect and resolve duplicate entries
+function resolveEntryDuplicates() {
+    console.log('Checking for duplicate entries...');
+    
+    // Build a map of dates to entries
+    const dateMap = {};
+    
+    // Group entries by date
+    state.entries.forEach(entry => {
+        if (!entry.date) return;
+        
+        if (dateMap[entry.date]) {
+            dateMap[entry.date].push(entry);
+        } else {
+            dateMap[entry.date] = [entry];
+        }
+    });
+    
+    // Find dates with duplicates
+    const duplicateDates = Object.entries(dateMap)
+        .filter(([_, entries]) => entries.length > 1)
+        .map(([date, entries]) => ({ date, entries }));
+    
+    if (duplicateDates.length === 0) {
+        console.log('No duplicate entries found.');
+        return [];
+    }
+    
+    console.warn(`Found ${duplicateDates.length} dates with duplicate entries.`);
+    
+    // Prompt user to resolve duplicates
+    const shouldResolve = confirm(`Found ${duplicateDates.length} dates with multiple entries. Would you like to automatically resolve these conflicts?`);
+    
+    if (!shouldResolve) {
+        console.log('User opted not to resolve duplicates.');
+        return duplicateDates;
+    }
+    
+    // Resolve duplicates - keep the most complete entry for each date
+    duplicateDates.forEach(({ date, entries }) => {
+        console.log(`Resolving duplicates for ${date} (${entries.length} entries)`);
+        
+        // Score each entry based on completeness
+        const scoredEntries = entries.map(entry => {
+            let score = 0;
+            
+            // Add points for each filled field
+            score += entry.sleepScore ? 1 : 0;
+            score += (entry.nightSleep && (entry.nightSleep.hours > 0 || entry.nightSleep.minutes > 0)) ? 1 : 0;
+            score += (entry.deepSleep && (entry.deepSleep.hours > 0 || entry.deepSleep.minutes > 0)) ? 1 : 0;
+            score += (entry.lightSleep && (entry.lightSleep.hours > 0 || entry.lightSleep.minutes > 0)) ? 1 : 0;
+            score += (entry.remSleep && (entry.remSleep.hours > 0 || entry.remSleep.minutes > 0)) ? 1 : 0;
+            score += entry.wakeUps ? 1 : 0;
+            score += entry.eventsNotes ? 1 : 0;
+            score += entry.tasks && entry.tasks.length > 0 ? 1 : 0;
+            score += entry.tags && entry.tags.length > 0 ? 1 : 0;
+            score += entry.calories ? 1 : 0;
+            score += entry.steps ? 1 : 0;
+            score += entry.weight ? 1 : 0;
+            score += entry.standing ? 1 : 0;
+            
+            return { entry, score };
+        });
+        
+        // Sort by score (descending)
+        scoredEntries.sort((a, b) => b.score - a.score);
+        
+        // Keep only the entry with highest score
+        const entriesToRemove = scoredEntries.slice(1).map(item => item.entry.id);
+        
+        // Remove duplicate entries
+        state.entries = state.entries.filter(entry => !entriesToRemove.includes(entry.id));
+        
+        console.log(`Kept entry ID ${scoredEntries[0].entry.id} with score ${scoredEntries[0].score}. Removed ${entriesToRemove.length} duplicate entries.`);
+    });
+    
+    // Save changes
+    saveData();
+    
+    // Update UI
+    renderEntries();
+    updateStatistics();
+    
+    alert(`Successfully resolved ${duplicateDates.length} duplicate entries. The most complete entry for each date was kept.`);
+    
+    return duplicateDates;
+}
+
+// Function to resolve all types of conflicts
+function resolveAllConflicts() {
+    console.log('Attempting to resolve all conflicts...');
+    
+    // Get current conflicts
+    const conflicts = detectConflicts();
+    if (conflicts.length === 0) {
+        console.log('No conflicts to resolve.');
+        return 0;
+    }
+    
+    console.log(`Found ${conflicts.length} conflicts to resolve.`);
+    
+    // Resolve each type of conflict
+    let resolvedCount = 0;
+    
+    // Resolve duplicate date conflicts
+    const duplicateDateConflicts = conflicts.filter(conflict => 
+        conflict.type === 'duplicate_date'
+    );
+    
+    if (duplicateDateConflicts.length > 0) {
+        console.log(`Resolving ${duplicateDateConflicts.length} duplicate date conflicts...`);
+        resolveEntryDuplicates();
+        resolvedCount += duplicateDateConflicts.length;
+    }
+    
+    // Other conflict types can be resolved here in the future
+    
+    console.log(`Successfully resolved ${resolvedCount} conflicts.`);
+    alert(`Successfully resolved ${resolvedCount} conflicts.`);
+    
+    return resolvedCount;
 }
