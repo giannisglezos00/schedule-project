@@ -223,8 +223,10 @@
     <!-- Modal for adding/editing entries -->
     <div id="entry-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-title" class="modal-title"><i class="fas fa-plus-circle"></i> Add New Entry</h2>
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title"><i class="fas fa-plus-circle"></i> Add New Entry</h2>
+                <span class="close-btn">&times;</span>
+            </div>
             
             <form id="entry-form">
                 <input type="hidden" id="entry-id">
@@ -439,11 +441,12 @@
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-cog"></i> Settings</h2>
-            
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-cog"></i> Settings</h2>
+                <span class="close-btn">&times;</span>
+            </div>
             <form id="settings-form">
-                <!-- Reference Date Section -->
+                <!-- Reference Date Section (Critical) -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-calendar-alt"></i>
@@ -456,33 +459,24 @@
                     </div>
                 </div>
                 
-                <!-- Goals Section -->
+                <!-- Theme Section -->
                 <div class="modal-section">
                     <div class="modal-section-title">
-                        <i class="fas fa-bullseye"></i>
-                        <h3>Daily Goals</h3>
+                        <i class="fas fa-paint-brush"></i>
+                        <h3>Appearance</h3>
                     </div>
-                    <div class="modal-grid">
-                        <div class="form-group">
-                            <label for="calories-goal">Calories Goal:</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-fire"></i>
-                                <input type="number" id="calories-goal" min="0" step="50" placeholder="Daily calorie goal">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="steps-goal">Steps Goal:</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-shoe-prints"></i>
-                                <input type="number" id="steps-goal" min="0" step="500" placeholder="Daily steps goal">
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="theme-selector">Theme:</label>
+                        <select id="theme-selector" name="theme">
+                            <option value="auto">Auto (System)</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
                     </div>
                 </div>
                 
                 <!-- Sleep Thresholds Section -->
-                <div class="modal-section sleep-metrics">
+                <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-bed"></i>
                         <h3>Sleep Quality Thresholds</h3>
@@ -496,7 +490,7 @@
                                 <div class="time-input">
                                     <input type="number" id="sleep-red-hours" min="0" max="23" value="6" placeholder="h">
                                     <span>h</span>
-                                    <input type="number" id="sleep-red-minutes" min="0" max="59" value="20" placeholder="m">
+                                    <input type="number" id="sleep-red-minutes" min="0" max="59" value="0" placeholder="m">
                                     <span>m or less</span>
                                 </div>
                             </div>
@@ -514,7 +508,7 @@
                                 <div class="time-input">
                                     <input type="number" id="sleep-darkgreen-hours" min="0" max="23" value="8" placeholder="h">
                                     <span>h</span>
-                                    <input type="number" id="sleep-darkgreen-minutes" min="0" max="59" value="30" placeholder="m">
+                                    <input type="number" id="sleep-darkgreen-minutes" min="0" max="59" value="0" placeholder="m">
                                     <span>m or more</span>
                                 </div>
                             </div>
@@ -522,44 +516,36 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Deep Sleep:</label>
-                        <div class="threshold-settings">
-                            <div class="threshold-item">
-                                <span class="threshold-label">Minimum (20-25%):</span>
+                        <label>Deep Sleep Threshold:</label>
+                        <div class="time-input">
+                            <input type="number" id="deep-min-hours" min="0" max="23" value="1" placeholder="h">
+                            <span>h</span>
+                            <input type="number" id="deep-min-minutes" min="0" max="59" value="30" placeholder="m">
+                            <span>m minimum</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Light Sleep Range:</label>
+                        <div class="threshold-item">
+                            <div class="range-input">
                                 <div class="time-input">
-                                    <input type="number" id="deep-min-hours" min="0" max="23" value="1" placeholder="h">
+                                    <input type="number" id="light-min-hours" min="0" max="23" value="3" placeholder="h">
                                     <span>h</span>
-                                    <input type="number" id="deep-min-minutes" min="0" max="59" value="30" placeholder="m">
-                                    <span>m</span>
+                                    <input type="number" id="light-min-minutes" min="0" max="59" value="0" placeholder="m">
+                                </div>
+                                <span>to</span>
+                                <div class="time-input">
+                                    <input type="number" id="light-max-hours" min="0" max="23" value="5" placeholder="h">
+                                    <span>h</span>
+                                    <input type="number" id="light-max-minutes" min="0" max="59" value="0" placeholder="m">
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label>Light Sleep:</label>
-                        <div class="threshold-settings">
-                            <div class="threshold-item">
-                                <span class="threshold-label">Ideal Range (50-60%):</span>
-                                <div class="range-input">
-                                    <div class="time-input">
-                                        <input type="number" id="light-min-hours" min="0" max="23" value="3" placeholder="h">
-                                        <span>h</span>
-                                        <input type="number" id="light-min-minutes" min="0" max="59" value="0" placeholder="m">
-                                    </div>
-                                    <span>to</span>
-                                    <div class="time-input">
-                                        <input type="number" id="light-max-hours" min="0" max="23" value="5" placeholder="h">
-                                        <span>h</span>
-                                        <input type="number" id="light-max-minutes" min="0" max="59" value="0" placeholder="m">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>REM Sleep:</label>
+                        <label>REM Sleep Thresholds:</label>
                         <div class="threshold-settings">
                             <div class="threshold-item">
                                 <span class="threshold-label">Poor (Red):</span>
@@ -575,7 +561,7 @@
                                 <div class="time-input">
                                     <input type="number" id="rem-yellow-hours" min="0" max="23" value="1" placeholder="h">
                                     <span>h</span>
-                                    <input type="number" id="rem-yellow-minutes" min="0" max="59" value="2" placeholder="m">
+                                    <input type="number" id="rem-yellow-minutes" min="0" max="59" value="30" placeholder="m">
                                     <span>m or less</span>
                                 </div>
                             </div>
@@ -583,8 +569,31 @@
                     </div>
                 </div>
                 
+                <!-- Goals Section -->
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fas fa-bullseye"></i>
+                        <h3>Daily Goals</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="calories-goal">Calories Goal:</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-fire"></i>
+                            <input type="number" id="calories-goal" min="0" step="50" placeholder="Daily calorie goal">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="steps-goal">Steps Goal:</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-shoe-prints"></i>
+                            <input type="number" id="steps-goal" min="0" step="500" placeholder="Daily steps goal">
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Tags Management Section -->
-                <div class="modal-section tags-events">
+                <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-tags"></i>
                         <h3>Tags Management</h3>
@@ -618,36 +627,28 @@
                     </div>
                 </div>
                 
-                <!-- Appearance Settings -->
+                <!-- Data Management Section -->
                 <div class="modal-section">
                     <div class="modal-section-title">
-                        <i class="fas fa-paint-brush"></i>
-                        <h3>Appearance</h3>
+                        <i class="fas fa-database"></i>
+                        <h3>Data Management</h3>
                     </div>
                     <div class="form-group">
-                        <label for="theme-selector">Theme:</label>
-                        <select id="theme-selector">
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                            <option value="auto">System Default</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="accent-color">Accent Color:</label>
-                        <div class="color-options">
-                            <div class="color-option blue selected" data-color="blue"></div>
-                            <div class="color-option purple" data-color="purple"></div>
-                            <div class="color-option teal" data-color="teal"></div>
-                            <div class="color-option orange" data-color="orange"></div>
-                            <div class="color-option pink" data-color="pink"></div>
-                        </div>
+                        <button type="button" id="export-data-btn" class="secondary-btn">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                        <button type="button" id="import-data-btn" class="secondary-btn">
+                            <i class="fas fa-upload"></i> Import Data
+                        </button>
+                        <button type="button" id="reset-data-btn" class="secondary-btn warning-btn">
+                            <i class="fas fa-trash"></i> Reset Data
+                        </button>
                     </div>
                 </div>
                 
-                <div class="form-actions">
+                <div class="settings-actions">
                     <button type="button" id="settings-cancel-btn" class="secondary-btn">Cancel</button>
-                    <button type="submit" id="settings-save-btn" class="primary-btn">Save Settings</button>
+                    <button type="submit" id="settings-save-btn" class="primary-btn">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -656,8 +657,10 @@
     <!-- Dashboard Modal -->
     <div id="dashboard-modal" class="modal">
         <div class="modal-content dashboard-modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-chart-pie"></i> Sleep Dashboard</h2>
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-chart-pie"></i> Sleep Dashboard</h2>
+                <span class="close-btn">&times;</span>
+            </div>
             
             <div class="dashboard-controls">
                 <div class="date-range-selector">
@@ -750,11 +753,15 @@
     <!-- Entry Preview Modal -->
     <div id="entry-preview-modal" class="modal">
         <div class="modal-content preview-modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-eye"></i> Entry Details</h2>
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-eye"></i> Entry Details</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            
             <div id="entry-preview-content">
                 <!-- Entry details will be populated here -->
             </div>
+            
             <div class="form-actions">
                 <button type="button" id="preview-close-btn" class="secondary-btn">Close</button>
                 <button type="button" id="preview-edit-btn" class="primary-btn">Edit Entry</button>

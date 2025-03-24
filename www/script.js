@@ -441,21 +441,31 @@ function updateSleepInsights(entries) {
 
 // Modal Functions
 function showAddEntryModal(date = null) {
-    // Reset form
-    elements.entryForm.reset();
-    elements.entryId.value = '';
-    state.currentTasks = [];
-    renderTasksList();
+    // Reset the form
+    document.getElementById('entry-form').reset();
     
-    // Set date if provided
+    // Clear tasks list
+    document.getElementById('tasks-list').innerHTML = '';
+    
+    // Set modal title
+    document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Entry';
+    
+    // Set today's date if no date provided
     if (date) {
-        elements.entryDate.value = date.toISOString().split('T')[0];
+        document.getElementById('entry-date').value = formatDateForInput(date);
     } else {
-        elements.entryDate.value = new Date().toISOString().split('T')[0];
+        const today = new Date();
+        document.getElementById('entry-date').value = formatDateForInput(today);
     }
     
-    // Show modal
-    elements.entryModal.classList.add('visible');
+    // Show the modal
+    const modal = document.getElementById('entry-modal');
+    showModal(modal);
+    
+    // Focus on date field
+    setTimeout(() => {
+        document.getElementById('entry-date').focus();
+    }, 100);
 }
 
 function showEditEntryModal(entryId) {
@@ -526,65 +536,60 @@ function showEntryPreview(entryId) {
 }
 
 function showSettingsModal() {
-    // Fill form with current settings
-    document.getElementById('reference-date').value = state.settings.referenceDate;
-    document.getElementById('calories-goal').value = state.settings.caloriesGoal;
-    document.getElementById('steps-goal').value = state.settings.stepsGoal;
+    // Initialize settings form with current values
+    initializeSettings();
     
-    // Set theme selector
-    document.getElementById('theme-selector').value = state.settings.theme;
+    // Show the modal
+    const modal = document.getElementById('settings-modal');
+    showModal(modal);
     
-    // Set accent color
-    document.querySelectorAll('.color-option').forEach(option => {
-        if (option.getAttribute('data-color') === state.settings.accentColor) {
-            option.classList.add('selected');
-        } else {
-            option.classList.remove('selected');
+    // Focus on reference date field
+    setTimeout(() => {
+        const refDateInput = document.getElementById('reference-date');
+        if (refDateInput) {
+            refDateInput.focus();
         }
-    });
-    
-    // Render tags list
-    renderTagsList();
-    
-    // Setup color presets
-    setupTagColorPresets();
-    
-    // Set first color preset as selected initially
-    const firstPreset = document.querySelector('.preset-color');
-    if (firstPreset) {
-        firstPreset.classList.add('selected');
-    }
-    
-    // Show modal
-    elements.settingsModal.classList.add('visible');
+    }, 100);
 }
 
 function showDashboardModal() {
-    // Update dashboard charts
+    // Update charts with current data
     updateDashboardCharts(state.entries);
-    updateSleepInsights(state.entries);
     
-    // Show modal
-    elements.dashboardModal.classList.add('visible');
+    // Show the modal
+    const modal = document.getElementById('dashboard-modal');
+    showModal(modal);
 }
 
 function showAddTaskModal() {
-    // Reset form but keep most fields empty
-    elements.entryForm.reset();
-    elements.entryId.value = '';
-    state.currentTasks = [];
-    renderTasksList();
+    // Reset the task form
+    const taskInput = document.getElementById('new-task');
+    if (taskInput) {
+        taskInput.value = '';
+    }
     
-    // Set today's date
-    elements.entryDate.value = new Date().toISOString().split('T')[0];
+    // Clear tasks list
+    const tasksList = document.getElementById('tasks-list');
+    if (tasksList) {
+        tasksList.innerHTML = '';
+    }
     
-    // Focus on the tasks section
+    // Set modal title
+    const modalTitle = document.getElementById('modal-title');
+    if (modalTitle) {
+        modalTitle.innerHTML = '<i class="fas fa-tasks"></i> Add New Task';
+    }
+    
+    // Show the modal
+    const modal = document.getElementById('entry-modal');
+    showModal(modal);
+    
+    // Focus on task input
     setTimeout(() => {
-        elements.newTask.focus();
-    }, 300);
-    
-    // Show modal
-    elements.entryModal.classList.add('visible');
+        if (taskInput) {
+            taskInput.focus();
+        }
+    }, 100);
 }
 
 // Initialize the application once the DOM is fully loaded
@@ -831,43 +836,76 @@ function setupEventListeners() {
 
     // Set up the add tag quick button if it exists
     setupAddTagQuickButton();
+    
+    // Floating action buttons
+    const addEntryFab = document.getElementById('add-entry-fab');
+    const addTaskFab = document.getElementById('add-task-fab');
+    const settingsFab = document.getElementById('settings-fab');
+    
+    if (addEntryFab) {
+        addEntryFab.addEventListener('click', () => showAddEntryModal());
+    }
+    
+    if (addTaskFab) {
+        addTaskFab.addEventListener('click', showAddTaskModal);
+    }
+    
+    if (settingsFab) {
+        settingsFab.addEventListener('click', showSettingsModal);
+    }
 }
 
 // Initialize modal behaviors
 function initializeModals() {
-    // Close button handlers
-    document.querySelectorAll('.close-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.modal').classList.remove('visible');
-        });
-    });
+    const modals = document.querySelectorAll('.modal');
     
-    // Close modal when clicking on the backdrop
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(event) {
-            if (event.target === this) {
-                this.classList.remove('visible');
+    // Add event listeners to all modals
+    modals.forEach(modal => {
+        // Close modal when clicking outside content
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        });
+        
+        // Close modal when clicking close button
+        const closeBtn = modal.querySelector('.close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                closeModal(modal);
+            });
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                closeModal(modal);
             }
         });
     });
     
-    // Prevent modal content clicks from closing the modal
-    document.querySelectorAll('.modal-content').forEach(content => {
-        content.addEventListener('click', function(event) {
-            event.stopPropagation();
+    // Cancel buttons for forms
+    const cancelButtons = document.querySelectorAll('#cancel-btn, #settings-cancel-btn, #dashboard-close-btn, #preview-close-btn');
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                closeModal(modal);
+            }
         });
     });
     
-    // ESC key to close modals
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            document.querySelectorAll('.modal').forEach(modal => {
-                if (modal.classList.contains('visible')) {
-                    modal.classList.remove('visible');
-                }
-            });
-        }
-    });
+    console.log('Modals initialized: Entry, Settings, Dashboard, and Preview modals are ready.');
+}
+
+function closeModal(modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showModal(modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
 // Add this function to your setupEventListeners function
@@ -2098,7 +2136,7 @@ function updateDateDisplay() {
     // Update the days count display
     if (elements.daysCount) {
         elements.daysCount.innerHTML = `
-            <span class="days-since">${daysDiff} days since ${referenceDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'yy' })}</span>
+            <span class="days-since">${daysDiff} days since ${referenceDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
             <span class="months-since">${monthsDecimal.toFixed(1)} months</span>
         `;
     }
@@ -2364,4 +2402,830 @@ function saveSettings(event) {
     
     // Close the settings modal
     elements.settingsModal.classList.remove('visible');
+}
+
+// Function to update theme based on settings
+function applyTheme() {
+    // Apply theme to document body
+    if (state.settings.theme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+    } else if (state.settings.theme === 'light') {
+        document.body.classList.add('light-theme');
+        document.body.classList.remove('dark-theme');
+    } else if (state.settings.theme === 'auto') {
+        // Check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+            document.body.classList.add('dark-theme');
+            document.body.classList.remove('light-theme');
+        } else {
+            document.body.classList.add('light-theme');
+            document.body.classList.remove('dark-theme');
+        }
+    }
+}
+
+// Function to apply accent color from settings
+function applyAccentColor() {
+    // Apply accent color to document body
+    document.body.setAttribute('data-accent', state.settings.accentColor);
+}
+
+// Helper function to create table cells with appropriate styling
+function createCell(content, className = '', colorClass = null) {
+    const cell = document.createElement('td');
+    
+    // Set content
+    cell.textContent = content;
+    
+    // Add class if provided
+    if (className) {
+        cell.classList.add(className);
+    }
+    
+    // If it's an empty value, add empty-cell class
+    if (content === '-') {
+        cell.classList.add('empty-cell');
+    }
+    
+    // Add color class if provided
+    if (colorClass) {
+        cell.classList.add(colorClass);
+        
+        // Add emphasis for important values
+        if (colorClass === 'green' || colorClass === 'red' || colorClass === 'dark-green') {
+            cell.style.fontWeight = 'bold';
+        }
+    }
+    
+    return cell;
+}
+
+// Helper function to determine the color class based on sleep score
+function getScoreColor(score) {
+    if (score === null || score === undefined || score === '') {
+        return null;
+    }
+    
+    score = parseInt(score);
+    
+    if (score >= 85) {
+        return 'dark-green';
+    } else if (score >= 70) {
+        return 'green';
+    } else if (score >= 55) {
+        return 'yellow';
+    } else {
+        return 'red';
+    }
+}
+
+/**
+ * Helper function to format time values in a compact way (e.g., "7h 30m")
+ * @param {number} hours - Number of hours
+ * @param {number} minutes - Number of minutes
+ * @returns {string} Formatted time string
+ */
+function formatTimeCompact(hours, minutes) {
+    if (hours === null || minutes === null || (hours === 0 && minutes === 0)) {
+        return '-';
+    }
+    
+    if (hours === 0) {
+        return `${minutes}m`;
+    }
+    
+    if (minutes === 0) {
+        return `${hours}h`;
+    }
+    
+    return `${hours}h ${minutes}m`;
+}
+
+/**
+ * Helper function to determine color coding for sleep duration based on thresholds
+ * @param {number} hours - Hours of sleep
+ * @param {number} minutes - Minutes of sleep
+ * @returns {string|null} Color class to apply or null if no color
+ */
+function getSleepColor(hours, minutes) {
+    // Convert hours and minutes to total minutes
+    const totalMinutes = (hours || 0) * 60 + (minutes || 0);
+    
+    // Get settings or use defaults
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        sleepThresholds: {
+            red: { hours: 6, minutes: 0 },
+            yellow: { hours: 7, minutes: 0 },
+            darkGreen: { hours: 8, minutes: 0 }
+        }
+    };
+    
+    // Calculate threshold minutes
+    let redThresholdMinutes = 360; // Default: 6h
+    let yellowThresholdMinutes = 420; // Default: 7h
+    let darkGreenThresholdMinutes = 480; // Default: 8h
+    
+    if (settings.sleepThresholds) {
+        if (settings.sleepThresholds.red) {
+            redThresholdMinutes = (settings.sleepThresholds.red.hours || 0) * 60 + 
+                                 (settings.sleepThresholds.red.minutes || 0);
+        }
+        
+        if (settings.sleepThresholds.yellow) {
+            yellowThresholdMinutes = (settings.sleepThresholds.yellow.hours || 0) * 60 + 
+                                    (settings.sleepThresholds.yellow.minutes || 0);
+        }
+        
+        if (settings.sleepThresholds.darkGreen) {
+            darkGreenThresholdMinutes = (settings.sleepThresholds.darkGreen.hours || 0) * 60 + 
+                                       (settings.sleepThresholds.darkGreen.minutes || 0);
+        }
+    }
+    
+    // Determine color class based on thresholds
+    if (totalMinutes === 0) {
+        return ''; // No color for zero values
+    } else if (totalMinutes < redThresholdMinutes) {
+        return 'poor'; // Below red threshold
+    } else if (totalMinutes < yellowThresholdMinutes) {
+        return 'average'; // Between red and yellow thresholds
+    } else if (totalMinutes >= darkGreenThresholdMinutes) {
+        return 'excellent'; // Above dark green threshold
+    } else {
+        return 'good'; // Between yellow and dark green thresholds
+    }
+}
+
+// Update settings form to apply theme changes immediately for preview
+document.addEventListener('DOMContentLoaded', function() {
+    const themeSelector = document.getElementById('theme-selector');
+    if (themeSelector) {
+        themeSelector.addEventListener('change', function() {
+            // Apply theme immediately as preview
+            const selectedTheme = themeSelector.value;
+            applyTheme(selectedTheme);
+            // Note: The actual preference will be saved when the form is submitted
+        });
+    }
+    
+    // Apply proper styling to settings buttons
+    const settingsCancelBtn = document.getElementById('settings-cancel-btn');
+    const settingsSaveBtn = document.getElementById('settings-save-btn');
+    
+    if (settingsCancelBtn) {
+        settingsCancelBtn.classList.add('secondary-btn');
+    }
+    
+    if (settingsSaveBtn) {
+        settingsSaveBtn.classList.add('primary-btn');
+    }
+    
+    // Ensure modals respect dark mode
+    const modals = document.querySelectorAll('.modal');
+    const currentTheme = localStorage.getItem('theme') || 'auto';
+    
+    if (currentTheme === 'dark' || 
+        (currentTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        modals.forEach(modal => {
+            modal.classList.add('dark-theme');
+        });
+    }
+});
+
+// Fix saveEntry function to work correctly
+function fixSaveEntry() {
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const entryId = document.getElementById('entry-id').value;
+            const entryDate = document.getElementById('entry-date').value;
+            
+            if (!entryDate) {
+                alert('Please select a date');
+                return;
+            }
+            
+            // Create entry object
+            const entry = {
+                id: entryId || Date.now().toString(),
+                date: entryDate,
+                // Add other fields as needed
+                // ...
+            };
+            
+            // Add to entries array
+            if (!entryId) {
+                state.entries.push(entry);
+            } else {
+                // Update existing entry
+                const index = state.entries.findIndex(e => e.id === entryId);
+                if (index !== -1) {
+                    state.entries[index] = entry;
+                }
+            }
+            
+            // Save data and close modal
+            saveData();
+            document.getElementById('entry-modal').style.display = 'none';
+            
+            // Re-render entries
+            renderEntries();
+            
+            console.log('Entry saved successfully');
+        });
+    }
+}
+
+// CSS variables for themes
+function setupThemeVariables() {
+    // Define CSS Variables
+    const root = document.documentElement;
+    
+    // Light Theme
+    root.style.setProperty('--bg-color', '#f8f9fa');
+    root.style.setProperty('--bg-secondary', '#ffffff');
+    root.style.setProperty('--text-color', '#333333');
+    root.style.setProperty('--border-color', '#e2e8f0');
+    root.style.setProperty('--input-bg', '#ffffff');
+    root.style.setProperty('--accent-color', '#4361ee');
+    root.style.setProperty('--accent-hover', '#3a56d4');
+    root.style.setProperty('--accent-rgb', '67, 97, 238');
+    
+    // Dark Theme Variables
+    root.style.setProperty('--dark-bg', '#121212');
+    root.style.setProperty('--dark-bg-secondary', '#1e1e1e');
+    root.style.setProperty('--dark-text', '#e2e8f0');
+    root.style.setProperty('--dark-border-color', '#383838');
+    root.style.setProperty('--dark-input-bg', '#2c2c2c');
+    root.style.setProperty('--dark-accent', '#5d76f7');
+    root.style.setProperty('--dark-accent-hover', '#6e84ff');
+    
+    // Score colors
+    root.style.setProperty('--color-excellent', '#22c55e');
+    root.style.setProperty('--color-good', '#84cc16');
+    root.style.setProperty('--color-average', '#f59e0b');
+    root.style.setProperty('--color-poor', '#ef4444');
+}
+
+// Initialize settings
+function initializeSettings() {
+    // Load settings
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        theme: 'auto',
+        referenceDate: new Date().toISOString().split('T')[0],
+        caloriesGoal: 2000,
+        stepsGoal: 10000,
+        sleepThresholds: {
+            red: { hours: 6, minutes: 0 },
+            yellow: { hours: 7, minutes: 0 },
+            darkGreen: { hours: 8, minutes: 0 }
+        },
+        deepSleepThreshold: { hours: 1, minutes: 30 },
+        lightSleepRange: {
+            min: { hours: 3, minutes: 0 },
+            max: { hours: 5, minutes: 0 }
+        },
+        remSleepThresholds: {
+            red: { hours: 0, minutes: 50 },
+            yellow: { hours: 1, minutes: 30 }
+        }
+    };
+    
+    // Populate settings form
+    const themeSelector = document.getElementById('theme-selector');
+    const referenceDate = document.getElementById('reference-date');
+    const caloriesGoal = document.getElementById('calories-goal');
+    const stepsGoal = document.getElementById('steps-goal');
+    
+    // Sleep thresholds
+    const sleepRedHours = document.getElementById('sleep-red-hours');
+    const sleepRedMinutes = document.getElementById('sleep-red-minutes');
+    const sleepYellowHours = document.getElementById('sleep-yellow-hours');
+    const sleepYellowMinutes = document.getElementById('sleep-yellow-minutes');
+    const sleepDarkGreenHours = document.getElementById('sleep-darkgreen-hours');
+    const sleepDarkGreenMinutes = document.getElementById('sleep-darkgreen-minutes');
+    
+    // Deep sleep threshold
+    const deepMinHours = document.getElementById('deep-min-hours');
+    const deepMinMinutes = document.getElementById('deep-min-minutes');
+    
+    // Light sleep range
+    const lightMinHours = document.getElementById('light-min-hours');
+    const lightMinMinutes = document.getElementById('light-min-minutes');
+    const lightMaxHours = document.getElementById('light-max-hours');
+    const lightMaxMinutes = document.getElementById('light-max-minutes');
+    
+    // REM sleep thresholds
+    const remRedHours = document.getElementById('rem-red-hours');
+    const remRedMinutes = document.getElementById('rem-red-minutes');
+    const remYellowHours = document.getElementById('rem-yellow-hours');
+    const remYellowMinutes = document.getElementById('rem-yellow-minutes');
+    
+    // Set values if elements exist
+    if (themeSelector) {
+        themeSelector.value = settings.theme || 'auto';
+    }
+    
+    if (referenceDate) {
+        referenceDate.value = settings.referenceDate || new Date().toISOString().split('T')[0];
+    }
+    
+    if (caloriesGoal) {
+        caloriesGoal.value = settings.caloriesGoal || 2000;
+    }
+    
+    if (stepsGoal) {
+        stepsGoal.value = settings.stepsGoal || 10000;
+    }
+    
+    // Sleep thresholds
+    if (sleepRedHours && settings.sleepThresholds && settings.sleepThresholds.red) {
+        sleepRedHours.value = settings.sleepThresholds.red.hours || 6;
+    }
+    
+    if (sleepRedMinutes && settings.sleepThresholds && settings.sleepThresholds.red) {
+        sleepRedMinutes.value = settings.sleepThresholds.red.minutes || 0;
+    }
+    
+    if (sleepYellowHours && settings.sleepThresholds && settings.sleepThresholds.yellow) {
+        sleepYellowHours.value = settings.sleepThresholds.yellow.hours || 7;
+    }
+    
+    if (sleepYellowMinutes && settings.sleepThresholds && settings.sleepThresholds.yellow) {
+        sleepYellowMinutes.value = settings.sleepThresholds.yellow.minutes || 0;
+    }
+    
+    if (sleepDarkGreenHours && settings.sleepThresholds && settings.sleepThresholds.darkGreen) {
+        sleepDarkGreenHours.value = settings.sleepThresholds.darkGreen.hours || 8;
+    }
+    
+    if (sleepDarkGreenMinutes && settings.sleepThresholds && settings.sleepThresholds.darkGreen) {
+        sleepDarkGreenMinutes.value = settings.sleepThresholds.darkGreen.minutes || 0;
+    }
+    
+    // Deep sleep threshold
+    if (deepMinHours && settings.deepSleepThreshold) {
+        deepMinHours.value = settings.deepSleepThreshold.hours || 1;
+    }
+    
+    if (deepMinMinutes && settings.deepSleepThreshold) {
+        deepMinMinutes.value = settings.deepSleepThreshold.minutes || 30;
+    }
+    
+    // Light sleep range
+    if (lightMinHours && settings.lightSleepRange && settings.lightSleepRange.min) {
+        lightMinHours.value = settings.lightSleepRange.min.hours || 3;
+    }
+    
+    if (lightMinMinutes && settings.lightSleepRange && settings.lightSleepRange.min) {
+        lightMinMinutes.value = settings.lightSleepRange.min.minutes || 0;
+    }
+    
+    if (lightMaxHours && settings.lightSleepRange && settings.lightSleepRange.max) {
+        lightMaxHours.value = settings.lightSleepRange.max.hours || 5;
+    }
+    
+    if (lightMaxMinutes && settings.lightSleepRange && settings.lightSleepRange.max) {
+        lightMaxMinutes.value = settings.lightSleepRange.max.minutes || 0;
+    }
+    
+    // REM sleep thresholds
+    if (remRedHours && settings.remSleepThresholds && settings.remSleepThresholds.red) {
+        remRedHours.value = settings.remSleepThresholds.red.hours || 0;
+    }
+    
+    if (remRedMinutes && settings.remSleepThresholds && settings.remSleepThresholds.red) {
+        remRedMinutes.value = settings.remSleepThresholds.red.minutes || 50;
+    }
+    
+    if (remYellowHours && settings.remSleepThresholds && settings.remSleepThresholds.yellow) {
+        remYellowHours.value = settings.remSleepThresholds.yellow.hours || 1;
+    }
+    
+    if (remYellowMinutes && settings.remSleepThresholds && settings.remSleepThresholds.yellow) {
+        remYellowMinutes.value = settings.remSleepThresholds.yellow.minutes || 30;
+    }
+    
+    // Render tags list for management
+    renderTagsManagement();
+    
+    // Apply theme
+    applyTheme(settings.theme || 'auto');
+}
+
+// Save settings
+function saveSettings(e) {
+    if (e) e.preventDefault();
+    
+    // Get form elements
+    const themeSelector = document.getElementById('theme-selector');
+    const referenceDate = document.getElementById('reference-date');
+    const caloriesGoal = document.getElementById('calories-goal');
+    const stepsGoal = document.getElementById('steps-goal');
+    
+    // Sleep thresholds
+    const sleepRedHours = document.getElementById('sleep-red-hours');
+    const sleepRedMinutes = document.getElementById('sleep-red-minutes');
+    const sleepYellowHours = document.getElementById('sleep-yellow-hours');
+    const sleepYellowMinutes = document.getElementById('sleep-yellow-minutes');
+    const sleepDarkGreenHours = document.getElementById('sleep-darkgreen-hours');
+    const sleepDarkGreenMinutes = document.getElementById('sleep-darkgreen-minutes');
+    
+    // Deep sleep threshold
+    const deepMinHours = document.getElementById('deep-min-hours');
+    const deepMinMinutes = document.getElementById('deep-min-minutes');
+    
+    // Light sleep range
+    const lightMinHours = document.getElementById('light-min-hours');
+    const lightMinMinutes = document.getElementById('light-min-minutes');
+    const lightMaxHours = document.getElementById('light-max-hours');
+    const lightMaxMinutes = document.getElementById('light-max-minutes');
+    
+    // REM sleep thresholds
+    const remRedHours = document.getElementById('rem-red-hours');
+    const remRedMinutes = document.getElementById('rem-red-minutes');
+    const remYellowHours = document.getElementById('rem-yellow-hours');
+    const remYellowMinutes = document.getElementById('rem-yellow-minutes');
+    
+    // Build settings object
+    const settings = {
+        theme: themeSelector ? themeSelector.value : 'auto',
+        referenceDate: referenceDate ? referenceDate.value : new Date().toISOString().split('T')[0],
+        caloriesGoal: caloriesGoal ? parseInt(caloriesGoal.value) : 2000,
+        stepsGoal: stepsGoal ? parseInt(stepsGoal.value) : 10000,
+        sleepThresholds: {
+            red: {
+                hours: sleepRedHours ? parseInt(sleepRedHours.value) : 6,
+                minutes: sleepRedMinutes ? parseInt(sleepRedMinutes.value) : 0
+            },
+            yellow: {
+                hours: sleepYellowHours ? parseInt(sleepYellowHours.value) : 7,
+                minutes: sleepYellowMinutes ? parseInt(sleepYellowMinutes.value) : 0
+            },
+            darkGreen: {
+                hours: sleepDarkGreenHours ? parseInt(sleepDarkGreenHours.value) : 8,
+                minutes: sleepDarkGreenMinutes ? parseInt(sleepDarkGreenMinutes.value) : 0
+            }
+        },
+        deepSleepThreshold: {
+            hours: deepMinHours ? parseInt(deepMinHours.value) : 1,
+            minutes: deepMinMinutes ? parseInt(deepMinMinutes.value) : 30
+        },
+        lightSleepRange: {
+            min: {
+                hours: lightMinHours ? parseInt(lightMinHours.value) : 3,
+                minutes: lightMinMinutes ? parseInt(lightMinMinutes.value) : 0
+            },
+            max: {
+                hours: lightMaxHours ? parseInt(lightMaxHours.value) : 5,
+                minutes: lightMaxMinutes ? parseInt(lightMaxMinutes.value) : 0
+            }
+        },
+        remSleepThresholds: {
+            red: {
+                hours: remRedHours ? parseInt(remRedHours.value) : 0,
+                minutes: remRedMinutes ? parseInt(remRedMinutes.value) : 50
+            },
+            yellow: {
+                hours: remYellowHours ? parseInt(remYellowHours.value) : 1,
+                minutes: remYellowMinutes ? parseInt(remYellowMinutes.value) : 30
+            }
+        }
+    };
+    
+    // Save settings to localStorage
+    localStorage.setItem('settings', JSON.stringify(settings));
+    
+    // Apply theme
+    applyTheme(settings.theme);
+    
+    // Close the modal
+    document.getElementById('settings-modal').style.display = 'none';
+    
+    // Update UI
+    updateDateDisplay(); // Update date display with new reference date
+    renderEntries(); // Re-render entries with new thresholds
+    
+    console.log('Settings saved successfully');
+}
+
+// Apply theme based on preference
+function applyTheme(theme) {
+    const root = document.documentElement;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (theme === 'dark' || (theme === 'auto' && prefersDark)) {
+        root.classList.add('dark-theme');
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.add('dark-theme');
+        });
+    } else {
+        root.classList.remove('dark-theme');
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('dark-theme');
+        });
+    }
+}
+
+// Call these functions on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupThemeVariables();
+    initializeSettings();
+    
+    // Settings form event listeners
+    const settingsForm = document.getElementById('settings-form');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', saveSettings);
+    }
+    
+    const settingsCancelBtn = document.getElementById('settings-cancel-btn');
+    if (settingsCancelBtn) {
+        settingsCancelBtn.addEventListener('click', function() {
+            document.getElementById('settings-modal').style.display = 'none';
+        });
+    }
+});
+
+// Updated getSleepColor function to use the new thresholds from settings
+function getSleepColor(sleepDuration) {
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        goodSleepThreshold: 7.5,
+        badSleepThreshold: 6.0
+    };
+    
+    if (sleepDuration >= settings.goodSleepThreshold) {
+        return 'excellent';
+    } else if (sleepDuration < settings.badSleepThreshold) {
+        return 'poor';
+    } else {
+        return 'average';
+    }
+}
+
+// Call additional initialization functions during document load
+document.addEventListener('DOMContentLoaded', function() {
+    setupThemeVariables();
+    initializeSettings();
+    initializeModals();
+    
+    // Call fixSaveEntry to ensure entry saving works
+    fixSaveEntry();
+    
+    // Load and render data
+    loadData();
+    renderEntries();
+});
+
+/**
+ * Determines the appropriate color class for deep sleep values based on thresholds
+ * @param {Number} hours - Deep sleep hours
+ * @param {Number} minutes - Deep sleep minutes
+ * @returns {String} Color class name
+ */
+function getDeepSleepColor(hours, minutes) {
+    // Convert hours and minutes to total minutes for easier comparison
+    const totalMinutes = (hours || 0) * 60 + (minutes || 0);
+    
+    // Get settings or use defaults if not available
+    const settings = JSON.parse(localStorage.getItem('settings')) || {};
+    
+    // Deep sleep thresholds (default values if not in settings)
+    const deepMinMinutes = settings.deepMinMinutes || 90; // 1h 30m minimum recommended
+    
+    if (totalMinutes === 0) {
+        return ''; // No color for zero values
+    } else if (totalMinutes < deepMinMinutes * 0.7) {
+        return 'poor'; // Below 70% of minimum threshold
+    } else if (totalMinutes < deepMinMinutes) {
+        return 'average'; // Below minimum but above 70%
+    } else if (totalMinutes >= deepMinMinutes * 1.3) {
+        return 'excellent'; // 30% above minimum threshold
+    } else {
+        return 'good'; // Between minimum and 30% above
+    }
+}
+
+// Add event listeners for data management buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Export data
+    const exportDataBtn = document.getElementById('export-data-btn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', exportData);
+    }
+    
+    // Import data
+    const importDataBtn = document.getElementById('import-data-btn');
+    if (importDataBtn) {
+        importDataBtn.addEventListener('click', function() {
+            // Create a file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+            
+            // Trigger click on the file input
+            fileInput.click();
+            
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        importData(e.target.result);
+                    };
+                    reader.readAsText(file);
+                }
+                
+                // Clean up
+                document.body.removeChild(fileInput);
+            });
+        });
+    }
+    
+    // Reset data
+    const resetDataBtn = document.getElementById('reset-data-btn');
+    if (resetDataBtn) {
+        resetDataBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+                resetData();
+            }
+        });
+    }
+});
+
+// Export data function
+function exportData() {
+    // Get all data from localStorage
+    const data = {
+        entries: JSON.parse(localStorage.getItem('entries') || '[]'),
+        settings: JSON.parse(localStorage.getItem('settings') || '{}'),
+        tags: JSON.parse(localStorage.getItem('tags') || '[]'),
+        tasks: JSON.parse(localStorage.getItem('tasks') || '{}')
+    };
+    
+    // Convert to JSON string
+    const jsonString = JSON.stringify(data, null, 2);
+    
+    // Create a blob with the data
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a temporary URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a link element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sleep-tracker-data-${new Date().toISOString().split('T')[0]}.json`;
+    
+    // Append the link to the body
+    document.body.appendChild(a);
+    
+    // Programmatically click the link
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Import data function
+function importData(jsonString) {
+    try {
+        // Parse the JSON data
+        const data = JSON.parse(jsonString);
+        
+        // Validate data structure
+        if (!data.entries || !data.settings || !data.tags || !data.tasks) {
+            throw new Error('Invalid data format');
+        }
+        
+        // Store the data in localStorage
+        localStorage.setItem('entries', JSON.stringify(data.entries));
+        localStorage.setItem('settings', JSON.stringify(data.settings));
+        localStorage.setItem('tags', JSON.stringify(data.tags));
+        localStorage.setItem('tasks', JSON.stringify(data.tasks));
+        
+        // Reload the data
+        loadData();
+        
+        // Update UI
+        renderEntries();
+        renderTagsList();
+        updateDateDisplay();
+        
+        alert('Data imported successfully');
+    } catch (error) {
+        console.error('Error importing data:', error);
+        alert('Error importing data: ' + error.message);
+    }
+}
+
+// Reset data function
+function resetData() {
+    // Clear all application data
+    localStorage.removeItem('entries');
+    localStorage.removeItem('settings');
+    localStorage.removeItem('tags');
+    localStorage.removeItem('tasks');
+    
+    // Reset to defaults
+    loadData();
+    
+    // Update UI
+    renderEntries();
+    renderTagsList();
+    updateDateDisplay();
+    
+    alert('All data has been reset to defaults');
+}
+
+// Add the missing getLightSleepColor function
+function getLightSleepColor(hours, minutes) {
+    // Convert to total minutes for easier comparison
+    const totalMinutes = (hours || 0) * 60 + (minutes || 0);
+    
+    // Get light sleep thresholds from settings or use defaults
+    const settings = state.settings || {};
+    
+    // Min threshold (default 3h 0m = 180 min)
+    const minHours = settings.lightMinHours || 3;
+    const minMinutes = settings.lightMinMinutes || 0;
+    const minThreshold = minHours * 60 + minMinutes;
+    
+    // Max threshold (default 5h 0m = 300 min)
+    const maxHours = settings.lightMaxHours || 5;
+    const maxMinutes = settings.lightMaxMinutes || 0;
+    const maxThreshold = maxHours * 60 + maxMinutes;
+    
+    // Determine color based on thresholds
+    if (totalMinutes === 0) {
+        return ''; // No color for 0 values
+    } else if (totalMinutes < minThreshold) {
+        return 'poor'; // Too little light sleep
+    } else if (totalMinutes > maxThreshold) {
+        return 'poor'; // Too much light sleep
+    } else {
+        return 'good'; // Just right
+    }
+}
+
+// Helper function to format date for input field
+function formatDateForInput(date) {
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Determines the appropriate color class for REM sleep values based on thresholds
+ * @param {Object} remSleep - REM sleep object with hours and minutes
+ * @returns {String} Color class name
+ */
+function getRemSleepColor(remSleep) {
+    // Return empty string if remSleep is not provided
+    if (!remSleep) {
+        return '';
+    }
+    
+    // Convert hours and minutes to total minutes for easier comparison
+    const totalMinutes = (remSleep.hours || 0) * 60 + (remSleep.minutes || 0);
+    
+    // Get settings or use defaults if not available
+    const settings = JSON.parse(localStorage.getItem('settings')) || {};
+    
+    // REM sleep thresholds (default values if not in settings)
+    // Poor threshold (red)
+    const remRedMinutes = (settings.remThresholds && settings.remThresholds.red) 
+        ? settings.remThresholds.red.hours * 60 + settings.remThresholds.red.minutes 
+        : 50; // Default: 0h 50m
+    
+    // Moderate threshold (yellow)
+    const remYellowMinutes = (settings.remThresholds && settings.remThresholds.yellow) 
+        ? settings.remThresholds.yellow.hours * 60 + settings.remThresholds.yellow.minutes 
+        : 90; // Default: 1h 30m
+    
+    if (totalMinutes === 0) {
+        return ''; // No color for zero values
+    } else if (totalMinutes <= remRedMinutes) {
+        return 'poor'; // Below red threshold
+    } else if (totalMinutes <= remYellowMinutes) {
+        return 'average'; // Between red and yellow thresholds
+    } else if (totalMinutes >= remYellowMinutes * 1.3) {
+        return 'excellent'; // 30% above yellow threshold
+    } else {
+        return 'good'; // Between yellow and 30% above yellow
+    }
 }

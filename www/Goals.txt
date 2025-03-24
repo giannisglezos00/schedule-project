@@ -27,3 +27,8 @@ Tag management could be like notes management
 Note management needs to have the option to give a color to the tags
 
 don't forget, modern and clean design
+
+
+Ideas:
+Weather api for each day
+Automatic Subscription reminders
