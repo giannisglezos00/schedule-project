@@ -445,7 +445,7 @@ function showAddEntryModal(date = null) {
     elements.entryForm.reset();
     elements.entryId.value = '';
     state.currentTasks = [];
-    renderTasks();
+    renderTasksList();
     
     // Set date if provided
     if (date) {
@@ -488,7 +488,7 @@ function showEditEntryModal(entryId) {
     
     // Set current tasks
     state.currentTasks = state.tasks[entry.date] || [];
-    renderTasks();
+    renderTasksList();
     
     // Show modal
     elements.entryModal.classList.add('visible');
@@ -573,7 +573,7 @@ function showAddTaskModal() {
     elements.entryForm.reset();
     elements.entryId.value = '';
     state.currentTasks = [];
-    renderTasks();
+    renderTasksList();
     
     // Set today's date
     elements.entryDate.value = new Date().toISOString().split('T')[0];
@@ -935,283 +935,13 @@ function filterEntries() {
     // Update the count
     const countMsg = `Showing ${filteredEntries.length} of ${state.entries.length} entries`;
     console.log(countMsg);
+    
+    // Function to update the date display in the header
+    updateDateDisplay();
 }
 
 function highlightSearchTerms(searchTerm) {
     // Only highlight text in notes cells and task cells
-    const noteCells = document.querySelectorAll('.events-cell');
-    const taskElements = document.querySelectorAll('.task-item-in-cell');
-    
-    // Function to highlight matches in a text node
-    function highlightMatches(node, term) {
-        const content = node.textContent;
-        const pattern = new RegExp(`(${term})`, 'gi');
-        const highlightedContent = content.replace(pattern, '<span class="highlight">$1</span>');
-        node.innerHTML = highlightedContent;
-    }
-    
-    // Highlight in note cells
-    noteCells.forEach(cell => {
-        if (cell.textContent.toLowerCase().includes(searchTerm)) {
-            highlightMatches(cell, searchTerm);
-        }
-    });
-    
-    // Highlight in task items
-    taskElements.forEach(task => {
-        if (task.textContent.toLowerCase().includes(searchTerm)) {
-            highlightMatches(task, searchTerm);
-        }
-    });
-}
-
-function sortEntries(entries = state.entries) {
-    const sortMethod = elements.sortBy.value;
-    
-    entries.sort((a, b) => {
-        switch (sortMethod) {
-            case 'date':
-                return new Date(b.date) - new Date(a.date); // Newest first
-                
-            case 'sleep':
-                const aSleep = a.nightSleep ? a.nightSleep.hours * 60 + a.nightSleep.minutes : 0;
-                const bSleep = b.nightSleep ? b.nightSleep.hours * 60 + b.nightSleep.minutes : 0;
-                return bSleep - aSleep; // More sleep first
-                
-            case 'calories':
-                const aCalories = a.calories || 0;
-                const bCalories = b.calories || 0;
-                return bCalories - aCalories; // More calories first
-                
-            case 'steps':
-                const aSteps = a.steps || 0;
-                const bSteps = b.steps || 0;
-                return bSteps - aSteps; // More steps first
-                
-            case 'tags':
-                const aTagCount = a.tags ? a.tags.length : 0;
-                const bTagCount = b.tags ? b.tags.length : 0;
-                return bTagCount - aTagCount; // More tags first
-                
-            default:
-                return new Date(b.date) - new Date(a.date); // Default to date
-        }
-    });
-    
-    return entries;
-}
-
-// Function to save entry data from the form
-function saveEntry(e) {
-    e.preventDefault();
-    
-    // Get form data
-    const entryId = elements.entryId.value;
-    const entryDate = elements.entryDate.value;
-    const sleepScore = elements.sleepScore.value ? parseInt(elements.sleepScore.value) : null;
-    
-    // Check for duplicate date when adding a new entry
-    if (!entryId) {
-        const existingEntry = state.entries.find(entry => entry.date === entryDate);
-        if (existingEntry) {
-            // Show confirmation dialog
-            if (!confirm(`An entry already exists for ${formatDate(new Date(entryDate))}. Do you want to edit that entry instead?`)) {
-                return; // User canceled, don't save
-            } else {
-                // User wants to edit the existing entry instead
-                showEditEntryModal(existingEntry.id);
-                return;
-            }
-        }
-    }
-    
-    // Collect sleep times
-    const nightSleep = {
-        hours: elements.nightSleepHours.value ? parseInt(elements.nightSleepHours.value) : 0,
-        minutes: elements.nightSleepMinutes.value ? parseInt(elements.nightSleepMinutes.value) : 0
-    };
-    
-    const dayNap = {
-        hours: elements.dayNapHours.value ? parseInt(elements.dayNapHours.value) : 0,
-        minutes: elements.dayNapMinutes.value ? parseInt(elements.dayNapMinutes.value) : 0
-    };
-    
-    const deepSleep = {
-        hours: elements.deepSleepHours.value ? parseInt(elements.deepSleepHours.value) : 0,
-        minutes: elements.deepSleepMinutes.value ? parseInt(elements.deepSleepMinutes.value) : 0
-    };
-    
-    const lightSleep = {
-        hours: elements.lightSleepHours.value ? parseInt(elements.lightSleepHours.value) : 0,
-        minutes: elements.lightSleepMinutes.value ? parseInt(elements.lightSleepMinutes.value) : 0
-    };
-    
-    const remSleep = {
-        hours: elements.remSleepHours.value ? parseInt(elements.remSleepHours.value) : 0,
-        minutes: elements.remSleepMinutes.value ? parseInt(elements.remSleepMinutes.value) : 0
-    };
-    
-    // Get health indicators
-    const cutSleep = elements.cutSleep.checked;
-    const seizure = elements.seizure.checked;
-    const shake = elements.shake.checked;
-    const afr = elements.afr.checked;
-    
-    // Get notes and tasks
-    const eventsNotes = elements.eventsNotes.value;
-    const tasks = state.currentTasks || [];
-    
-    // Get tags
-    const tagsInput = elements.tags.value;
-    const customTags = tagsInput.split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag !== '');
-    
-    // Get selected tags from interface
-    const selectedTags = Array.from(document.querySelectorAll('#available-tags .tag.selected'))
-        .map(tagElement => tagElement.textContent.trim());
-    
-    // Combine both tag sources
-    const allTags = [...new Set([...selectedTags, ...customTags])];
-    
-    // Get activity metrics
-    const calories = elements.calories.value ? parseInt(elements.calories.value) : null;
-    const steps = elements.steps.value ? parseInt(elements.steps.value) : null;
-    const weight = elements.weight.value ? parseFloat(elements.weight.value) : null;
-    const standing = elements.standing.value ? parseInt(elements.standing.value) : null;
-    
-    // Create entry object
-    const entry = {
-        id: entryId || `entry_${Date.now()}`,
-        date: entryDate,
-        sleepScore,
-        nightSleep,
-        dayNap,
-        deepSleep,
-        lightSleep,
-        remSleep,
-        wakeUps: elements.wakeUps.value ? parseInt(elements.wakeUps.value) : 0,
-        cutSleep,
-        seizure,
-        shake,
-        afr,
-        eventsNotes,
-        tasks,
-        tags: allTags,
-        calories,
-        steps,
-        weight,
-        standing
-    };
-    
-    // Update or add entry
-    if (entryId) {
-        // Update existing entry
-        const index = state.entries.findIndex(e => e.id === entryId);
-        if (index !== -1) {
-            state.entries[index] = entry;
-        }
-    } else {
-        // Add new entry
-        state.entries.push(entry);
-    }
-    
-    // Save and update UI
-    saveData();
-    renderEntries();
-    updateTodayInfo();
-    updateStatistics();
-    
-    // Close modal
-    elements.entryModal.classList.remove('visible');
-}
-
-// Function to save settings
-function saveSettings(e) {
-    e.preventDefault();
-    
-    // Get settings from form
-    const referenceDate = elements.referenceDate.value;
-    const caloriesGoal = elements.caloriesGoal.value ? parseInt(elements.caloriesGoal.value) : 2500;
-    const stepsGoal = elements.stepsGoal.value ? parseInt(elements.stepsGoal.value) : 10000;
-    
-    // Get sleep thresholds
-    const sleepThresholds = {
-        red: {
-            hours: elements.sleepRedHours.value ? parseInt(elements.sleepRedHours.value) : 6,
-            minutes: elements.sleepRedMinutes.value ? parseInt(elements.sleepRedMinutes.value) : 20
-        },
-        yellow: {
-            hours: elements.sleepYellowHours.value ? parseInt(elements.sleepYellowHours.value) : 7,
-            minutes: elements.sleepYellowMinutes.value ? parseInt(elements.sleepYellowMinutes.value) : 0
-        },
-        darkGreen: {
-            hours: elements.sleepDarkGreenHours.value ? parseInt(elements.sleepDarkGreenHours.value) : 8,
-            minutes: elements.sleepDarkGreenMinutes.value ? parseInt(elements.sleepDarkGreenMinutes.value) : 30
-        }
-    };
-    
-    // Get deep sleep minimum
-    const deepSleepMin = {
-        hours: elements.deepMinHours.value ? parseInt(elements.deepMinHours.value) : 1,
-        minutes: elements.deepMinMinutes.value ? parseInt(elements.deepMinMinutes.value) : 30
-    };
-    
-    // Get light sleep range
-    const lightSleepRange = {
-        min: {
-            hours: elements.lightMinHours.value ? parseInt(elements.lightMinHours.value) : 3,
-            minutes: elements.lightMinMinutes.value ? parseInt(elements.lightMinMinutes.value) : 0
-        },
-        max: {
-            hours: elements.lightMaxHours.value ? parseInt(elements.lightMaxHours.value) : 5,
-            minutes: elements.lightMaxMinutes.value ? parseInt(elements.lightMaxMinutes.value) : 0
-        }
-    };
-    
-    // Get REM thresholds
-    const remThresholds = {
-        red: {
-            hours: elements.remRedHours.value ? parseInt(elements.remRedHours.value) : 0,
-            minutes: elements.remRedMinutes.value ? parseInt(elements.remRedMinutes.value) : 50
-        },
-        yellow: {
-            hours: elements.remYellowHours.value ? parseInt(elements.remYellowHours.value) : 1,
-            minutes: elements.remYellowMinutes.value ? parseInt(elements.remYellowMinutes.value) : 2
-        }
-    };
-    
-    // Get theme settings
-    const theme = elements.themeSelector.value;
-    
-    // Get accent color
-    let accentColor = 'blue';
-    document.querySelectorAll('.color-option').forEach(option => {
-        if (option.classList.contains('selected')) {
-            accentColor = option.dataset.color;
-        }
-    });
-    
-    // Preserve any existing settings that we're not updating
-    const currentSettings = { ...state.settings };
-    
-    // Update settings
-    state.settings = {
-        ...currentSettings,
-        referenceDate,
-        caloriesGoal,
-        stepsGoal,
-        sleepThresholds,
-        deepSleepMin,
-        lightSleepRange,
-        remThresholds,
-        theme,
-        accentColor
-    };
-    
-    // Save settings and update UI
-    saveData();
-    updateDateDisplay();
     updateDaysCount();
     applyTheme();
     applyAccentColor();
@@ -2113,4 +1843,266 @@ function resolveAllConflicts() {
     alert(`Successfully resolved ${resolvedCount} conflicts.`);
     
     return resolvedCount;
+}
+
+// Function to update tag filter select dropdown
+function updateTagFilter() {
+    // Get reference to the tag filter dropdown
+    const tagFilter = document.getElementById('tag-filter');
+    
+    // Clear existing options
+    tagFilter.innerHTML = '';
+    
+    // Add "All Tags" option
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = 'All Tags';
+    tagFilter.appendChild(allOption);
+    
+    // Create a Set to collect unique tags
+    const tagsSet = new Set();
+    
+    // Add tags from state.tags
+    state.tags.forEach(tag => tagsSet.add(tag.name));
+    
+    // Add tags from entries that may not be in state.tags
+    state.entries.forEach(entry => {
+        if (entry.tags && Array.isArray(entry.tags)) {
+            entry.tags.forEach(tag => tagsSet.add(tag));
+        }
+    });
+    
+    // Convert Set to Array and sort alphabetically
+    const uniqueTags = Array.from(tagsSet).sort();
+    
+    // Create an option for each tag
+    uniqueTags.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        tagFilter.appendChild(option);
+    });
+}
+
+// Function to update today's information in the sidebar
+function updateTodayInfo() {
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    
+    // Find today's entry
+    const todayEntry = state.entries.find(entry => entry.date === todayString);
+    
+    // Get today's tasks from state.tasks
+    const todayTasks = state.tasks[todayString] || [];
+    
+    // Display today's tasks in sidebar
+    const todayTasksList = document.getElementById('today-tasks');
+    todayTasksList.innerHTML = '';
+    
+    if (todayTasks.length === 0) {
+        const emptyMessage = document.createElement('li');
+        emptyMessage.classList.add('empty-message');
+        emptyMessage.textContent = 'No tasks for today';
+        todayTasksList.appendChild(emptyMessage);
+    } else {
+        todayTasks.forEach(task => {
+            const taskItem = document.createElement('li');
+            taskItem.textContent = task.text;
+            taskItem.dataset.taskId = task.id;
+            if (task.completed) {
+                taskItem.classList.add('completed');
+            }
+            
+            // Make task clickable to show details
+            taskItem.addEventListener('click', function() {
+                if (todayEntry) {
+                    showEditEntryModal(todayEntry.id);
+                    // Highlight the task input field
+                    setTimeout(() => {
+                        const taskItems = document.querySelectorAll('#tasks-list .task-item');
+                        taskItems.forEach(item => {
+                            if (item.textContent.includes(task.text)) {
+                                item.classList.add('highlighted');
+                                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        });
+                    }, 300);
+                } else {
+                    showAddTaskModal();
+                }
+            });
+            
+            todayTasksList.appendChild(taskItem);
+        });
+    }
+    
+    // Update today's tags
+    const todayTagsList = document.getElementById('today-tags-list');
+    todayTagsList.innerHTML = '';
+    
+    if (todayEntry && todayEntry.tags && todayEntry.tags.length > 0) {
+        todayEntry.tags.forEach(tagName => {
+            // Find the tag in state.tags to get its color
+            const tagInfo = state.tags.find(t => t.name === tagName) || { color: '#6366f1', name: tagName };
+            
+            const tagElement = document.createElement('span');
+            tagElement.classList.add('tag');
+            tagElement.textContent = tagInfo.name;
+            tagElement.style.backgroundColor = tagInfo.color;
+            
+            // Make tag clickable to filter by this tag
+            tagElement.addEventListener('click', function() {
+                elements.tagFilter.value = tagInfo.name;
+                filterEntries();
+            });
+            
+            todayTagsList.appendChild(tagElement);
+        });
+    } else {
+        const emptyTag = document.createElement('span');
+        emptyTag.classList.add('tag', 'empty-tag');
+        emptyTag.textContent = 'No tags';
+        todayTagsList.appendChild(emptyTag);
+    }
+}
+
+// Function to update the displayed month in the UI
+function updateMonthDisplay() {
+    const options = { month: 'long', year: 'numeric' };
+    elements.currentMonth.textContent = state.currentMonth.toLocaleDateString('en-US', options);
+}
+
+// Function to navigate to the previous month
+function navigateToPreviousMonth() {
+    state.currentMonth.setMonth(state.currentMonth.getMonth() - 1);
+    updateMonthDisplay();
+    renderEntries();
+}
+
+// Function to navigate to the next month
+function navigateToNextMonth() {
+    state.currentMonth.setMonth(state.currentMonth.getMonth() + 1);
+    updateMonthDisplay();
+    renderEntries();
+}
+
+// Function to add a new task
+function addTask() {
+    const taskText = elements.newTask.value.trim();
+    if (!taskText) return;
+    
+    // Create new task
+    const newTask = {
+        id: Date.now().toString(),
+        text: taskText,
+        completed: false
+    };
+    
+    // Add task to current tasks
+    state.currentTasks.push(newTask);
+    
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    
+    // If we're editing today's entry, update the tasks in state.tasks
+    const entryDate = elements.entryDate.value;
+    if (entryDate === todayString) {
+        if (!state.tasks[todayString]) {
+            state.tasks[todayString] = [];
+        }
+        state.tasks[todayString].push(newTask);
+        
+        // Update the sidebar immediately
+        updateTodayInfo();
+    }
+    
+    // Clear the input field
+    elements.newTask.value = '';
+    
+    // Render the tasks in the modal
+    renderTasksList();
+    
+    // Save data to ensure persistence
+    saveData();
+}
+
+// Function to update the date display in the header
+function updateDateDisplay() {
+    const today = new Date();
+    
+    // Format current date
+    const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+    elements.currentDate.textContent = today.toLocaleDateString('en-US', options);
+    
+    // Calculate days since reference date
+    const referenceDate = new Date(state.settings.referenceDate);
+    const daysDiff = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
+    const monthsDiff = (today.getFullYear() - referenceDate.getFullYear()) * 12 + 
+                      (today.getMonth() - referenceDate.getMonth()) + 
+                      (today.getDate() >= referenceDate.getDate() ? 0 : -1);
+    const monthsDecimal = monthsDiff + (today.getDate() / 30);
+    
+    // Update the days count display
+    if (elements.daysCount) {
+        elements.daysCount.innerHTML = `
+            <span class="days-since">${daysDiff} days since ${referenceDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'yy' })}</span>
+            <span class="months-since">${monthsDecimal.toFixed(1)} months</span>
+        `;
+    }
+}
+
+// Function to calculate color luminance for text contrast
+function getLuminance(hexColor) {
+    // Convert hex to RGB
+    const r = parseInt(hexColor.substr(1, 2), 16) / 255;
+    const g = parseInt(hexColor.substr(3, 2), 16) / 255;
+    const b = parseInt(hexColor.substr(5, 2), 16) / 255;
+    
+    // Calculate luminance
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+// Function to render the tasks list in the entry modal
+function renderTasksList() {
+    if (!elements.tasksList) return;
+    
+    elements.tasksList.innerHTML = '';
+    
+    state.currentTasks.forEach(task => {
+        const taskItem = document.createElement('div');
+        taskItem.classList.add('task-item');
+        if (task.completed) {
+            taskItem.classList.add('completed');
+        }
+        
+        const taskText = document.createElement('span');
+        taskText.classList.add('task-text');
+        taskText.textContent = task.text;
+        
+        // Click on task to toggle completion
+        taskItem.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-task-btn') || 
+                e.target.closest('.delete-task-btn')) {
+                return; // Don't toggle if delete button was clicked
+            }
+            task.completed = !task.completed;
+            renderTasksList();
+            saveData();
+        });
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('delete-task-btn');
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.addEventListener('click', () => {
+            state.currentTasks = state.currentTasks.filter(t => t.id !== task.id);
+            renderTasksList();
+            saveData();
+        });
+        
+        taskItem.appendChild(taskText);
+        taskItem.appendChild(deleteBtn);
+        
+        elements.tasksList.appendChild(taskItem);
+    });
 }
