@@ -30,7 +30,7 @@ The Sleep Tracker is a web application designed to help users track and analyze 
 - Note wake-ups during sleep
 
 ### Health Indicators
-- Mark special health conditions (cut sleep, seizure, etc.)
+- Mark special health conditions (cut sleep, seizure, shake, afrodite)
 - Track activity metrics (calories, steps, standing hours)
 - Record weight
 
@@ -38,17 +38,20 @@ The Sleep Tracker is a web application designed to help users track and analyze 
 - Add and manage daily tasks
 - Mark tasks as completed
 - Associate tasks with specific dates
+- View tasks in the sidebar for quick access
 
 ### Tag System
 - Create and manage custom tags with color coding
 - Filter entries by tags
 - Visualize tag distribution
+- Add tags directly from the entry form or settings
 
 ### Data Visualization
 - Weekly/monthly statistics
 - Sleep quality trends
 - Sleep composition breakdown
 - Activity metrics comparison
+- Health events timeline
 
 ## State Management
 The application uses a global `state` object that contains:
@@ -72,23 +75,29 @@ The application uses a global `state` object that contains:
 - `showEditEntryModal()`: Opens modal to edit an existing entry
 - `saveEntry()`: Saves entry data from the form
 - `deleteEntry()`: Removes an entry
+- `saveSettings()`: Saves user settings and preferences
+- `showEntryPreview()`: Displays detailed view of an entry
 
 ### Task Management
 - `addTask()`: Adds a new task
 - `renderTasksList()`: Displays tasks in the modal
+- `showAddTaskModal()`: Opens modal to add standalone tasks
 
 ### Tag Management
-- `addNewTag()`: Creates a new tag
+- `addNewTag()`: Creates a new tag with custom color
 - `renderTagsList()`: Displays tags in the available tags container
 - `renderTagsManagement()`: Displays tags in the settings modal
 - `deleteTag()`: Removes a tag
+- `updateTagFilter()`: Updates tag filter dropdown options
 
 ### Display Functions
 - `renderEntries()`: Renders the entries table
 - `updateMonthDisplay()`: Updates the month display in header
-- `updateDateDisplay()`: Updates the date display
-- `updateTodayInfo()`: Updates today's tasks and tags
+- `updateDateDisplay()`: Updates the date display and days count
+- `updateTodayInfo()`: Updates today's tasks and tags in sidebar
 - `updateStatistics()`: Updates weekly statistics
+- `formatDate()`: Formats date objects consistently
+- `highlightSearchTerms()`: Highlights search matches in the table
 
 ### Navigation
 - `navigateToPreviousMonth()`: Shows previous month data
@@ -96,29 +105,54 @@ The application uses a global `state` object that contains:
 
 ### Filtering and Sorting
 - `filterEntries()`: Filters entries based on search and tag selection
-- `sortEntries()`: Sorts entries based on chosen criteria
+- `sortEntries()`: Sorts entries based on chosen criteria (date, sleep time, calories, steps, tags)
 
 ### Data Analysis
 - `updateDashboardCharts()`: Updates charts in the dashboard
 - `updateSleepInsights()`: Generates insights from sleep data
 - `detectConflicts()`: Identifies conflicts in the data
 - `resolveEntryDuplicates()`: Resolves duplicate entries
+- `resolveAllConflicts()`: Handles all detected data conflicts
+- `showConflictsNotification()`: Displays notification about data conflicts
+
+### Utility Functions
+- `getLuminance()`: Calculates color luminance for contrast
+- `setupTagColorPresets()`: Sets up color preset selection for tags
+- `setupAddTagQuickButton()`: Configures quick tag addition from sidebar
 
 ## Settings
 - Reference date for day counting
 - Daily calorie and step goals
-- Sleep quality thresholds
-- Deep sleep minimum
-- Light sleep ideal range
-- Theme and accent color
+- Sleep quality thresholds:
+  - Total sleep duration (red, yellow, dark green levels)
+  - Deep sleep minimum thresholds
+  - Light sleep ideal range
+  - REM sleep thresholds
+- Theme preferences (light/dark/auto)
+- Accent color selection (blue, purple, teal, orange, pink)
 
 ## Data Storage
-The application uses browser localStorage to persist user data between sessions.
+The application uses browser localStorage to persist user data between sessions with `saveData()` and `loadData()` functions managing data serialization.
 
 ## Theme System
 - Supports light and dark mode
 - Custom accent colors (blue, purple, teal, orange, pink)
 - Automatic theme based on system preference
+- Dynamic color contrast handling for readability
 
-## Responsive Design
-The application is designed for desktop use, featuring a clean and modern UI optimized for larger screens. 
+## User Interface
+The application features a clean, modern UI with:
+- Interactive data table with sortable columns
+- Visual indicators for sleep quality
+- Color-coded tags and health indicators
+- Modal-based forms for data entry
+- Date navigation and filtering controls
+- Dashboard with visualization charts
+
+## Design Considerations
+The application is optimized for desktop use with:
+- Fixed-width columns for readability
+- Hover effects for better interaction
+- Visual grouping of related data
+- Persistent header for navigation
+- Color-coding for quick data interpretation 

@@ -940,6 +940,47 @@ function filterEntries() {
     updateDateDisplay();
 }
 
+// Function to sort entries based on selected criteria
+function sortEntries(entries) {
+    const sortValue = elements.sortBy.value;
+    
+    // Use the filtered entries array if provided, otherwise use all entries
+    let entriesToSort = entries || state.entries;
+    
+    // Create a copy of the array to avoid modifying the original
+    let sortedEntries = [...entriesToSort];
+    
+    switch(sortValue) {
+        case 'date':
+            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            break;
+        case 'sleep':
+            sortedEntries.sort((a, b) => {
+                const aTotal = (a.nightSleep?.hours || 0) * 60 + (a.nightSleep?.minutes || 0);
+                const bTotal = (b.nightSleep?.hours || 0) * 60 + (b.nightSleep?.minutes || 0);
+                return bTotal - aTotal;
+            });
+            break;
+        case 'calories':
+            sortedEntries.sort((a, b) => (b.calories || 0) - (a.calories || 0));
+            break;
+        case 'steps':
+            sortedEntries.sort((a, b) => (b.steps || 0) - (a.steps || 0));
+            break;
+        case 'tags':
+            sortedEntries.sort((a, b) => {
+                const aTags = a.tags ? a.tags.length : 0;
+                const bTags = b.tags ? b.tags.length : 0;
+                return bTags - aTags;
+            });
+            break;
+        default:
+            sortedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    
+    return sortedEntries;
+}
+
 function highlightSearchTerms(searchTerm) {
     // Only highlight text in notes cells and task cells
     updateDaysCount();
@@ -1245,6 +1286,17 @@ function renderEntries() {
     if (elements.searchInput.value) {
         highlightSearchTerms(elements.searchInput.value);
     }
+}
+
+// Helper function to format dates consistently
+function formatDate(date) {
+    const options = { 
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
 }
 
 // Function to add a new tag
@@ -2105,4 +2157,211 @@ function renderTasksList() {
         
         elements.tasksList.appendChild(taskItem);
     });
+}
+
+// Function to save entry data from the form
+function saveEntry(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const entryId = elements.entryId.value;
+    const entryDate = elements.entryDate.value;
+    const sleepScore = elements.sleepScore.value ? parseInt(elements.sleepScore.value) : null;
+    
+    // Check for duplicate date when adding a new entry
+    if (!entryId) {
+        const existingEntry = state.entries.find(entry => entry.date === entryDate);
+        if (existingEntry) {
+            // Show confirmation dialog
+            if (!confirm(`An entry already exists for ${formatDate(new Date(entryDate))}. Do you want to edit that entry instead?`)) {
+                return; // User canceled, don't save
+            } else {
+                // User wants to edit the existing entry instead
+                showEditEntryModal(existingEntry.id);
+                return;
+            }
+        }
+    }
+    
+    // Collect sleep times
+    const nightSleep = {
+        hours: elements.nightSleepHours.value ? parseInt(elements.nightSleepHours.value) : 0,
+        minutes: elements.nightSleepMinutes.value ? parseInt(elements.nightSleepMinutes.value) : 0
+    };
+    
+    const dayNap = {
+        hours: elements.dayNapHours.value ? parseInt(elements.dayNapHours.value) : 0,
+        minutes: elements.dayNapMinutes.value ? parseInt(elements.dayNapMinutes.value) : 0
+    };
+    
+    const deepSleep = {
+        hours: elements.deepSleepHours.value ? parseInt(elements.deepSleepHours.value) : 0,
+        minutes: elements.deepSleepMinutes.value ? parseInt(elements.deepSleepMinutes.value) : 0
+    };
+    
+    const lightSleep = {
+        hours: elements.lightSleepHours.value ? parseInt(elements.lightSleepHours.value) : 0,
+        minutes: elements.lightSleepMinutes.value ? parseInt(elements.lightSleepMinutes.value) : 0
+    };
+    
+    const remSleep = {
+        hours: elements.remSleepHours.value ? parseInt(elements.remSleepHours.value) : 0,
+        minutes: elements.remSleepMinutes.value ? parseInt(elements.remSleepMinutes.value) : 0
+    };
+    
+    // Get health indicators
+    const cutSleep = elements.cutSleep.checked;
+    const seizure = elements.seizure.checked;
+    const shake = elements.shake.checked;
+    const afr = elements.afr.checked;
+    
+    // Get notes and tasks
+    const eventsNotes = elements.eventsNotes.value;
+    const tasks = state.currentTasks || [];
+    
+    // Get tags
+    const tagsInput = elements.tags.value;
+    const customTags = tagsInput.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+    
+    // Get selected tags from interface
+    const selectedTags = Array.from(document.querySelectorAll('#available-tags .tag.selected'))
+        .map(tagElement => tagElement.textContent.trim());
+    
+    // Combine both tag sources
+    const allTags = [...new Set([...selectedTags, ...customTags])];
+    
+    // Get activity metrics
+    const calories = elements.calories.value ? parseInt(elements.calories.value) : null;
+    const steps = elements.steps.value ? parseInt(elements.steps.value) : null;
+    const weight = elements.weight.value ? parseFloat(elements.weight.value) : null;
+    const standing = elements.standing.value ? parseInt(elements.standing.value) : null;
+    
+    // Create entry object
+    const entry = {
+        id: entryId || `entry_${Date.now()}`,
+        date: entryDate,
+        sleepScore,
+        nightSleep,
+        dayNap,
+        deepSleep,
+        lightSleep,
+        remSleep,
+        wakeUps: elements.wakeUps.value ? parseInt(elements.wakeUps.value) : 0,
+        cutSleep,
+        seizure,
+        shake,
+        afr,
+        eventsNotes,
+        tasks,
+        tags: allTags,
+        calories,
+        steps,
+        weight,
+        standing
+    };
+    
+    // Update or add entry
+    if (entryId) {
+        // Update existing entry
+        const index = state.entries.findIndex(e => e.id === entryId);
+        if (index !== -1) {
+            state.entries[index] = entry;
+        }
+    } else {
+        // Add new entry
+        state.entries.push(entry);
+    }
+    
+    // Save and update UI
+    saveData();
+    renderEntries();
+    updateTodayInfo();
+    
+    // Close modal
+    elements.entryModal.classList.remove('visible');
+}
+
+// Function to save settings from the settings form
+function saveSettings(event) {
+    event.preventDefault();
+    
+    // Update settings from the form
+    state.settings.referenceDate = elements.referenceDate.value;
+    state.settings.caloriesGoal = parseInt(elements.caloriesGoal.value || 0);
+    state.settings.stepsGoal = parseInt(elements.stepsGoal.value || 0);
+    
+    // Sleep thresholds
+    state.settings.sleepThresholds = {
+        red: {
+            hours: parseInt(elements.sleepRedHours.value || 0),
+            minutes: parseInt(elements.sleepRedMinutes.value || 0)
+        },
+        yellow: {
+            hours: parseInt(elements.sleepYellowHours.value || 0),
+            minutes: parseInt(elements.sleepYellowMinutes.value || 0)
+        },
+        darkGreen: {
+            hours: parseInt(elements.sleepDarkGreenHours.value || 0),
+            minutes: parseInt(elements.sleepDarkGreenMinutes.value || 0)
+        }
+    };
+    
+    // Deep sleep thresholds
+    state.settings.deepSleepMin = {
+        hours: parseInt(elements.deepMinHours.value || 0),
+        minutes: parseInt(elements.deepMinMinutes.value || 0)
+    };
+    
+    // Light sleep thresholds
+    state.settings.lightSleepRange = {
+        min: {
+            hours: parseInt(elements.lightMinHours.value || 0),
+            minutes: parseInt(elements.lightMinMinutes.value || 0)
+        },
+        max: {
+            hours: parseInt(elements.lightMaxHours.value || 0),
+            minutes: parseInt(elements.lightMaxMinutes.value || 0)
+        }
+    };
+    
+    // REM sleep thresholds
+    state.settings.remThresholds = {
+        red: {
+            hours: parseInt(elements.remRedHours.value || 0),
+            minutes: parseInt(elements.remRedMinutes.value || 0)
+        },
+        yellow: {
+            hours: parseInt(elements.remYellowHours.value || 0),
+            minutes: parseInt(elements.remYellowMinutes.value || 0)
+        }
+    };
+    
+    // Theme settings
+    state.settings.theme = elements.themeSelector.value;
+    
+    // Accent color
+    const selectedColorOption = document.querySelector('.color-option.selected');
+    if (selectedColorOption) {
+        state.settings.accentColor = selectedColorOption.dataset.color;
+        document.body.setAttribute('data-accent', selectedColorOption.dataset.color);
+    }
+    
+    // Apply theme
+    if (state.settings.theme === 'dark' || 
+        (state.settings.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+    
+    // Save data and update UI
+    saveData();
+    renderEntries();
+    updateDateDisplay();
+    updateTodayInfo();
+    
+    // Close the settings modal
+    elements.settingsModal.classList.remove('visible');
 }
